@@ -1,0 +1,35 @@
+@use '../../styles/main.scss' as *;
+
+.searchBarContainer {
+  padding: 20px 0;
+}
+
+.labelContainer {
+  display: flex;
+  align-items: center;
+}
+
+/* Make label text bold */
+:global(.usa-label) {
+  font-weight: bold;
+}
+
+.tooltipWrapper {
+  margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  position: relative;
+  top: 1px; /* Fine-tune vertical alignment */
+}
+
+/* Add spacing between hint and search form */
+:global(.usa-hint) {
+  margin-bottom: 12px;
+}
+
+/* Add spacing above error message */
+:global(.usa-error-message) {
+  margin-top: 12px;
+  display: block;
+} 

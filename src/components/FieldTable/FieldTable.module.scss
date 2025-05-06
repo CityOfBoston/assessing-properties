@@ -1,0 +1,54 @@
+@use '../../styles/main.scss' as *;
+
+.fieldTable {
+  width: 100%;
+  border: 1px solid #dfe1e2;
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid #dfe1e2;
+  transition: background-color 0.2s ease;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover {
+    background-color: #F2F2F2;
+  }
+}
+
+.headerRow {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid #dfe1e2;
+  background-color: #f8f8f8;
+}
+
+.cell, .headerCell {
+  flex: 1;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+}
+
+.headerCell {
+  font-weight: bold;
+}
+
+.headerText {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: bold;
+} 

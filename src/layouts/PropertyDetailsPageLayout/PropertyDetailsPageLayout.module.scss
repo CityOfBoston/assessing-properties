@@ -1,0 +1,114 @@
+@use '../../styles/main.scss' as main;
+
+.pageLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure at least full viewport height */
+  margin: 0;
+  padding: 0;
+  
+  /* Header wrapper - handles the sticky behavior */
+  .headerWrapper {
+    width: 100%;
+    position: relative;
+    z-index: 1100; /* Ensure header is above other sticky elements */
+    
+    /* Sticky behavior applied via JavaScript */
+    &:global(.stickyActive) {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Main container with sidebar and content */
+  .mainContainer {
+    flex: 1; /* This makes the main content area take up available space */
+    display: flex;
+    width: 100%;
+    
+    /* Prevent content jump when header becomes fixed */
+    &:global(.headerIsSticky) {
+      margin-top: var(--header-height, 60px); /* Use dynamic height or fallback */
+    }
+    
+    /* Sidebar wrapper */
+    .sidebarWrapper {
+      position: relative; /* Changed from sticky */
+      align-self: stretch;
+      z-index: 1000; /* Below header but above content */
+      background-color: white;
+      
+      /* When sidebar is sticky */
+      &:global(.stickyActive) {
+        position: fixed;
+        top: var(--header-height, 60px); /* Position below sticky header */
+        height: calc(100vh - var(--header-height, 60px)); /* Take full height minus header height */
+        overflow-y: auto; /* Allow scrolling if content is too tall */
+      }
+      
+      /* Make sure sidebar takes full available height */
+      display: flex;
+      flex-direction: column;
+      
+      /* Make the sidebar component inside take up full height */
+      > :first-child {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+    }
+    
+    /* Content area - takes remaining space */
+    .contentArea {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      
+      /* Adjust content to prevent overlap with sidebar */
+      &:global(.sidebarIsSticky) {
+        margin-left: var(--sidebar-width, 250px);
+      }
+      
+      /* Sub-header wrapper */
+      .subHeaderWrapper {
+        position: relative; /* Changed from sticky */
+        z-index: 900; /* Below sidebar but above content */
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 0 2rem;
+        
+        /* When subheader is sticky */
+        &:global(.stickyActive) {
+          position: fixed;
+          top: var(--header-height, 60px); /* Position below sticky header */
+          /* Width will be set in JS to match the original width before fixing */
+          left: calc(var(--sidebar-width, 250px)); /* Account for sidebar width and left padding */
+          right: 4rem; /* Account for right padding */
+        }
+      }
+      
+      /* Content wrapper */
+      .contentWrapper {
+        padding: 2rem 0;
+        @include main.grid-container; /* Apply the grid container mixin */
+        flex: 1; /* Grow to fill available space */
+        
+        /* Prevent content jump when subheader becomes fixed */
+        &:global(.subHeaderIsSticky) {
+          margin-top: var(--subheader-height, 70px); /* Use dynamic height or fallback */
+        }
+      }
+    }
+  }
+
+  /* Footer stays at the bottom */
+  footer {
+    width: 100%;
+  }
+} 

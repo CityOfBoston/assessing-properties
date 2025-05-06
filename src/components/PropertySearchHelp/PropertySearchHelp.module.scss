@@ -1,0 +1,47 @@
+@use '../../styles/main.scss' as *;
+
+.container {
+  width: 100%;
+}
+
+.heading {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.queryMessage {
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+.tipsList {
+  list-style: none;
+  padding: 0;
+  margin-top: 24px;
+}
+
+.tipItem {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.iconWrapper {
+  margin-right: 8px;
+  padding-top: 3px; /* Align with first line of text */
+}
+
+.arrowIcon {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.tipContent {
+  flex: 1;
+}
+
+.tipTitle {
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 4px;
+} 

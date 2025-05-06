@@ -1,0 +1,86 @@
+@use '../../styles/main.scss' as main;
+
+.feedbackForm {
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+}
+
+.feedbackContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 16px 24px;
+  border: 1px solid var(--border-color, #dcdee0);
+  border-radius: 4px;
+  
+  // First container with radio buttons
+  &:first-child {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+}
+
+.feedbackQuestion {
+  margin: 0;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.radioGroup {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  
+  // Styling for the radio tiles
+  :global(.usa-radio) {
+    margin-top: 0;
+  }
+  
+  :global(.usa-radio__input--tile) + :global(.usa-radio__label) {
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+.feedbackPrompt {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.disclaimerText {
+  margin-bottom: 12px;
+}
+
+// Add spacing for text area and character count and set font to Lora
+:global(.usa-textarea) {
+  margin-bottom: 8px;
+  font-family: 'Lora', serif; // Set font to Lora
+  font-size: 1rem;
+}
+
+// Style the validation checklist
+:global(.usa-checklist) {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+// Add spacing for button and contact info
+:global(.usa-button) {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  text-transform: uppercase; // Make button text uppercase
+  font-family: 'Montserrat', sans-serif; // Set font to Montserrat
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.contactInfo {
+  margin: 0;
+  font-size: 0.9rem;
+} 

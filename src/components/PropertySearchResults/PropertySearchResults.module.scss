@@ -1,0 +1,29 @@
+@use '../../styles/main.scss' as *;
+
+.container {
+  width: 100%;
+}
+
+.heading {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.tableContainer {
+  margin-top: 16px;
+}
+
+.resultsTable {
+  width: 100%;
+  border-collapse: collapse;
+  
+  th {
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+}
+
+.detailsLink {
+  color: #0071bc;
+  text-decoration: underline;
+} 

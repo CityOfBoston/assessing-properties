@@ -1,0 +1,46 @@
+@use '../../styles/main.scss' as main;
+
+.contentSection {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.sectionHeader {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  margin-top: 0;
+  
+  &:not(:first-child) {
+    margin-top: 32px;
+  }
+}
+
+.recordTableWrapper {
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.sectionText {
+  font-family: 'Lora', serif;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.noContentMessage {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  text-align: center;
+  color: #71767a;
+  padding: 32px 0;
+}
+
+:global(.usa-link.usa-link--external) {
+  font-family: 'Montserrat', sans-serif;
+  display: inline-block;
+  font-weight: 500;
+  margin-bottom: 32px;
+} 

@@ -1,0 +1,27 @@
+@use '../../styles/main.scss' as *;
+
+.page {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.searchContainer {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #D2D2D2;
+  margin: 40px 0;
+}
+
+.resultsContainer {
+  width: 100%;
+  margin-top: 40px;
+}
+
+.bulletLabel {
+  font-weight: bold;
+} 

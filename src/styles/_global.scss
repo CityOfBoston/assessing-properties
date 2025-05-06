@@ -1,0 +1,29 @@
+// Global styles
+
+body, 
+html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+// Prevent body scrolling when modal is open
+body.modal-open {
+  overflow: hidden;
+}
+
+// Header sticky behavior
+.header-container {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+// Global font declarations
+body, p {
+  font-family: 'Lora', system-ui, serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', system-ui, sans-serif;
+}

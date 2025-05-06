@@ -1,0 +1,39 @@
+@use '../../styles/main.scss' as *;
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #58585B !important;
+  box-shadow: inset 0 0 0 2px #58585B !important;
+  
+  svg path, img {
+    fill: #58585B;
+  }
+  
+  &:hover {
+    color: #1871BD !important;
+    box-shadow: inset 0 0 0 2px #1871BD !important;
+    
+    svg path, img {
+      fill: #1871BD;
+    }
+  }
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.text {
+  display: inline-block;
+  font-weight: 500;
+} 
