@@ -1,0 +1,31 @@
+@use '../../styles/main.scss' as main;
+
+.background {
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(9, 31, 47, 0.80);
+  }
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 50px 30px;
+  flex: 1;
+  @include main.grid-container;
+} 

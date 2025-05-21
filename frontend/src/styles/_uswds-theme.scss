@@ -1,0 +1,5 @@
+@use "@cob-uswds-components/uswds-core" with (
+    $theme-show-notifications: false,
+    $theme-font-path: './cob-uswds/fonts',
+    $theme-image-path: './cob-uswds/img',
+);  

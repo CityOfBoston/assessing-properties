@@ -1,0 +1,56 @@
+@use '../../styles/main.scss' as *;
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:focus {
+    outline: 2px solid #0071bc;
+    border-radius: 50%;
+  }
+  
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid #0071bc;
+    border-radius: 50%;
+  }
+}
+
+.icon {
+  cursor: pointer;
+}
+
+.tooltipContent {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #091F2F;
+  font-weight: normal;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  width: max-content;
+  max-width: 300px;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  [data-variant="white"] & {
+    background-color: white;
+    color: black;
+  }
+} 

@@ -1,0 +1,35 @@
+// SASS Main Entry Point
+
+// Theme overrides
+@use './_uswds-theme' as *;
+
+@use '@cob-uswds-components/uswds-core' as *;
+
+// Forward the grid mixins for use in module files
+@forward '@cob-uswds-components/uswds-core/src/styles/mixins/layout-grid';
+
+@use '@cob-uswds-components/usa-banner' as *;
+@use '@cob-uswds-components/cob-site-banner' as *;
+@use '@cob-uswds-components/cob-slim-header' as *;
+@use '@cob-uswds-components/cob-slim-footer' as *;
+@use '@cob-uswds-components/usa-sidenav' as *;
+@use '@cob-uswds-components/usa-radio' as *;
+@use '@cob-uswds-components/usa-label' as *;
+@use '@cob-uswds-components/usa-hint' as *;
+@use '@cob-uswds-components/usa-search' as *;
+@use '@cob-uswds-components/usa-table' as *;
+@use "@cob-uswds-components/usa-error-message" as *;
+
+@use '@cob-uswds-components/uswds-fonts' as *;
+@use '@cob-uswds-components/usa-prose' as *;
+@use '@cob-uswds-components/usa-paragraph' as *;
+@use '@cob-uswds-components/usa-display' as *;
+@use '@cob-uswds-components/usa-link' as *;
+
+@forward '@cob-uswds-components/uswds-core/src/styles/tokens/color';
+@forward '@cob-uswds-components/uswds-core/src/styles/tokens/font';
+@forward '@cob-uswds-components/uswds-core/src/styles/tokens/units';
+@forward '@cob-uswds-components/uswds-core/src/styles/functions/color';
+
+// Import project specific global styles
+@use './_global' as *;
