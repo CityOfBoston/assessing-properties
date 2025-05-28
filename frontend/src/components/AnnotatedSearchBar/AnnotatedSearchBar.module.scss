@@ -3,6 +3,7 @@
 .searchBarContainer {
   width: 100%;
   position: relative;
+  --search-input-height: 48px; // Height of just the input box
 }
 
 .labelContainer {
@@ -16,6 +17,10 @@
   align-items: center;
   font-size: 1rem;
   color: white;
+
+  @include at-media-max('mobile-lg') {
+    font-size: 18px;
+  }
 }
 
 .tooltipWrapper {
@@ -174,6 +179,64 @@
   max-height: calc(8 * (48px + 1px)); // 8 items * (item height + border)
   overflow-y: auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: none; // Hide by default
+
+  &:not(:empty) {
+    display: block; // Show only when there's content
+  }
+
+  @include at-media-max('mobile-lg') {
+    position: fixed;
+    top: calc(var(--search-bar-bottom) + 36px);
+    left: 0;
+    right: 0;
+    width: 100vw;
+    min-height: calc(100vh - var(--search-bar-bottom) - 36px);
+    border: none;
+    box-shadow: none;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+// Show suggestions container when input is focused
+.searchInput:focus ~ .suggestionsContainer,
+.searchInput:focus + .suggestionsContainer,
+.searchBarContainer:focus-within .suggestionsContainer {
+  @include at-media-max('mobile-lg') {
+    transform: translateY(0);
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+// Remove the backdrop overlay
+.suggestionsContainer::before {
+  display: none;
+}
+
+// Remove the animation keyframes since we're using transitions
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .suggestionItem {
@@ -185,6 +248,7 @@
   cursor: pointer;
   height: 48px;
   box-sizing: border-box;
+  background: white;
 
   &:last-child {
     border-bottom: none;
@@ -193,17 +257,69 @@
   &:hover {
     background-color: #f5f5f5;
   }
+
+  @include at-media-max('mobile-lg') {
+    height: auto;
+    padding: 16px;
+  }
+}
+
+.suggestionContent {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+
+  @include at-media-max('mobile-lg') {
+    align-items: flex-start;
+  }
+}
+
+.locationIcon {
+  display: none;
+
+  @include at-media-max('mobile-lg') {
+    display: block;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+  }
+}
+
+.addressContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  @include at-media-max('mobile-lg') {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }
 
 .fullAddress {
   margin: 0;
   color: black;
+
+  @include at-media-max('mobile-lg') {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1.2;
+  }
 }
 
 .parcelId {
   margin: 0;
   color: black;
   text-align: right;
+
+  @include at-media-max('mobile-lg') {
+    font-size: 16px;
+    text-align: left;
+    color: #565c65;
+  }
 }
 
 .loadingContainer {

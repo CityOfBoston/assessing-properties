@@ -67,9 +67,12 @@ export default function WelcomePageLayout({
       if (!banner || !headerRef.current || !mainRef.current) return;
       
       const bannerHeight = banner.getBoundingClientRect().height;
+      const searchBackground = document.querySelector('.search-background');
+      const searchBackgroundBottom = searchBackground ? 
+        searchBackground.getBoundingClientRect().bottom : 0;
       
-      // Apply sticky behavior when scrolled past the banner
-      if (window.scrollY > bannerHeight) {
+      // Apply sticky behavior when scrolled past the banner and search background
+      if (window.scrollY > bannerHeight && window.scrollY > searchBackgroundBottom) {
         headerRef.current.classList.add('stickyActive');
         mainRef.current.classList.add('headerIsSticky');
       } else {

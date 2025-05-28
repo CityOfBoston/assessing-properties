@@ -1,0 +1,47 @@
+@use '../../styles/main.scss' as *;
+
+.container {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.content {
+  @include grid-container;
+  position: relative;
+  width: 100%;
+}
+
+.closeButton {
+  position: absolute;
+  top: 25px;
+  right: 60px;
+  z-index: 1;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+  }
+
+  @include at-media-max('mobile-lg') {
+    top: 15px;
+    right: 15px;
+  }
+} 

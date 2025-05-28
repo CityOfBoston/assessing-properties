@@ -35,7 +35,7 @@ const preview: Preview = {
           name: 'Mobile',
           styles: {
             width: '360px',
-            height: '840px',
+            height: '800px',
           },
         },
         tablet: {

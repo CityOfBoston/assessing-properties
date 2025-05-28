@@ -7,6 +7,7 @@
 
 // Forward the grid mixins for use in module files
 @forward '@cob-uswds-components/uswds-core/src/styles/mixins/layout-grid';
+@forward '@cob-uswds-components/uswds-core/src/styles/mixins/helpers/at-media';
 
 @use '@cob-uswds-components/usa-banner' as *;
 @use '@cob-uswds-components/cob-site-banner' as *;

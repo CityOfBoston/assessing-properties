@@ -25,7 +25,10 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 50px 30px;
-  flex: 1;
-  @include main.grid-container;
+  padding: 30px 15px;
+
+  @include main.at-media('mobile-lg') {
+    @include main.grid-container;
+    padding: 50px 30px;
+  }
 } 

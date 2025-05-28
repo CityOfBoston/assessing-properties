@@ -48,12 +48,12 @@ Path aliases are configured in `vite.config.ts` and provide a way to create shor
 Instead of using relative paths, use the alias prefix followed by the path from the target directory:
 
 ```tsx
-// ❌ Don't use relative paths
+// Don't use relative paths
 import { MyComponent } from '../../../components/MyComponent';
 import { MainLayout } from '../../layouts/MainLayout';
 import '../../../styles/components.scss';
 
-// ✅ Use aliases instead
+// Use aliases instead
 import { MyComponent } from '@components/MyComponent';
 import { MainLayout } from '@layouts/MainLayout';
 import '@styles/components.scss';

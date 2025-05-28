@@ -1,6 +1,6 @@
 import { useSearchSuggestions } from '../../hooks/useSearchSuggestions';
 import { AnnotatedSearchBar } from '../../components/AnnotatedSearchBar';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 interface SearchBarContainerProps {
   onSelect?: (pid: string, fullAddress: string) => void;
@@ -8,6 +8,9 @@ interface SearchBarContainerProps {
   tooltipHint?: string;
   placeholderText?: string;
   debounceMs?: number;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  onClear?: () => void;
 }
 
 export const SearchBarContainer = ({
@@ -16,6 +19,9 @@ export const SearchBarContainer = ({
   tooltipHint = 'Enter an address or parcel ID to search',
   placeholderText = 'Enter address or parcel ID',
   debounceMs = 300,
+  onFocus,
+  onBlur,
+  onClear,
 }: SearchBarContainerProps) => {
   const {
     suggestions,
@@ -24,6 +30,9 @@ export const SearchBarContainer = ({
     searchValue,
     setSearchValue,
   } = useSearchSuggestions({ debounceMs });
+
+  const isClearing = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = useCallback((searchTerm: string) => {
     console.log('[SearchBarContainer] Search triggered with term:', searchTerm);
@@ -55,6 +64,37 @@ export const SearchBarContainer = ({
     setSearchValue(value);
   }, [setSearchValue]);
 
+  const handleFocus = useCallback(() => {
+    isClearing.current = false;
+    onFocus?.();
+  }, [onFocus]);
+
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    // Check if the related target is the clear button
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (relatedTarget?.classList.contains('clearButton')) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    if (!isClearing.current) {
+      onBlur?.();
+    }
+  }, [onBlur]);
+
+  const handleClear = useCallback(() => {
+    isClearing.current = true;
+    setSearchValue('');
+    onClear?.();
+    // Refocus the input after clearing
+    inputRef.current?.focus();
+    // Reset the clearing flag after a short delay
+    setTimeout(() => {
+      isClearing.current = false;
+    }, 100);
+  }, [setSearchValue, onClear]);
+
   // Transform suggestions to match AnnotatedSearchBar interface
   const transformedSuggestions = suggestions.map(suggestion => ({
     fullAddress: suggestion.fullAddress,
@@ -79,6 +119,10 @@ export const SearchBarContainer = ({
       loading={isLoading}
       errorMessage={error?.message}
       onSearch={handleSearch}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onClear={handleClear}
+      inputRef={inputRef}
     />
   );
 }; 

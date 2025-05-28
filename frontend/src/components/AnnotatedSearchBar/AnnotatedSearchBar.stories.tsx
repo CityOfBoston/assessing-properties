@@ -10,7 +10,7 @@ const meta = {
   decorators: [
     (Story) => (
       <div style={{ 
-        padding: '4rem', 
+        padding: '4rem 1rem', 
         backgroundColor: '#091F2F',
         minHeight: '500px',
         position: 'relative'
