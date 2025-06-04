@@ -19,7 +19,7 @@ export const PropertySearchHelp: React.FC<PropertySearchHelpProps> = ({
     <div className={styles.container}>
       <h2 className={styles.heading}>No Results Found</h2>
       <p className={styles.queryMessage}>
-        We did not find results for "{searchQuery}"
+        We did not find results for "<strong>{searchQuery}</strong>"
       </p>
       
       <h2 className={styles.heading}>Search Tips</h2>

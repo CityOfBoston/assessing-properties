@@ -3,11 +3,16 @@ import Banner from "../Banner";
 import Footer from "../Footer";
 import Header from "../Header";
 import SearchBackground from "@components/SearchBackground";
-import styles from "./WelcomePageLayout.module.scss";
+import styles from "./SearchResultsLayout.module.scss";
 
-interface WelcomePageLayoutProps {
+interface SearchResultsLayoutProps {
   /**
-   * The content to render on top of the search background
+   * The content to render in the search background area
+   */
+  searchContent: React.ReactNode;
+
+  /**
+   * The content to render below the search background
    */
   children: React.ReactNode;
   
@@ -18,37 +23,42 @@ interface WelcomePageLayoutProps {
 }
 
 /**
- * The WelcomePageLayout component provides a layout structure similar to PageLayout
- * but with a full-height SearchBackground component in the content area.
+ * The SearchResultsLayout component provides a layout structure similar to PageLayout
+ * but with a stacked SearchBackground and content area.
  * 
  * It includes:
  * - City of Boston Banner
  * - Sticky Header that becomes fixed when scrolling past the banner
- * - Full-height SearchBackground with content overlaid
+ * - SearchBackground area that sizes to its content
+ * - Additional content area below with grid container
  * - Footer
  * 
  * ## Features
  * - **Sticky Header**: The header becomes fixed at the top of the viewport when scrolling past the banner
- * - **Full-height Background**: The search background fills the entire content area
+ * - **Stacked Layout**: SearchBackground followed by additional content
+ * - **Grid Container**: The additional content area uses the USWDS grid container
  * - **Responsive Design**: Works on all screen sizes
  * 
  * @example
  * ```tsx
- * import WelcomePageLayout from './layouts/WelcomePageLayout/WelcomePageLayout';
+ * import SearchResultsLayout from './layouts/SearchResultsLayout/SearchResultsLayout';
  * 
- * function WelcomePage() {
+ * function SearchResultsPage() {
  *   return (
- *     <WelcomePageLayout>
- *       <div>
- *         <h1>Welcome to Properties</h1>
- *         <p>Your content goes here...</p>
- *       </div>
- *     </WelcomePageLayout>
+ *     <SearchResultsLayout
+ *       searchContent={<SearchBar />}
+ *     >
+ *       <div>Results content goes here...</div>
+ *     </SearchResultsLayout>
  *   );
  * }
  * ```
  */
-export default function WelcomePageLayout({ children, headerContent }: WelcomePageLayoutProps) {
+export default function SearchResultsLayout({ 
+  searchContent, 
+  children, 
+  headerContent 
+}: SearchResultsLayoutProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   
@@ -122,7 +132,7 @@ export default function WelcomePageLayout({ children, headerContent }: WelcomePa
   }, []);
 
   return (
-    <div className={styles.welcomePageLayout}>
+    <div className={styles.searchResultsLayout}>
       {/* Banner at the top */}
       <Banner />
       
@@ -131,11 +141,17 @@ export default function WelcomePageLayout({ children, headerContent }: WelcomePa
         <Header additionalContent={headerContent} />
       </div>
       
-      {/* Main content with SearchBackground */}
+      {/* Main content with stacked SearchBackground and additional content */}
       <main ref={mainRef} className={styles.main}>
+        {/* Search background area */}
         <SearchBackground>
-          {children}
+          {searchContent}
         </SearchBackground>
+        
+        {/* Additional content area with grid container */}
+        <div className={styles.contentArea}>
+          {children}
+        </div>
       </main>
       
       {/* Footer at the bottom */}

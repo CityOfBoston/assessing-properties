@@ -1,0 +1,54 @@
+@use '@styles/main' as main;
+
+.resultsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldTable {
+  margin-top: 24px;
+  display: none;
+
+  @include main.at-media('mobile-lg') {
+    display: block;
+  }
+}
+
+.recordTable {
+  margin-top: 24px;
+  display: block;
+
+  @include main.at-media('mobile-lg') {
+    display: none;
+  }
+
+  @include main.at-media-max('mobile-lg') {
+    & > :not(:last-child) {
+      margin-bottom: 16px;
+    }
+  }
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: 2rem;
+}
+
+.resultsHeader {
+  margin-top: 24px;
+  margin-bottom: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.resultsDescription {
+  margin-top: 24px;
+  margin-bottom: 0;
+  font-size: 1.125rem;
+  color: #555;
+}
+
+.detailsLink {
+  color: #0071bc;
+  text-decoration: underline;
+} 

@@ -1,0 +1,142 @@
+@use '../../styles/main.scss' as main;
+
+.propertyDetailsLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure at least full viewport height */
+  margin: 0;
+  padding: 0;
+  
+  /* Header wrapper - handles the sticky behavior */
+  .headerWrapper {
+    width: 100%;
+    position: relative;
+    
+    /* Sticky behavior applied via JavaScript */
+    &:global(.stickyActive) {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Mobile search icon */
+    .mobileSearchIcon {
+      display: none;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      padding: 8px;
+      margin-right: 8px;
+
+      @include main.at-media-max('mobile-lg') {
+        display: block;
+      }
+    }
+  }
+
+  /* Section navigation */
+  .sectionNav {
+    width: 100%;
+    background: white;
+    position: relative;
+    z-index: 999;
+
+    /* Hide on mobile */
+    @include main.at-media-max('mobile-lg') {
+      display: none;
+    }
+
+    /* Sticky behavior applied via JavaScript */
+    &:global(.stickyActive) {
+      position: fixed;
+      left: 0;
+      right: 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Navigation content with grid container */
+  .navContent {
+    @include main.grid-container;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  /* Navigation buttons */
+  .navButton {
+    background: none;
+    border: none;
+    padding: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    color: #091F2F;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #288BE4;
+    }
+  }
+
+  /* Main content area */
+  .main {
+    flex: 1; /* This makes the main content area take up available space */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: #F7F7F7;
+    
+    /* Prevent content jump when header becomes fixed */
+    &:global(.headerIsSticky) {
+      margin-top: calc(var(--header-height, 60px) + var(--nav-height, 50px)); /* Account for both header and nav heights */
+
+      @include main.at-media-max('mobile-lg') {
+        margin-top: var(--header-height, 60px); /* Only account for header on mobile */
+      }
+    }
+
+    /* Grid container wrapper */
+    > div {
+      @include main.grid-container;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+  }
+
+  /* Individual sections */
+  .section {
+    background: white;
+    padding: 32px;
+    margin-bottom: 58px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Content wrapper to handle padding */
+    > * {
+      width: 100%;
+    }
+  }
+
+  /* Footer stays at the bottom */
+  footer {
+    width: 100%;
+  }
+}
+
+.detailsTitle {
+  margin: 48px 0;
+}
+
+.feedbackSenderWrapper {
+  padding-bottom: 48px;
+} 

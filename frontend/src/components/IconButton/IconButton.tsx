@@ -5,7 +5,7 @@ interface IconButtonProps {
   /**
    * The SVG icon to display
    */
-  icon: React.ReactNode;
+  src: string;
   
   /**
    * The text to display next to the icon
@@ -32,7 +32,7 @@ interface IconButtonProps {
  * IconButton component that displays an icon alongside text
  */
 export const IconButton: React.FC<IconButtonProps> = ({
-  icon,
+  src,
   text,
   onClick,
   className = '',
@@ -44,9 +44,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       type={type}
       onClick={onClick}
     >
-      <span className={styles.iconContainer}>
-        {icon}
-      </span>
+      <img src={src} alt={text + " icon"} className={styles.iconContainer} />
       <span className={styles.text}>{text}</span>
     </button>
   );

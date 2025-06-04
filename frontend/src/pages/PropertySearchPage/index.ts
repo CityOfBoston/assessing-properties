@@ -1,1 +1,0 @@
-export { PropertySearchPage } from './PropertySearchPage'; 

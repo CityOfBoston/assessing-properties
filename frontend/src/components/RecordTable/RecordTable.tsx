@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './RecordTable.module.scss';
 
 export interface RecordTableData {
-  [key: string]: string | number;
+  [key: string]: string | number | React.ReactNode;
 }
 
 interface RecordTableProps {

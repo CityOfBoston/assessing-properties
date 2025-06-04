@@ -5,12 +5,17 @@ export interface FeedbackSenderProps {
   /**
    * Optional handler for the feedback submission
    */
-  onSubmit?: (data: { helpful: boolean; feedback?: string }) => void;
+  onSubmit?: (data: { helpful: boolean; feedback?: string; parcelId?: string }) => void;
   
   /**
    * Optional callback URL for the "Assessing department" link
    */
   assessingDeptUrl?: string;
+
+  /**
+   * Optional parcelId for context
+   */
+  parcelId?: string;
 }
 
 /**
@@ -19,6 +24,7 @@ export interface FeedbackSenderProps {
 export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
   onSubmit,
   assessingDeptUrl = '#',
+  parcelId,
 }) => {
   const [feedbackOption, setFeedbackOption] = useState<string | null>(null);
   const [feedbackText, setFeedbackText] = useState('');
@@ -43,6 +49,7 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
       onSubmit({
         helpful: feedbackOption === 'yes',
         feedback: feedbackText || undefined,
+        parcelId,
       });
     }
     

@@ -1,48 +1,33 @@
-import { useState, useCallback } from 'react';
-import WelcomePageLayout from '@layouts/WelcomePageLayout';
-import { WelcomeContent } from '@components/WelcomeContent';
-import { SearchBarContainer } from '@containers/SearchBarContainer';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import WelcomePageLayout from '@layouts/WelcomePageLayout/WelcomePageLayout';
+import { WelcomeContent } from '@components/WelcomeContent/WelcomeContent';
+import { SearchBarContainer } from '@containers/SearchBarContainer/SearchBarContainer';
 
-export const WelcomePage = () => {
+export default function WelcomePage() {
+  const navigate = useNavigate();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isClearing, setIsClearing] = useState(false);
 
-  const handleFocus = useCallback(() => {
-    setIsSearchFocused(true);
-  }, []);
-
-  const handleBlur = useCallback(() => {
-    if (!isClearing) {
-      setIsSearchFocused(false);
-    }
-  }, [isClearing]);
-
-  const handleClear = useCallback(() => {
-    setIsClearing(true);
-    // Reset the clearing flag after a short delay
-    setTimeout(() => {
-      setIsClearing(false);
-    }, 100);
-  }, []);
+  const handlePropertySelect = (pid: string, fullAddress: string) => {
+    // Navigate to property details page
+    navigate(`/details?parcelId=${pid}`);
+  };
 
   return (
-    <WelcomePageLayout
-      welcomeContent={
-        <>
-          <WelcomeContent 
-            additionalContent={
-              <SearchBarContainer 
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                onClear={handleClear}
-              />
-            }
-            hideTitleAndDescriptionOnMobile={isSearchFocused}
+    <WelcomePageLayout>
+      <WelcomeContent
+        additionalContent={
+          <SearchBarContainer
+            onSelect={handlePropertySelect}
+            labelText="Search for a property"
+            tooltipHint="Enter an address or parcel ID to search"
+            placeholderText="Enter address or parcel ID"
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
           />
-        </>
-      }
-      searchResults={null}
-      headerContent={null}
-    />
+        }
+        hideTitleAndDescriptionOnMobile={isSearchFocused}
+      />
+    </WelcomePageLayout>
   );
-}; 
+} 

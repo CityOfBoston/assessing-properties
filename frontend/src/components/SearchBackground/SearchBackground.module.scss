@@ -30,5 +30,6 @@
   @include main.at-media('mobile-lg') {
     @include main.grid-container;
     padding: 50px 30px;
+    width: 100%;
   }
 } 

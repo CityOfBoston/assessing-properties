@@ -11,6 +11,8 @@ interface SearchBarContainerProps {
   onFocus?: () => void;
   onBlur?: () => void;
   onClear?: () => void;
+  errorMessage?: string;
+  value?: string;
 }
 
 export const SearchBarContainer = ({
@@ -22,6 +24,8 @@ export const SearchBarContainer = ({
   onFocus,
   onBlur,
   onClear,
+  errorMessage,
+  value,
 }: SearchBarContainerProps) => {
   const {
     suggestions,
@@ -112,12 +116,12 @@ export const SearchBarContainer = ({
       labelText={labelText}
       tooltipHint={tooltipHint}
       placeholderText={placeholderText}
-      value={searchValue}
+      value={value || searchValue}
       onChange={handleInputChange}
       onSuggestionClick={handleSuggestionClick}
       suggestions={transformedSuggestions}
       loading={isLoading}
-      errorMessage={error?.message}
+      errorMessage={errorMessage || error?.message}
       onSearch={handleSearch}
       onFocus={handleFocus}
       onBlur={handleBlur}

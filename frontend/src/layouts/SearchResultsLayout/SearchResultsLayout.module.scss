@@ -1,6 +1,6 @@
 @use '../../styles/main.scss' as main;
 
-.welcomePageLayout {
+.searchResultsLayout {
   display: flex;
   flex-direction: column;
   min-height: 100vh; /* Ensure at least full viewport height */
@@ -24,7 +24,7 @@
     }
   }
 
-  /* Main content area with SearchBackground */
+  /* Main content area with stacked layout */
   .main {
     flex: 1; /* This makes the main content area take up available space */
     display: flex;
@@ -34,11 +34,13 @@
     &:global(.headerIsSticky) {
       margin-top: var(--header-height, 60px); /* Use dynamic height or fallback */
     }
+  }
 
-    /* Ensure SearchBackground fills the entire main area */
-    :global(.background) {
-      min-height: calc(100vh - var(--header-height, 60px) - var(--banner-height, 0px) - var(--footer-height, 0px));
-    }
+  /* Additional content area with grid container */
+  .contentArea {
+    @include main.grid-container;
+    padding: 2rem 1rem;
+    width: 100%;
   }
 
   /* Footer stays at the bottom */

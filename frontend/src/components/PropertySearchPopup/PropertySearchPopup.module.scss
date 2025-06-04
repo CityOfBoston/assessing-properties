@@ -3,14 +3,10 @@
 .container {
   position: relative;
   display: block;
-  width: 100%;
-  max-width: 100%;
 }
 
 .content {
-  @include grid-container;
   position: relative;
-  width: 100%;
 }
 
 .closeButton {
