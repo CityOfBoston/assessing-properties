@@ -5,30 +5,6 @@
   flex-direction: column;
 }
 
-.fieldTable {
-  margin-top: 24px;
-  display: none;
-
-  @include main.at-media('mobile-lg') {
-    display: block;
-  }
-}
-
-.recordTable {
-  margin-top: 24px;
-  display: block;
-
-  @include main.at-media('mobile-lg') {
-    display: none;
-  }
-
-  @include main.at-media-max('mobile-lg') {
-    & > :not(:last-child) {
-      margin-bottom: 16px;
-    }
-  }
-}
-
 .loadingContainer {
   text-align: center;
   padding: 2rem;
@@ -51,4 +27,8 @@
 .detailsLink {
   color: #0071bc;
   text-decoration: underline;
-} 
+}
+
+.resultsTable {
+  margin-top: 24px;
+}

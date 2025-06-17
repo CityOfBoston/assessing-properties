@@ -1,0 +1,56 @@
+@use '../../styles/main' as main;
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background-color: #D4E8FA;
+  min-width: 0;
+
+  @include main.at-media-max('mobile-lg') {
+    padding: 8px;
+    gap: 4px;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  font-weight: normal;
+
+  @include main.at-media-max('mobile-lg') {
+    flex-direction: column;
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @include main.at-media-max('mobile-lg') {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.headerText {
+  flex: 1;
+  min-width: 0;
+  word-wrap: break-word;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-family: 'Montserrat', sans-serif;
+
+}
+
+.value {
+  font-size: 16px;
+  color: #091F2F;
+  text-align: left;
+} 

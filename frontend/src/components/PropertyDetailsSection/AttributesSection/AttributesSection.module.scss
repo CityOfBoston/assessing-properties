@@ -1,0 +1,95 @@
+@use '../../../styles/main' as main;
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-bottom: 16px;
+
+  @include main.at-media-max('tablet') {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    // Hide all groups after the first two on mobile when not expanded
+    .group:nth-child(n + 3) {
+      display: none;
+    }
+  }
+}
+
+// Show all groups when expanded on mobile
+.expanded {
+  @include main.at-media-max('tablet') {
+    .group:nth-child(n + 3) {
+      display: block;
+    }
+  }
+}
+
+.group {
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    font-weight: normal;
+    text-transform: uppercase;
+  }
+
+  ul {
+    list-style: disc;
+    padding-left: 20px;
+    margin: 0;
+
+    li {
+      margin-bottom: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      strong {
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.seeMoreButton {
+  display: none;
+
+  @include main.at-media-max('tablet') {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #1871BD;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Lora", serif;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.arrow {
+  font-size: 24px;
+  line-height: 1;
+  color: #1871BD;
+  
+  &::before {
+    content: '›';
+    display: inline-block;
+    transform: rotate(90deg);
+  }
+
+  &.up::before {
+    transform: rotate(-90deg);
+  }
+} 

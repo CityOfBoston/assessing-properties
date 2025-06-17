@@ -1,7 +1,7 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import WelcomePage from '@pages/WelcomePage';
 import SearchResultsPage from '@pages/SearchResultsPage';
-import PropertyDetailPage from '@pages/PropertyDetailPage';
+import PropertyDetailsPage from '@src/pages/PropertyDetailsPage';
 import '@styles/main.scss';
 
 export const App = () => {
@@ -10,7 +10,7 @@ export const App = () => {
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/search" element={<SearchResultsPage />} />
-        <Route path="/details" element={<PropertyDetailPage />} />
+        <Route path="/details" element={<PropertyDetailsPage />} />
       </Routes>
     </Router>
   );

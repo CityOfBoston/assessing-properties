@@ -1,0 +1,146 @@
+@use '@styles/main' as main;
+
+.section {
+  display: flex;
+  gap: 80px;
+  margin: 16px;
+
+  @include main.at-media-max('mobile-lg') {
+    flex-direction: column;
+    gap: 24px;
+    margin: 0;
+  }
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.leftContent {
+  flex: 1;
+}
+
+.rightContent {
+  flex: 0;
+  margin: 0 24px;
+
+  @include main.at-media-max('mobile-lg') {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.locationContainer {
+  display: flex;
+  align-items: center;
+}
+
+.locationIcon {
+  margin-right: 6px;
+}
+
+.propertyImage {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+
+  @include main.at-media-max('mobile-lg') {
+    width: 100%;
+    height: 240px;
+  }
+}
+
+.mapLink {
+  display: block;
+  margin-top: 12px;
+  text-align: left;
+  font-size: 12px;
+
+  @include main.at-media-max('mobile-lg') {
+    text-align: center;
+    margin-top: 16px;
+  }
+}
+
+.divider {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  height: 1px;
+  background-color: #D2D2D2;
+}
+
+.sectionHeader {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.mapLink {
+  font-weight: 300;
+  font-size: 18px;
+
+  @include main.at-media-max('mobile-lg') {
+    font-size: 16px;
+  }
+}
+
+.sectionIcon {
+  width: 24px;
+}
+
+.sectionTitle {
+  margin: 0;
+}
+
+.sectionContent {
+  margin-left: 30px;
+}
+
+.ownerDisclaimer {
+  margin-top: 8px;
+  color: #58585B;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 28px;
+  margin-right: 80px;
+
+  @include main.at-media-max('mobile-lg') {
+    margin-right: 0;
+  }
+}
+
+.cardGroupSection {
+  width: 100%;
+
+  &.desktop {
+    @include main.at-media-max('mobile-lg') {
+      display: none;
+    }
+  }
+
+  &.mobile {
+    display: none;
+
+    @include main.at-media-max('mobile-lg') {
+      display: block;
+    }
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+
+  @include main.at-media-max('mobile-lg') {
+    width: 100%;
+    gap: 0;
+    
+    button {
+      flex: 1;
+    }
+  }
+} 

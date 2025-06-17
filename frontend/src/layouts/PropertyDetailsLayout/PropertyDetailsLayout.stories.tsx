@@ -8,7 +8,7 @@ import {
   AbatementsSection,
   ApprovedPermitsSection,
   ContactUsSection,
-} from '@components/PropertyDetailSections';
+} from '@src/components/PropertyDetailsSection';
 
 const meta = {
   title: 'Layouts/PropertyDetailsLayout',
@@ -136,19 +136,108 @@ export const WithAllSections: Story = {
     sections: [
       {
         name: 'Overview',
-        component: <OverviewSection />,
+        component: <OverviewSection data={{
+          fullAddress: "123 Main Street, Boston, MA 02118",
+          owners: ["John Smith", "Jane Smith"],
+          imageSrc: "https://placehold.co/512x512",
+          assessedValue: 750000,
+          propertyType: "Residential - Single Family",
+          parcelId: 1234567890,
+          netTax: 7500,
+          personalExample: false,
+          residentialExemption: true
+        }} />,
       },
       {
         name: 'Property Value',
-        component: <PropertyValueSection />,
+        component: <PropertyValueSection 
+          historicPropertyValues={{
+            2018: 425000,
+            2019: 432000,
+            2020: 445000,
+            2021: 460000,
+            2022: 478500,
+            2023: 492000,
+            2024: 510000
+          }}
+        />,
       },
       {
         name: 'Attributes',
-        component: <AttributesSection />,
+        component: <AttributesSection data={{
+          // Bedrooms
+          bedroomNumber: 4,
+          bedroomType: 'Master Suite',
+          totalRooms: 8,
+
+          // Bathrooms
+          totalBathrooms: 3,
+          halfBathrooms: 1,
+          bathStyle1: 'Modern',
+          bathStyle2: 'Traditional',
+          bathStyle3: 'Contemporary',
+
+          // Kitchen
+          numberOfKitchens: 1,
+          kitchenType: 'Gourmet',
+          kitchenStyle1: 'Modern',
+          kitchenStyle2: 'Open Concept',
+          kitchenStyle3: 'Island',
+
+          // Utilities
+          fireplaces: 2,
+          acType: 'Central Air',
+          heatType: 'Forced Air',
+
+          // Interior
+          interiorCondition: 'Excellent',
+          interiorFinish: 'High End',
+
+          // Exterior
+          exteriorFinish: 'Brick',
+          exteriorCondition: 'Good',
+          view: 'City Skyline',
+          grade: 'A',
+
+          // Construction
+          yearBuilt: 2015,
+          roofCover: 'Asphalt Shingle',
+          roofStructure: 'Gable',
+          foundation: 'Concrete',
+          landUse: 'Residential',
+
+          // Last Transaction
+          salePrice: 850000,
+          saleDate: '2023-06-15',
+          registryBookAndPlace: 'Book 12345, Page 678',
+
+          // Parking
+          parkingSpots: 2,
+          parkingOwnership: 'Owned',
+          parkingType: 'Garage',
+          tandemParking: false,
+
+          // Details
+          propertyType: 'Single Family',
+          livingArea: 2500,
+          floor: 1,
+          penthouseUnit: false,
+          complex: 'None',
+          storyHeight: 9,
+          style: 'Contemporary',
+          orientation: 'South'
+        }} />,
       },
       {
         name: 'Property Taxes',
-        component: <PropertyTaxesSection />,
+        component: <PropertyTaxesSection
+          propertyGrossTax={9427.20}
+          residentialExemption={3716.40}
+          personalExemption={0}
+          communityPreservation={0}
+          propertyNetTax={5710.80}
+          parcelId="1234567890"
+        />,
       },
       {
         name: 'Abatements',
@@ -156,7 +245,7 @@ export const WithAllSections: Story = {
       },
       {
         name: 'Permits',
-        component: <ApprovedPermitsSection />,
+        component: <ApprovedPermitsSection parcelId="1234567890" />,
       },
       {
         name: 'Contact Us',

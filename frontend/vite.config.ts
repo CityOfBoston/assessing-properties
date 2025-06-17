@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+import type { LogErrorOptions, ViteDevServer } from 'vite';
 
 /**
  * USWDS Configuration
@@ -23,9 +24,23 @@ const USWDS_ASSETS = ['fonts', 'img', 'js'].map(folder => ({
 
 // USWDS script paths (kept external from bundling)
 const USWDS_SCRIPTS = [
-  './cob-uswds/js/uswds-init.min.js',
-  './cob-uswds/js/cob-uswds.min.js',
+  '/cob-uswds/js/uswds-init.min.js',
+  '/cob-uswds/js/cob-uswds.min.js',
 ];
+
+// Custom plugin to handle pre-transform errors during development mode
+const uswdsErrorHandler = {
+  name: 'uswds-error-handler',
+  configureServer(server: ViteDevServer) {
+    const originalError = server.config.logger.error;
+    server.config.logger.error = (msg: string, ...args: unknown[]) => {
+      if (msg.includes('uswds-init.min.js') || msg.includes('cob-uswds.min.js')) {
+        return;
+      }
+      originalError(msg, ...args as [LogErrorOptions | undefined]);
+    };
+  }
+};
 
 export default defineConfig({
   /**
@@ -47,6 +62,9 @@ export default defineConfig({
       // The writeBundle hook ensures assets are copied during the build process
       hook: 'writeBundle',
     }),
+
+    // Custom plugin to handle USWDS script errors
+    uswdsErrorHandler,
   ],
   
   /**
@@ -61,8 +79,8 @@ export default defineConfig({
       
       // Add application-specific aliases
       '@src': path.resolve(__dirname, 'src'),
-      '@components': path.resolve(__dirname, 'src/components'),
       '@layouts': path.resolve(__dirname, 'src/layouts'),
+      '@components': path.resolve(__dirname, 'src/components'),
       '@styles': path.resolve(__dirname, 'src/styles'),
       '@containers': path.resolve(__dirname, 'src/containers'),
       '@assets': path.resolve(__dirname, 'src/assets'),

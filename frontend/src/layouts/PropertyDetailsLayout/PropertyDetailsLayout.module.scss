@@ -62,23 +62,23 @@
   /* Navigation content with grid container */
   .navContent {
     @include main.grid-container;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-    gap: 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   /* Navigation buttons */
   .navButton {
     background: none;
     border: none;
-    padding: 1rem;
+    font-size: 16px;
+    padding: 10px;
     font-family: 'Montserrat', sans-serif;
-    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     text-transform: uppercase;
     color: #091F2F;
-    transition: color 0.2s;
+    white-space: nowrap; /* Prevent text wrapping */
 
     &:hover {
       color: #288BE4;
@@ -92,6 +92,10 @@
     flex-direction: column;
     width: 100%;
     background: #F7F7F7;
+    
+    @include main.at-media-max('mobile-lg') {
+      background: white;
+    }
     
     /* Prevent content jump when header becomes fixed */
     &:global(.headerIsSticky) {
@@ -108,6 +112,10 @@
       display: flex;
       flex-direction: column;
       width: 100%;
+
+      @include main.at-media-max('mobile-lg') {
+        padding: 0;
+      }
     }
   }
 
@@ -116,6 +124,22 @@
     background: white;
     padding: 32px;
     margin-bottom: 58px;
+
+    @include main.at-media-max('mobile-lg') {
+      padding: 24px;
+      margin-bottom: 0;
+      position: relative;
+
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 24px;
+        right: 24px;
+        height: 1px;
+        background-color: #D2D2D2;
+      }
+    }
 
     &:last-child {
       margin-bottom: 0;
@@ -135,8 +159,17 @@
 
 .detailsTitle {
   margin: 48px 0;
+
+  @include main.at-media-max('mobile-lg') {
+    padding: 0 24px;
+    margin: 24px 0;
+  }
 }
 
 .feedbackSenderWrapper {
   padding-bottom: 48px;
+
+  @include main.at-media-max('mobile-lg') {
+    padding: 24px;
+  }
 } 

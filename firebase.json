@@ -44,5 +44,8 @@
         ]
       }
     ]
+  },
+  "storage": {
+    "rules": "storage.rules"
   }
 }

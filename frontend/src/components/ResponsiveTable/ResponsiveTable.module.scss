@@ -1,0 +1,35 @@
+@use '@styles/main' as main;
+
+.responsiveTable {
+  width: 100%;
+}
+
+.fieldTable {
+  display: none;
+
+  @include main.at-media('mobile-lg') {
+    display: block;
+  }
+}
+
+.recordTable {
+  display: block;
+
+  @include main.at-media('mobile-lg') {
+    display: none;
+  }
+
+  @include main.at-media-max('mobile-lg') {
+    & > :not(:last-child) {
+      margin-bottom: 16px;
+    }
+  }
+}
+
+.detailsLinks {
+  display: inline-flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  white-space: nowrap;
+} 

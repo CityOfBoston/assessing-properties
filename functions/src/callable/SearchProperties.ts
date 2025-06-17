@@ -1,7 +1,7 @@
 import {onCall} from "firebase-functions/v2/https";
 import {assemblePropertySearchQuery, executePropertySearchQuery} from
   "../lib/PropertyClient";
-import { SearchPropertiesRequest } from "../types";
+import {SearchPropertiesRequest} from "../types";
 
 /**
  * Callable function that searches for properties based on a search string.
@@ -16,22 +16,22 @@ export const searchProperties =
 onCall<SearchPropertiesRequest>(async (request) => {
   console.log(`[SearchProperties] Function called with searchString: "${
     request.data?.searchString}", isDetailed: ${request.data?.isDetailed}`);
-  
+
   try {
     const {searchString, isDetailed = false} = request.data;
 
     if (!searchString) {
-      console.warn('[SearchProperties] Missing searchString in request');
+      console.warn("[SearchProperties] Missing searchString in request");
       throw new Error("Search string is required");
     }
 
     console.log(`[SearchProperties] Assembling search query for: "${
       searchString}"`);
     const query = assemblePropertySearchQuery(searchString, isDetailed);
-    
-    console.log('[SearchProperties] Executing property search query');
+
+    console.log("[SearchProperties] Executing property search query");
     const results = await executePropertySearchQuery(query, isDetailed);
-    
+
     console.log(`[SearchProperties] Search completed. Found ${
       results.length} results`);
     return {
@@ -39,9 +39,9 @@ onCall<SearchPropertiesRequest>(async (request) => {
       data: results,
     };
   } catch (error) {
-    console.error('[SearchProperties] Error:', error);
+    console.error("[SearchProperties] Error:", error);
     console.error(`[SearchProperties] Stack trace: ${error instanceof Error ?
-       error.stack : 'No stack trace available'}`);
+      error.stack : "No stack trace available"}`);
     throw new Error(error instanceof Error ? error.message :
       "An error occurred while searching properties");
   }

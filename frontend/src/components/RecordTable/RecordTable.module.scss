@@ -2,8 +2,7 @@
 
 .recordTable {
   width: 100%;
-  border: 1px solid #dfe1e2;
-  border-radius: 4px;
+  border: 1px solid #1B1B1B;
   overflow: hidden;
 }
 
@@ -16,7 +15,7 @@
 .row {
   display: flex;
   width: 100%;
-  border-bottom: 1px solid #dfe1e2;
+  border-bottom: 1px solid #1B1B1B;
   transition: background-color 0.2s ease;
   
   &:last-child {
@@ -37,4 +36,8 @@
 
 .labelText {
   font-weight: bold;
+  letter-spacing: 0.012em;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  font-size: 14px;
 } 

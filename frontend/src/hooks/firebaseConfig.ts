@@ -21,20 +21,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Get Functions instance.
-const functions = getFunctions(app);
+const functions = getFunctions(app, 'us-central1');
 
 // Export the callable function with authentication ensured.
 export const saveFormData = async (data: any) => {
-  const callable = httpsCallable(functions, 'saveFormData');
-  return callable(data);
+  try {
+    const callable = httpsCallable(functions, 'saveFormData');
+    return await callable(data);
+  } catch (error) {
+    console.error('Error saving form data:', error);
+    throw error;
+  }
 };
 
 // Export the search properties callable function
 export const searchProperties = async (request: SearchPropertiesRequest): 
 Promise<SearchPropertiesResponse> => {
-  const callable = httpsCallable
-  <SearchPropertiesRequest, SearchPropertiesResponse>
-  (functions, 'searchProperties');
-  const result = await callable(request);
-  return result.data;
+  try {
+    const callable = httpsCallable<SearchPropertiesRequest, SearchPropertiesResponse>(
+      functions, 
+      'searchProperties'
+    );
+    const result = await callable(request);
+    return result.data;
+  } catch (error) {
+    console.error('Error searching properties:', error);
+    throw error;
+  }
 };

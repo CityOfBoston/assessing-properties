@@ -1,0 +1,43 @@
+@use '../../../styles/main' as main;
+
+.valueHistory {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+
+  h2, p {
+    margin: 0;
+  }
+}
+
+.seeMoreButton {
+  font-family: "Lora", serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #1871BD;
+  font-size: 16px;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.arrow {
+  font-size: 24px;
+  line-height: 1;
+  &::before {
+    content: '›';
+    display: inline-block;
+    transform: rotate(90deg);
+  }
+
+  &.up::before {
+    transform: rotate(-90deg);
+  }
+} 

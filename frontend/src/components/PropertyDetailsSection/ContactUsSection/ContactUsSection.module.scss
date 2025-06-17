@@ -1,0 +1,44 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+}
+
+.contactBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  flex: 1;
+  min-width: 0; // Prevents flex items from overflowing
+  border-radius: 2px;
+  border: 1px solid #D2D2D2;
+}
+
+.icon {
+  margin-bottom: 22px;
+}
+
+.content {
+  width: 100%;
+}
+
+.list {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin: 0;
+
+  li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+} 

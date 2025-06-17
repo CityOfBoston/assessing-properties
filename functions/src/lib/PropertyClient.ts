@@ -1,5 +1,5 @@
-import { DetailedSearchResult, SearchResult, ParcelId, PropertyDetails, 
-  PropertyOverview, PropertyAttributes, PropertyValue, PropertyTax 
+import {DetailedSearchResult, SearchResult, ParcelId, PropertyDetails,
+  PropertyOverview, PropertyAttributes, PropertyValue, PropertyTax,
 } from "../types";
 const PROPERTIES_TABLE = "6b7e460e-33f6-4e61-80bc-1bef2e73ac54";
 const BASE_URL = "https://data.boston.gov/api/3/action/datastore_search_sql";
@@ -48,72 +48,72 @@ const BASE_URL = "https://data.boston.gov/api/3/action/datastore_search_sql";
  */
 export function assemblePropertySearchQuery(searchString: string,
   isDetailed = false): string {
-    console.log(`[PropertyClient] Assembling search query with searchString: "${
-      searchString}", isDetailed: ${isDetailed}`);
-    
-    const selectFields = ['"PID"', '"ST_NUM"', '"ST_NUM2"', '"ST_NAME"', 
-      '"UNIT_NUM"', '"CITY"', '"ZIP_CODE"'];
-    if (isDetailed) {
-      selectFields.push('"OWNER"', '"TOTAL_VALUE"');
-      console.log('[PropertyClient] Including detailed fields in query');
-    }
-    const fieldsToSelect = selectFields.join(', ');
-  
-    const cleaned = searchString
-      .trim()
-      .replace(/[^\w\s]/g, '')
-      .replace(/\s+/g, ' ')
-      .toLowerCase();
-    
-    console.log(`[PropertyClient] Cleaned search string: "${cleaned}"`);
-    const tokens = cleaned.split(' ').filter(Boolean);
+  console.log(`[PropertyClient] Assembling search query with searchString: "${
+    searchString}", isDetailed: ${isDetailed}`);
 
-    // === Special case: PID exact match ===
-    if (tokens.length === 1 && /^\d+$/.test(tokens[0])) {
-      const pid = tokens[0];
-      console.log(`[PropertyClient] Detected PID exact match search: ${pid}`);
-      const query = `SELECT ${fieldsToSelect}
+  const selectFields = ["\"PID\"", "\"ST_NUM\"", "\"ST_NUM2\"", "\"ST_NAME\"",
+    "\"UNIT_NUM\"", "\"CITY\"", "\"ZIP_CODE\""];
+  if (isDetailed) {
+    selectFields.push("\"OWNER\"", "\"TOTAL_VALUE\"");
+    console.log("[PropertyClient] Including detailed fields in query");
+  }
+  const fieldsToSelect = selectFields.join(", ");
+
+  const cleaned = searchString
+    .trim()
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+  console.log(`[PropertyClient] Cleaned search string: "${cleaned}"`);
+  const tokens = cleaned.split(" ").filter(Boolean);
+
+  // === Special case: PID exact match ===
+  if (tokens.length === 1 && /^\d+$/.test(tokens[0])) {
+    const pid = tokens[0];
+    console.log(`[PropertyClient] Detected PID exact match search: ${pid}`);
+    const query = `SELECT ${fieldsToSelect}
   FROM ${PROPERTIES_TABLE}
   WHERE "PID" = '${pid}'
   LIMIT 20`;
-      console.log('[PropertyClient] Generated PID exact match query');
-      return query;
-    }
-  
-    console.log('[PropertyClient] Building full-text search query');
-    const fullTextVector = `to_tsvector('simple', 
+    console.log("[PropertyClient] Generated PID exact match query");
+    return query;
+  }
+
+  console.log("[PropertyClient] Building full-text search query");
+  const fullTextVector = `to_tsvector('simple', 
     COALESCE("ST_NUM", '') || ' ' || 
     COALESCE("ST_NUM2", '') || ' ' || 
     COALESCE("ST_NAME", '') || ' ' || 
     COALESCE("UNIT_NUM", '') || ' ' || 
     COALESCE("CITY", '') || ' ' || 
     COALESCE("ZIP_CODE", ''))`;
-  
-    const tsQuery = `plainto_tsquery('simple', '${cleaned}')`;
-  
-    const fallbackILIKE = tokens.map(token => {
-      const isNumeric = /^\d+$/.test(token);
-      const fields = isNumeric ? ['ST_NUM', 'ST_NUM2', 'UNIT_NUM', 'ZIP_CODE'] 
-      : ['ST_NAME', 'CITY'];
-      return `(${fields.map(f => `"${f}" ILIKE '%${token}%'`).join(' OR ')})`;
-    }).join(' AND ');
 
-    const query = `SELECT ${fieldsToSelect}
+  const tsQuery = `plainto_tsquery('simple', '${cleaned}')`;
+
+  const fallbackILIKE = tokens.map((token) => {
+    const isNumeric = /^\d+$/.test(token);
+    const fields = isNumeric ? ["ST_NUM", "ST_NUM2", "UNIT_NUM", "ZIP_CODE"] :
+      ["ST_NAME", "CITY"];
+    return `(${fields.map((f) => `"${f}" ILIKE '%${token}%'`).join(" OR ")})`;
+  }).join(" AND ");
+
+  const query = `SELECT ${fieldsToSelect}
   FROM ${PROPERTIES_TABLE}
   WHERE ${fullTextVector} @@ ${tsQuery}
       OR (${fallbackILIKE})
   LIMIT 20`;
-    
-    console.log('[PropertyClient] Generated full-text search query');
-    return query;
+
+  console.log("[PropertyClient] Generated full-text search query");
+  return query;
 }
 
 /**
- * Given a parcel id, assembles a sql query string that will be used to 
+ * Given a parcel id, assembles a sql query string that will be used to
  * get all the property details for the parcel. We assume that since the
  * parcel id is unique, the response will only contain one record, so we
  * can just return the first record in the response.
- * 
+ *
  * @param parcelId - The parcel id of the property to get details for
  * @return A sql query string that will be used to get all the property
  * details for the parcel
@@ -125,7 +125,7 @@ export function assemblePropertyDetailsQuery(parcelId: ParcelId): string {
   const query = `SELECT * FROM "${PROPERTIES_TABLE}" WHERE "PID" = 
   '${parcelId.toString()}'
   LIMIT 1`;
-  console.log('[PropertyClient] Generated property details query');
+  console.log("[PropertyClient] Generated property details query");
   return query;
 }
 
@@ -149,7 +149,7 @@ export async function executePropertySearchQuery(query: string,
   const url = `${BASE_URL}?sql=${encodeURIComponent(query)}`;
 
   try {
-    console.log('[PropertyClient] Sending request to Boston data API');
+    console.log("[PropertyClient] Sending request to Boston data API");
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -167,7 +167,7 @@ export async function executePropertySearchQuery(query: string,
     const json = await response.json();
 
     if (!json.success || !json.result || !json.result.records) {
-      console.warn('[PropertyClient] API returned no results');
+      console.warn("[PropertyClient] API returned no results");
       return [];
     }
 
@@ -183,7 +183,7 @@ export async function executePropertySearchQuery(query: string,
       const fullAddress =
             `${stNum}${stNum2} ${stName}`.trim() + (unit ? `, ${unit}` : "") +
             (city ? `, ${city}` : "") + (zipCode ? `, ${zipCode}` : "");
-      
+
       if (isDetailed) {
         return {
           parcelId: ParcelId.create(record.PID),
@@ -203,23 +203,23 @@ export async function executePropertySearchQuery(query: string,
       results.length} search results`);
     return results;
   } catch (error) {
-    console.error('[PropertyClient] Error executing property search:', error);
+    console.error("[PropertyClient] Error executing property search:", error);
     console.error(`[PropertyClient] Stack trace: ${error instanceof Error ?
-       error.stack : 'No stack trace available'}`);
+      error.stack : "No stack trace available"}`);
     throw error;
   }
 }
 
 /**
  * Helper function to discern whether a property is residential or commercial
- * based on the land use code. If the land use code starts with '1' or is '013' 
+ * based on the land use code. If the land use code starts with '1' or is '013'
  * or '031', it is residential. Otherwise, it is commercial.
- * 
+ *
  * @param luc - The land use code of the property
  * @return true if the property is residential, false otherwise
  */
 function isResidential(luc: string): boolean {
-  return luc.startsWith('1') || luc === '013' || luc === '031';
+  return luc.startsWith("1") || luc === "013" || luc === "031";
 }
 
 /**
@@ -238,13 +238,13 @@ function isResidential(luc: string): boolean {
  * possible matches in the database
  * @return A DetailedSearchResult object containing the property details
  */
-export async function executePropertyDetailsQuery(query: string): 
+export async function executePropertyDetailsQuery(query: string):
 Promise<PropertyDetails> {
-  console.log('[PropertyClient] Executing property details query');
+  console.log("[PropertyClient] Executing property details query");
   const url = `${BASE_URL}?sql=${encodeURIComponent(query)}`;
 
   try {
-    console.log('[PropertyClient] Sending request to Boston data API');
+    console.log("[PropertyClient] Sending request to Boston data API");
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -260,16 +260,16 @@ Promise<PropertyDetails> {
     }
 
     const json = await response.json();
-    
-    if (!json.success || !json.result || !json.result.records || 
+
+    if (!json.success || !json.result || !json.result.records ||
       !json.result.records[0]) {
       console.error(
-        '[PropertyClient] API returned no results for property details');
-      throw new Error('No property details found');
+        "[PropertyClient] API returned no results for property details");
+      throw new Error("No property details found");
     }
 
     console.log(
-      '[PropertyClient] Processing property details from API response');
+      "[PropertyClient] Processing property details from API response");
     const record = json.result.records[0];
     const stNum = record.ST_NUM || "";
     const stNum2 = record.ST_NUM2 ? `-${record.ST_NUM2}` : "";
@@ -282,7 +282,7 @@ Promise<PropertyDetails> {
           (city ? `, ${city}` : "") + (zipCode ? `, ${zipCode}` : "");
 
     // Assemble PropertyOverview
-    console.log('[PropertyClient] Assembling property overview');
+    console.log("[PropertyClient] Assembling property overview");
     const propertyOverview: PropertyOverview = {
       parcelId: ParcelId.create(record.PID),
       fullAddress,
@@ -295,11 +295,11 @@ Promise<PropertyDetails> {
       netTax: parseFloat(record.GROSS_TAX) || 0,
       hasResidentialExemption: record.OWN_OCC === "Y",
       hasPersonalExemption: false,
-      classificationCode: record.LUC || ""
+      classificationCode: record.LUC || "",
     };
 
     // Assemble PropertyAttributes
-    console.log('[PropertyClient] Assembling property attributes');
+    console.log("[PropertyClient] Assembling property attributes");
     const attributes: PropertyAttributes = {
       bedrooms: parseInt(record.BED_RMS) || 0,
       bedroomType: record.BDRM_COND || "",
@@ -340,20 +340,20 @@ Promise<PropertyDetails> {
       complex: "",
       storyHeight: 0,
       style: record.BLDG_TYPE || "",
-      orientation: record.ORIENTATION || ""
+      orientation: record.ORIENTATION || "",
     };
 
     // Assemble PropertyValue
-    console.log('[PropertyClient] Assembling property value information');
+    console.log("[PropertyClient] Assembling property value information");
     const propertyValue: PropertyValue = {
       buildingValue: parseFloat(record.BLDG_VALUE) || 0,
       landValue: parseFloat(record.LAND_VALUE) || 0,
       assessedValue: parseFloat(record.TOTAL_VALUE) || 0,
-      historicalValues: []
+      historicalValues: [],
     };
 
     // Assemble PropertyTax
-    console.log('[PropertyClient] Assembling property tax information');
+    console.log("[PropertyClient] Assembling property tax information");
     const propertyTax: PropertyTax = {
       assessedValue: parseFloat(record.TOTAL_VALUE) || 0,
       isResidential: isResidential(record.LUC) || false,
@@ -362,14 +362,14 @@ Promise<PropertyDetails> {
       residentialExemption: record.OWN_OCC === "Y" ? 0 : 0,
       personalExemption: 0,
       communityPreservationFee: 0,
-      netTax: parseFloat(record.GROSS_TAX) || 0
+      netTax: parseFloat(record.GROSS_TAX) || 0,
     };
 
     const propertyDetails = {
       overview: propertyOverview,
       attributes: attributes,
       value: propertyValue,
-      tax: propertyTax
+      tax: propertyTax,
     };
 
     console.log(
@@ -377,9 +377,9 @@ Promise<PropertyDetails> {
         record.PID}`);
     return propertyDetails;
   } catch (error) {
-    console.error('[PropertyClient] Error fetching property details:', error);
-    console.error(`[PropertyClient] Stack trace: ${error instanceof Error ? 
-      error.stack : 'No stack trace available'}`);
+    console.error("[PropertyClient] Error fetching property details:", error);
+    console.error(`[PropertyClient] Stack trace: ${error instanceof Error ?
+      error.stack : "No stack trace available"}`);
     throw error;
   }
 }

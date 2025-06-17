@@ -1,0 +1,45 @@
+@use '@styles/main' as main;
+
+.header {
+  margin: 0;
+}
+
+.text {
+  margin: 0px;
+  line-height: 28px;
+  letter-spacing: 0.192px;
+}
+
+.cardGroup {
+  :global(.group) {
+    @include main.at-media-max('mobile-lg') {
+      --cards-per-row: 1;
+    }
+  }
+}
+
+.exemptionContent {
+  .text {
+    margin-bottom: 16px;
+  }
+}
+
+.list {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin: 0;
+
+  li {
+    line-height: 28px;
+    letter-spacing: 0.192px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.netTax {
+  font-size: 20px;
+  font-weight: bold;
+}

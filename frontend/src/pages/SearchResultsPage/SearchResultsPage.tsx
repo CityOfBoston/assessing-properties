@@ -4,8 +4,7 @@ import SearchResultsLayout from '@layouts/SearchResultsLayout';
 import WelcomeContent from '@components/WelcomeContent';
 import { SearchBarContainer } from '@containers/SearchBarContainer';
 import PropertySearchHelp from '@components/PropertySearchHelp';
-import RecordTable from '@components/RecordTable';
-import FieldTable from '@components/FieldTable';
+import ResponsiveTable from '@components/ResponsiveTable';
 import { ParcelId, DetailedSearchResult } from '@src/types';
 import styles from './SearchResultsPage.module.scss';
 import { toWords } from 'number-to-words';
@@ -68,6 +67,14 @@ export default function SearchResultsPage() {
     }).finally(() => setLoading(false));
   }, [query]);
 
+  const tableData = results?.map(result => ({
+    'Parcel ID': result.parcelId.toString(),
+    'Address': result.fullAddress,
+    'Owner(s)': result.owners.join(', '),
+    'Assessed Value': `$${result.value.toLocaleString()}`,
+    'Details': null, // This will be handled by ResponsiveTable
+  })) || [];
+
   return (
     <SearchResultsLayout
       searchContent={
@@ -87,38 +94,12 @@ export default function SearchResultsPage() {
           <p className={styles.resultsDescription}>
             We found {toWords(results.length)} ({results.length}) result{results.length !== 1 ? 's' : ''}.
           </p>
-          <div className={styles.fieldTable}>
-            <FieldTable
-              data={results.map(result => ({
-                'Parcel ID': result.parcelId.toString(),
-                'Address': result.fullAddress,
-                'Owner(s)': result.owners.join(', '),
-                'Assessed Value': `$${result.value.toLocaleString()}`,
-                'Details': (
-                  <Link to={`/details?parcelId=${result.parcelId.toString()}`} className={styles.detailsLink}>
-                    View Details
-                  </Link>
-                ),
-              }))}
+          <div className={styles.resultsTable}>
+            <ResponsiveTable
+              data={tableData}
+              showDetails={true}
+              showMapLink={true}
             />
-          </div>
-          <div className={styles.recordTable}>
-            {results.map((result, idx) => (
-              <RecordTable
-                key={result.parcelId.toString()}
-                data={{
-                  'Parcel ID': result.parcelId.toString(),
-                  'Address': result.fullAddress,
-                  'Owner(s)': result.owners.join(', '),
-                  'Assessed Value': `$${result.value.toLocaleString()}`,
-                  'Details': (
-                    <Link to={`/details?parcelId=${result.parcelId.toString()}`} className={styles.detailsLink}>
-                      View Details
-                    </Link>
-                  ),
-                }}
-              />
-            ))}
           </div>
         </div>
       ) : (

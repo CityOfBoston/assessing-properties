@@ -65,7 +65,6 @@ export interface FeedbackData {
 }
 
 
-
 /**
  * Declares a data object called SearchResult that has the following
  * properties:

@@ -1,0 +1,31 @@
+@use '../../styles/main.scss' as main;
+
+.group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  width: 100%;
+
+  @include main.at-media-max('mobile-lg') {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+.cardWrapper {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+.cardWrapper > * {
+  width: 100%;
+  min-width: 0;
+}
+
+@include main.at-media-max('mobile-lg') {
+  .group {
+    grid-template-columns: repeat(auto-fit, minmax(max(100px, calc((100% - 12px) / 2)), 1fr));
+    gap: 12px;
+  }
+} 
