@@ -3,11 +3,12 @@
  *
  * import {onCall} from "firebase-functions/v2/https";
  * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import {searchProperties} from "./callable/SearchProperties";
+import {getSearchSuggestions} from "./callable/getSearchSuggestions";
+import {getSearchResults} from "./callable/getSearchResults";
+import {getPropertyDetails} from "./callable/getPropertyDetails";
+import {postPropertyFeedback} from "./callable/postPropertyFeedback";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -17,4 +18,9 @@ import {searchProperties} from "./callable/SearchProperties";
 //   response.send("Hello from Firebase!");
 // });
 
-export {searchProperties};
+export {
+  getSearchSuggestions,
+  getSearchResults,
+  getPropertyDetails,
+  postPropertyFeedback,
+};

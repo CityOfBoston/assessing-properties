@@ -4,7 +4,7 @@ import Footer from "../Footer";
 import Header from "../Header";
 import { IconButton } from "@components/IconButton";
 import { PropertySearchPopup } from "@components/PropertySearchPopup";
-import FeedbackSender from "@components/FeedbackSender";
+import { FeedbackSenderContainer } from "@containers/FeedbackSenderContainer";
 import styles from "./PropertyDetailsLayout.module.scss";
 
 // Add useMediaQuery hook
@@ -206,6 +206,7 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
                   src="/cob-uswds/img/usa-icons/search.svg"
                   text="Search another property"
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  useLoraFont={true}
                 />
               )}
             </>
@@ -245,7 +246,7 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
             </div>
           ))}
           <div className={styles.feedbackSenderWrapper}>
-            <FeedbackSender parcelId={parcelId} />
+            <FeedbackSenderContainer parcelId={parcelId} />
           </div>
         </div>
       </main>

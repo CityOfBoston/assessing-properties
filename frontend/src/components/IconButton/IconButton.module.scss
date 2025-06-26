@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
+  padding: 0;
   gap: 8px;
   color: #58585B !important;
   box-shadow: inset 0 0 0 2px #58585B !important;
@@ -25,7 +25,14 @@
   justify-content: center;
 }
 
-.text {
-  font-weight: 300;
+.montserratText {
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.loraText {
+  font-family: 'Lora', system-ui, serif;
+  font-weight: 400;
   text-transform: none;
 } 

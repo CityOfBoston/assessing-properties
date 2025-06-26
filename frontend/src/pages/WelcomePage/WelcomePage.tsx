@@ -8,7 +8,7 @@ export default function WelcomePage() {
   const navigate = useNavigate();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  const handlePropertySelect = (pid: string, fullAddress: string) => {
+  const handlePropertySelect = (pid: string) => {
     // Navigate to property details page
     navigate(`/details?parcelId=${pid}`);
   };

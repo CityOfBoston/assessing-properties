@@ -35,7 +35,7 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
           className="usa-link usa-link--external"
           rel="noreferrer"
           target="_blank"
-          href={`/details?parcelId=${parcelId}`}
+          href={`#/details?parcelId=${parcelId}`}
         >
           View Details
         </a>
@@ -72,7 +72,7 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
             className="usa-link usa-link--external"
             rel="noreferrer"
             target="_blank"
-            href={`/details?parcelId=${parcelId}`}
+            href={`#/details?parcelId=${parcelId}`}
           >
             View Details
           </a>

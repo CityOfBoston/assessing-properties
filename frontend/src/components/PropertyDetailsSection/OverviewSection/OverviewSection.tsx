@@ -2,18 +2,7 @@ import styles from './OverviewSection.module.scss';
 import PropertyDetailsCardGroup from '@components/PropertyDetailsCardGroup';
 import IconButton from '@components/IconButton';
 import PropertyDetailsSection from '../PropertyDetailsSection';
-
-interface OverviewSectionData {
-  fullAddress: string;
-  owners: string[];
-  imageSrc: string;
-  assessedValue: number;
-  propertyType: string;
-  parcelId: number;
-  netTax: number;
-  personalExample: boolean;
-  residentialExemption: boolean;
-}
+import { OverviewSectionData } from '@src/types';
 
 /**
  * OverviewSection component displays property overview information
@@ -33,7 +22,7 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
     { 
       icon: <img src="/cob-uswds/img/usa-icons/person.svg"/>,
       header: 'Personal Exemption',
-      value: data.personalExample ? 'Yes' : 'No'
+      value: data.personalExemption ? 'Yes' : 'No'
     },
     {
       icon: <img src="/cob-uswds/img/usa-icons/home.svg"/>,
@@ -112,7 +101,7 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
       </div>
 
       <div className={styles.buttonGroup}>
-        <button className={`usa-button usa-button--primary`}>Pay your taxes</button>
+        <button className={`usa-button usa-button--primary`}>Pay Your Taxes</button>
         <IconButton src="/cob-uswds/img/usa-icons/print.svg" text="Print" />
       </div>
     </PropertyDetailsSection>

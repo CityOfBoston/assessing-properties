@@ -26,6 +26,11 @@ interface IconButtonProps {
    * Optional button type
    */
   type?: 'button' | 'submit' | 'reset';
+
+  /**
+   * When true, uses Lora font with normal case and weight instead of Montserrat all caps bold
+   */
+  useLoraFont?: boolean;
 }
 
 /**
@@ -36,7 +41,8 @@ export const IconButton: React.FC<IconButtonProps> = ({
   text,
   onClick,
   className = '',
-  type = 'button'
+  type = 'button',
+  useLoraFont = false
 }) => {
   return (
     <button 
@@ -45,7 +51,9 @@ export const IconButton: React.FC<IconButtonProps> = ({
       onClick={onClick}
     >
       <img src={src} alt={text + " icon"} className={styles.iconContainer} />
-      <span className={styles.text}>{text}</span>
+      <span className={`${styles.text} ${useLoraFont ? styles.loraText : styles.montserratText}`}>
+        {text}
+      </span>
     </button>
   );
 };

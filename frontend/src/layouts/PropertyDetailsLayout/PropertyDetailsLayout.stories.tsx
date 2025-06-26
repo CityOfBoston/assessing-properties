@@ -142,9 +142,9 @@ export const WithAllSections: Story = {
           imageSrc: "https://placehold.co/512x512",
           assessedValue: 750000,
           propertyType: "Residential - Single Family",
-          parcelId: 1234567890,
+          parcelId: "0201862000",
           netTax: 7500,
-          personalExample: false,
+          personalExemption: false,
           residentialExemption: true
         }} />,
       },

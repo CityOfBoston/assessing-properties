@@ -1,6 +1,7 @@
 import { useSearchSuggestions } from '../../hooks/useSearchSuggestions';
 import { AnnotatedSearchBar } from '../../components/AnnotatedSearchBar';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarContainerProps {
   onSelect?: (pid: string, fullAddress: string) => void;
@@ -27,6 +28,8 @@ export const SearchBarContainer = ({
   errorMessage,
   value,
 }: SearchBarContainerProps) => {
+  const navigate = useNavigate();
+  const [isFocused, setIsFocused] = useState(false);
   const {
     suggestions,
     isLoading,
@@ -50,13 +53,13 @@ export const SearchBarContainer = ({
     if (suggestions.length === 1) {
       const suggestion = suggestions[0];
       console.log('[SearchBarContainer] Single suggestion found, selecting:', suggestion);
-      onSelect?.(suggestion.pid, suggestion.fullAddress);
-    } else if (suggestions.length > 1) {
-      console.log('[SearchBarContainer] Multiple suggestions found:', suggestions.length);
+      onSelect?.(suggestion.parcelId, suggestion.fullAddress);
     } else {
-      console.log('[SearchBarContainer] No suggestions found for term:', searchTerm);
+      // Navigate to search results page for all other cases
+      console.log('[SearchBarContainer] Navigating to search results for term:', searchTerm);
+      navigate(`/search?search=${encodeURIComponent(searchTerm)}`);
     }
-  }, [suggestions, onSelect]);
+  }, [suggestions, onSelect, navigate]);
 
   const handleSuggestionClick = useCallback((suggestion: { parcelId: string, fullAddress: string }) => {
     console.log('[SearchBarContainer] Suggestion clicked:', suggestion);
@@ -69,6 +72,7 @@ export const SearchBarContainer = ({
   }, [setSearchValue]);
 
   const handleFocus = useCallback(() => {
+    setIsFocused(true);
     isClearing.current = false;
     onFocus?.();
   }, [onFocus]);
@@ -83,6 +87,7 @@ export const SearchBarContainer = ({
     }
 
     if (!isClearing.current) {
+      setIsFocused(false);
       onBlur?.();
     }
   }, [onBlur]);
@@ -102,13 +107,17 @@ export const SearchBarContainer = ({
   // Transform suggestions to match AnnotatedSearchBar interface
   const transformedSuggestions = suggestions.map(suggestion => ({
     fullAddress: suggestion.fullAddress,
-    parcelId: suggestion.pid,
+    parcelId: suggestion.parcelId,
   }));
+
+  // Hide error message when input is focused
+  const displayErrorMessage = isFocused ? undefined : (errorMessage || error?.message);
 
   console.log('[SearchBarContainer] Rendering with:', {
     suggestionsCount: transformedSuggestions.length,
     isLoading,
-    hasError: !!error
+    hasError: !!error,
+    isFocused
   });
 
   return (
@@ -121,7 +130,7 @@ export const SearchBarContainer = ({
       onSuggestionClick={handleSuggestionClick}
       suggestions={transformedSuggestions}
       loading={isLoading}
-      errorMessage={errorMessage || error?.message}
+      errorMessage={displayErrorMessage}
       onSearch={handleSearch}
       onFocus={handleFocus}
       onBlur={handleBlur}

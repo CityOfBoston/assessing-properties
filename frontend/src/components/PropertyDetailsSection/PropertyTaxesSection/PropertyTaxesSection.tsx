@@ -5,15 +5,7 @@ import PropertyDetailsSection from '../PropertyDetailsSection';
 import PropertyDetailsCardGroup from '@components/PropertyDetailsCardGroup';
 import FormulaAccordion from '@components/FormulaAccordion';
 import styles from './PropertyTaxesSection.module.scss';
-
-interface PropertyTaxSectionData {
-  propertyGrossTax: number;
-  residentialExemption: number;
-  personalExemption: number;
-  communityPreservation: number;
-  propertyNetTax: number;
-  parcelId: string
-}
+import { PropertyTaxesSectionData } from '@src/types';
 
 export default function PropertyTaxesSection({
   propertyGrossTax,
@@ -22,7 +14,7 @@ export default function PropertyTaxesSection({
   communityPreservation,
   propertyNetTax,
   parcelId
-}: PropertyTaxSectionData) {
+}: PropertyTaxesSectionData) {
   const taxRateCards = [
     {
       header: 'Residential Tax Rate',
@@ -146,7 +138,7 @@ export default function PropertyTaxesSection({
     },
     {
       title: 'Community Preservation',
-      value: `$${communityPreservation.toLocaleString()}`,
+      value: `-$${communityPreservation.toLocaleString()}`,
       description: (
         <div className={styles.text}>
           We calculate the CPA surcharge by first deducting $100,000 from the value of your property. Next, we recalculate the tax and apply your residential exemption and any personal exemptions, if you have them. To learn more visit the{' '}

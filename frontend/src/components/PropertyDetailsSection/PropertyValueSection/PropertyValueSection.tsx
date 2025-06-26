@@ -3,12 +3,7 @@ import PropertyDetailsSection from '../PropertyDetailsSection';
 import PropertyValuesBarChart from '@components/PropertyValuesBarChart';
 import ResponsiveTable from '@components/ResponsiveTable';
 import styles from './PropertyValueSection.module.scss';
-
-interface PropertyValueSectionData {
-  historicPropertyValues: {
-    [year: number]: number;
-  };
-}
+import { PropertyValueSectionData } from '@src/types';
 
 export default function PropertyValueSection({ historicPropertyValues }: PropertyValueSectionData) {
   const [showAllValues, setShowAllValues] = useState(false);
@@ -16,7 +11,7 @@ export default function PropertyValueSection({ historicPropertyValues }: Propert
   // Convert data object to array of {year, value} pairs and sort by year
   const sortedData = Object.entries(historicPropertyValues)
     .map(([year, value]) => ({ year: parseInt(year), value }))
-    .sort((a, b) => b.year - a.year);
+    .sort((a, b) => a.year - b.year);
 
   // Get either all data or just the 5 most recent years
   const displayData = showAllValues ? sortedData : sortedData.slice(0, 5);

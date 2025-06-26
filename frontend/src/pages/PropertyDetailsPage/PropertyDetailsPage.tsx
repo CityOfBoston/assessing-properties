@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyDetailsLayout from '@layouts/PropertyDetailsLayout';
 import {
@@ -9,17 +10,26 @@ import {
   ApprovedPermitsSection,
   ContactUsSection,
 } from '@src/components/PropertyDetailsSection';
+import { usePropertyDetails } from '@hooks/usePropertyDetails';
 import styles from './PropertyDetailsPage.module.scss';
 
 /**
  * PropertyDetailPage displays comprehensive property information using the PropertyDetailsLayout
- * and various detail sections. It gets the parcelId from URL search parameters.
+ * and various detail sections. It gets the parcelId from URL search parameters and fetches
+ * property details using the usePropertyDetails hook.
  */
 export default function PropertyDetailsPage() {
   const [searchParams] = useSearchParams();
   const parcelId = searchParams.get('parcelId') || '';
+  const { propertyDetails, isLoading, error, fetchPropertyDetails } = usePropertyDetails();
 
-  // If no parcelId is provided, we could redirect to search or show an error
+  useEffect(() => {
+    if (parcelId) {
+      fetchPropertyDetails(parcelId);
+    }
+  }, [parcelId, fetchPropertyDetails]);
+
+  // If no parcelId is provided, show error
   if (!parcelId) {
     return (
       <div className={styles.error}>
@@ -29,20 +39,46 @@ export default function PropertyDetailsPage() {
     );
   }
 
-  const sections = [
+  // Create sections array with all available sections
+  const sections = isLoading || error || !propertyDetails ? [
+    {
+      name: 'Loading',
+      component: (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Loading property details...</p>
+          {error && <p className={styles.errorText}>Error: {error.message}</p>}
+        </div>
+      ),
+    },
+  ] : [
     {
       name: 'Overview',
-      component: <OverviewSection data={{
-        fullAddress: "123 Main Street, Boston, MA 02118",
-        owners: ["John Smith", "Jane Smith"],
-        imageSrc: "https://placehold.co/512x512",
-        assessedValue: 750000,
-        propertyType: "Residential - Single Family",
-        parcelId: 1234567890,
-        netTax: 7500,
-        personalExample: false,
-        residentialExemption: true
-      }} />,
+      component: <OverviewSection data={propertyDetails.overview} />,
+    },
+    {
+      name: 'Property Value',
+      component: <PropertyValueSection {...propertyDetails.propertyValue} />,
+    },
+    {
+      name: 'Attributes',
+      component: <AttributesSection data={propertyDetails.propertyAttributes} />,
+    },
+    {
+      name: 'Property Taxes',
+      component: <PropertyTaxesSection {...propertyDetails.propertyTaxes} />,
+    },
+    {
+      name: 'Abatements',
+      component: <AbatementsSection />,
+    },
+    {
+      name: 'Approved Permits',
+      component: <ApprovedPermitsSection parcelId={parcelId} />,
+    },
+    {
+      name: 'Contact Us',
+      component: <ContactUsSection />,
     },
   ];
 

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SearchBarContainer } from '@containers/SearchBarContainer';
 import { SearchBackground } from '@components/SearchBackground';
 import styles from './PropertySearchPopup.module.scss';
+import { useNavigate } from 'react-router-dom';
 
 export interface PropertySearchPopupProps {
   onClose: () => void;
@@ -10,8 +11,15 @@ export interface PropertySearchPopupProps {
 
 export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
   onClose,
-  onSelect,
 }) => {
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const navigate = useNavigate();
+
+  const handlePropertySelect = (pid: string) => {
+    // Navigate to property details page
+    navigate(`/details?parcelId=${pid}`);
+  };
+
   return (
     <div className={styles.container}>
       <button 
@@ -23,7 +31,13 @@ export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
       </button>
       <SearchBackground>
         <div className={styles.content}>
-          <SearchBarContainer onSelect={onSelect} />
+          <SearchBarContainer onSelect={handlePropertySelect} 
+          labelText="Search for a property"
+          tooltipHint="Enter an address or parcel ID to search"
+          placeholderText="Enter address or parcel ID"
+          onFocus={() => setIsSearchFocused(true)}
+          onBlur={() => setIsSearchFocused(false)}
+          />
         </div>
       </SearchBackground>
     </div>

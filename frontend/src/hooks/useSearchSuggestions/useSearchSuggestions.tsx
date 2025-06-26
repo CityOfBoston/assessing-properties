@@ -1,18 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
-import { searchProperties } from '../firebaseConfig';
-import { SearchResult } from '../../types';
-
-interface SearchSuggestion {
-  pid: string;
-  fullAddress: string;
-}
+import { getSearchSuggestions } from '../firebaseConfig';
+import { PropertySearchSuggestions } from '../../types';
 
 interface UseSearchSuggestionsProps {
   debounceMs?: number;
 }
 
 interface UseSearchSuggestionsReturn {
-  suggestions: SearchSuggestion[];
+  suggestions: PropertySearchSuggestions['suggestions'];
   isLoading: boolean;
   error: Error | null;
   searchValue: string;
@@ -22,7 +17,8 @@ interface UseSearchSuggestionsReturn {
 export const useSearchSuggestions = ({
   debounceMs = 300,
 }: UseSearchSuggestionsProps = {}): UseSearchSuggestionsReturn => {
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestions, setSuggestions] = 
+  useState<PropertySearchSuggestions['suggestions']>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [searchValue, setSearchValue] = useState('');
@@ -44,18 +40,8 @@ export const useSearchSuggestions = ({
     }
 
     try {
-      const response = await searchProperties({
-        searchString: userInput,
-        isDetailed: false
-      });
-
-      const results = response.data as SearchResult[];
-      const formattedSuggestions = results.map(result => ({
-        pid: result.parcelId.toString(),
-        fullAddress: result.fullAddress
-      }));
-
-      setSuggestions(formattedSuggestions);
+      const searchSuggestions = await getSearchSuggestions(userInput);
+      setSuggestions(searchSuggestions.suggestions);
     } catch (err) {
       setError(err instanceof Error ? err : 
         new Error('An error occurred while fetching suggestions'));

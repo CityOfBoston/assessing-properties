@@ -4,7 +4,8 @@
  */
 import { initializeApp } from 'firebase/app';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { SearchPropertiesRequest, SearchPropertiesResponse } from '../types';
+import type { PropertySearchSuggestions, PropertyDetailsData, PropertySearchResults, 
+  FeedbackData } from '../types';
 
 // Firebase configuration.
 const firebaseConfig = {
@@ -20,32 +21,84 @@ const firebaseConfig = {
 // Initialize Firebase app.
 const app = initializeApp(firebaseConfig);
 
-// Get Functions instance.
+// Generic response type for all Firebase callable functions
+interface FirebaseResponse<T> {
+  statusCode: number;
+  message: string;
+  data: T;
+}
+
+// Helper function to handle Firebase callable function responses
+async function callFirebaseFunction<T, R>(
+  callableFunction: any,
+  params: T
+): Promise<R> {
+  try {
+    const result = await callableFunction(params);
+    const response: FirebaseResponse<R> = result.data;
+    
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response.data;
+    } else {
+      throw new Error(`Firebase function error: ${response.message}`);
+    }
+  } catch (error) {
+    console.error('Firebase function call failed:', error);
+    throw error;
+  }
+}
+
+// Abstracted getFunctions call
 const functions = getFunctions(app, 'us-central1');
 
-// Export the callable function with authentication ensured.
-export const saveFormData = async (data: any) => {
-  try {
-    const callable = httpsCallable(functions, 'saveFormData');
-    return await callable(data);
-  } catch (error) {
-    console.error('Error saving form data:', error);
-    throw error;
-  }
-};
+// Callable function getSearchSuggestions that takes a sequenceString and 
+// returns a PropertySearchSuggestions
+const getSearchSuggestionsCallable = httpsCallable<
+  { sequenceString: string }, 
+  FirebaseResponse<PropertySearchSuggestions>
+>(functions, 'getSearchSuggestions');
 
-// Export the search properties callable function
-export const searchProperties = async (request: SearchPropertiesRequest): 
-Promise<SearchPropertiesResponse> => {
-  try {
-    const callable = httpsCallable<SearchPropertiesRequest, SearchPropertiesResponse>(
-      functions, 
-      'searchProperties'
-    );
-    const result = await callable(request);
-    return result.data;
-  } catch (error) {
-    console.error('Error searching properties:', error);
-    throw error;
-  }
-};
+export const getSearchSuggestions = (sequenceString: string) =>
+  callFirebaseFunction<{ sequenceString: string }, PropertySearchSuggestions>(
+    getSearchSuggestionsCallable,
+    { sequenceString }
+  );
+
+// Callable function getSearchResults that takes a sequenceString and 
+// returns a PropertySearchResults object
+const getSearchResultsCallable = httpsCallable<
+  { sequenceString: string }, 
+  FirebaseResponse<PropertySearchResults>
+>(functions, 'getSearchResults');
+
+export const getSearchResults = (sequenceString: string) =>
+  callFirebaseFunction<{ sequenceString: string }, PropertySearchResults>(
+    getSearchResultsCallable,
+    { sequenceString }
+  );
+
+// Callable function getPropertyDetails that takes a parcelId and 
+// returns a PropertyDetailsData object
+const getPropertyDetailsCallable = httpsCallable<
+  { parcelId: string }, 
+  FirebaseResponse<PropertyDetailsData>
+>(functions, 'getPropertyDetails');
+
+export const getPropertyDetails = (parcelId: string) =>
+  callFirebaseFunction<{ parcelId: string }, PropertyDetailsData>(
+    getPropertyDetailsCallable,
+    { parcelId }
+  );
+
+// Callable function postPropertyFeedback that takes a feedbackData object and 
+// returns a void
+const postPropertyFeedbackCallable = httpsCallable<
+  { feedbackData: FeedbackData }, 
+  FirebaseResponse<void>
+>(functions, 'postPropertyFeedback');
+
+export const sendPropertyFeedback = (feedbackData: FeedbackData) =>
+  callFirebaseFunction<{ feedbackData: FeedbackData }, void>(
+    postPropertyFeedbackCallable,
+    { feedbackData }
+  );

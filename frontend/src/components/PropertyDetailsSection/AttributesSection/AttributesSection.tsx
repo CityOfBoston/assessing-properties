@@ -1,70 +1,7 @@
 import { useState } from 'react';
 import PropertyDetailsSection from '../PropertyDetailsSection';
 import styles from './AttributesSection.module.scss';
-
-interface PropertyAttributesData {
-  // Bedrooms
-  bedroomNumber?: number;
-  bedroomType?: string;
-  totalRooms?: number;
-
-  // Bathrooms
-  totalBathrooms?: number;
-  halfBathrooms?: number;
-  bathStyle1?: string;
-  bathStyle2?: string;
-  bathStyle3?: string;
-
-  // Kitchen
-  numberOfKitchens?: number;
-  kitchenType?: string;
-  kitchenStyle1?: string;
-  kitchenStyle2?: string;
-  kitchenStyle3?: string;
-
-  // Utilities
-  fireplaces?: number;
-  acType?: string;
-  heatType?: string;
-
-  // Interior
-  interiorCondition?: string;
-  interiorFinish?: string;
-
-  // Exterior
-  exteriorFinish?: string;
-  exteriorCondition?: string;
-  view?: string;
-  grade?: string;
-
-  // Construction
-  yearBuilt?: number;
-  roofCover?: string;
-  roofStructure?: string;
-  foundation?: string;
-  landUse?: string;
-
-  // Last Transaction
-  salePrice?: number;
-  saleDate?: string;
-  registryBookAndPlace?: string;
-
-  // Parking
-  parkingSpots?: number;
-  parkingOwnership?: string;
-  parkingType?: string;
-  tandemParking?: boolean;
-
-  // Details
-  propertyType?: string;
-  livingArea?: number;
-  floor?: number;
-  penthouseUnit?: boolean;
-  complex?: string;
-  storyHeight?: number;
-  style?: string;
-  orientation?: string;
-}
+import { PropertyAttributesData } from '@src/types';
 
 interface AttributesSectionData {
   data: PropertyAttributesData;

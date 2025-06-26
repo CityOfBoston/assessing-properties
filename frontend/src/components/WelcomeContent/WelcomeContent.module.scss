@@ -20,6 +20,7 @@
   margin-top: 32px;
   font-weight: bold;
   text-transform: uppercase;
+  text-align: center;
 
   @include at-media-max('mobile-lg') {
     font-size: 20px;
