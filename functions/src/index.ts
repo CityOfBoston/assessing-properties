@@ -5,22 +5,31 @@
  * import {onDocumentWritten} from "firebase-functions/v2/firestore";
  */
 
-import {getSearchSuggestions} from "./callable/getSearchSuggestions";
-import {getSearchResults} from "./callable/getSearchResults";
-import {getPropertyDetails} from "./callable/getPropertyDetails";
-import {postPropertyFeedback} from "./callable/postPropertyFeedback";
+// Initialize Firebase Admin SDK
+import * as admin from "firebase-admin";
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+// Initialize the app if it hasn't been initialized already
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// Callable functions
+import {storePropertyFeedback} from "./callable/StorePropertyFeedback";
+import {fetchPropertyDetailsByParcelId} from "./callable/FetchPropertyDetailsByParcelId";
+import {fetchPropertySummariesByParcelIds} from "./callable/FetchPropertySummariesByParcelIds";
+import {getCurrentParcelIdAddressPairings} from "./callable/GetCurrentParcelIdAddressPairings";
+
+// HTTP functions
+import {generateAndStoreParcelIdAddressPairings} from "./https/GenerateAndStoreParcelIdAddressPairings";
+
+// Scheduler functions
+import {runYearlyParcelIdAddressPairingsUpdate} from "./scheduler/RunYearlyParcelIdAddressPairingsUpdate";
 
 export {
-  getSearchSuggestions,
-  getSearchResults,
-  getPropertyDetails,
-  postPropertyFeedback,
+  storePropertyFeedback,
+  fetchPropertyDetailsByParcelId,
+  fetchPropertySummariesByParcelIds,
+  getCurrentParcelIdAddressPairings,
+  generateAndStoreParcelIdAddressPairings,
+  runYearlyParcelIdAddressPairingsUpdate,
 };

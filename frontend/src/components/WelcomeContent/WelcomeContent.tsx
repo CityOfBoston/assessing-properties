@@ -19,7 +19,7 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({
       <img 
         src={assessingLogo} 
         alt="Assessing Department Logo" 
-        className={styles.logo}
+        className={`${styles.logo} ${hideTitleAndDescriptionOnMobile ? styles.hideOnMobile : ''}`}
       />
       <div className={styles.contentWrapper}>
         <h1 className={titleClassName}>

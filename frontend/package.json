@@ -19,8 +19,10 @@
     "classnames": "^2.5.1",
     "cob-uswds": "^1.0.21",
     "firebase": "^11.7.1",
+    "fuse.js": "^7.1.0",
     "gulp": "^5.0.0",
     "number-to-words": "^1.2.4",
+    "pako": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.6.0",
@@ -42,6 +44,7 @@
     "@types/classnames": "^2.3.4",
     "@types/node": "^22.14.1",
     "@types/number-to-words": "^1.2.3",
+    "@types/pako": "^2.0.3",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
@@ -65,5 +68,6 @@
     "extends": [
       "plugin:storybook/recommended"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

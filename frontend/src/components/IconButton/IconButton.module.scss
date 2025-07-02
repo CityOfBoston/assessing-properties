@@ -1,28 +1,56 @@
 @use '../../styles/main.scss' as *;
 
 .iconButton {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  gap: 8px;
-  color: #58585B !important;
-  box-shadow: inset 0 0 0 2px #58585B !important;
-  
-  svg path, img {
-    fill: #58585B;
+  padding: 16px !important;
+  height: auto !important;
+  min-height: 24px !important;
+  line-height: 1.2 !important;
+
+  &.hasIcon {
+    gap: 8px;
+    color: #58585B !important;
+    box-shadow: inset 0 0 0 2px #58585B !important;
+    
+    &:hover {
+      color: #1871BD !important;
+      box-shadow: inset 0 0 0 2px #1871BD !important;
+    }
   }
-  
-  &:hover {
-    color: #1871BD !important;
-    box-shadow: inset 0 0 0 2px #1871BD !important;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &.usa-button,
+  &.usa-button--outline,
+  &.usa-button--primary {
+    padding: 16px !important;
   }
 }
 
-.iconContainer {
+.iconWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.iconContainer {
+  display: block;
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+}
+
+.text {
+  display: inline-block;
+  line-height: inherit;
 }
 
 .montserratText {

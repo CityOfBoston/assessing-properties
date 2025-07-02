@@ -8,9 +8,16 @@ export default function WelcomePage() {
   const navigate = useNavigate();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  const handlePropertySelect = (pid: string) => {
+  const handlePropertySelect = (pid: string, fullAddress?: string) => {
+    console.log('[WelcomePage] handlePropertySelect called with pid:', pid, 'address:', fullAddress);
+    console.log('[WelcomePage] About to navigate to:', `/details?parcelId=${pid}`);
+    try {
     // Navigate to property details page
     navigate(`/details?parcelId=${pid}`);
+      console.log('[WelcomePage] Navigation called successfully');
+    } catch (error) {
+      console.error('[WelcomePage] Navigation error:', error);
+    }
   };
 
   return (

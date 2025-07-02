@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { SearchBarContainer } from './SearchBarContainer';
+import { MemoryRouter } from 'react-router-dom';
+import { ParcelPairingsProvider } from '@hooks/useParcelPairingsContext';
 
 const meta = {
   title: 'Container/SearchBarContainer',
@@ -9,14 +11,18 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div style={{ 
-        padding: '4rem 1rem', 
-        backgroundColor: '#091F2F',
-        minHeight: '500px',
-        position: 'relative'
-      }}>
-        <Story />
-      </div>
+      <ParcelPairingsProvider>
+        <MemoryRouter>
+          <div style={{ 
+            padding: '4rem 1rem', 
+            backgroundColor: '#091F2F',
+            minHeight: '500px',
+            position: 'relative'
+          }}>
+            <Story />
+          </div>
+        </MemoryRouter>
+      </ParcelPairingsProvider>
     ),
   ],
   tags: ['autodocs'],

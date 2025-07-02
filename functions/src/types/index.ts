@@ -296,3 +296,10 @@ export interface FeedbackData {
   hasPositiveSentiment: boolean;
   feedbackMessage?: string;
 }
+
+// Standard response interface
+export interface StandardResponse<T = any> {
+  status: "success" | "error";
+  message: string;
+  data?: T;
+}

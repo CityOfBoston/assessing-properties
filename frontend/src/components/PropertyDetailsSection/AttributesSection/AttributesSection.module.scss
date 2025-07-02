@@ -31,8 +31,13 @@
   h3 {
     margin: 0 0 12px 0;
     font-size: 18px;
-    font-weight: normal;
+    font-weight: bold;
+    font-family: 'Montserrat', sans-serif;
     text-transform: uppercase;
+
+    @include main.at-media-max('mobile-lg') {
+      font-size: 16px;
+    }
   }
 
   ul {

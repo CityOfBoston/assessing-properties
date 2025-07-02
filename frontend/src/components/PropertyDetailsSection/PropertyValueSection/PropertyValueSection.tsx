@@ -17,16 +17,14 @@ export default function PropertyValueSection({ historicPropertyValues }: Propert
   const displayData = showAllValues ? sortedData : sortedData.slice(0, 5);
 
   // Format data for the table
-  const tableData = displayData.map(({ year, value }) => ({
+  const tableData = [...displayData].reverse().map(({ year, value }) => ({
     'Year': year,
-    'Assessed Value': `$${value.toLocaleString()}`,
+    'Assessed Value': value != null ? `$${value.toLocaleString()}` : 'N/A',
   }));
 
   // Get the most recent value for the chart title
   const mostRecentValue = sortedData[0]?.value;
-  const formattedValue = mostRecentValue 
-    ? `$${mostRecentValue.toLocaleString()}`
-    : 'No data available';
+  const formattedValue = mostRecentValue != null ? `$${mostRecentValue.toLocaleString()}` : 'N/A';
 
   return (
     <PropertyDetailsSection title="Property Value">
@@ -50,7 +48,7 @@ export default function PropertyValueSection({ historicPropertyValues }: Propert
       />
 
       <div className={styles.valueHistory}>
-        <h2>Value History</h2>
+        <h3>Value History</h3>
         <p><strong>Note:</strong> The assessed value is the actual billed assessment.</p>
         <ResponsiveTable data={tableData} />
         {sortedData.length > 5 && (

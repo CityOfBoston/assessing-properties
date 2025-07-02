@@ -1,6 +1,7 @@
-import { useSearchSuggestions } from '../../hooks/useSearchSuggestions';
+import { useSearchSuggestions } from '@hooks/useSearchSuggestions';
 import { AnnotatedSearchBar } from '../../components/AnnotatedSearchBar';
-import { useCallback, useRef, useState } from 'react';
+import { LoadingIndicator } from '../../components/LoadingIndicator';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchBarContainerProps {
@@ -14,6 +15,12 @@ interface SearchBarContainerProps {
   onClear?: () => void;
   errorMessage?: string;
   value?: string;
+  preloadValue?: string;
+}
+
+interface SearchSuggestion {
+  parcelId: string;
+  fullAddress: string;
 }
 
 export const SearchBarContainer = ({
@@ -21,31 +28,65 @@ export const SearchBarContainer = ({
   labelText = 'Search for a property',
   tooltipHint = 'Enter an address or parcel ID to search',
   placeholderText = 'Enter address or parcel ID',
-  debounceMs = 300,
+  debounceMs = 30,
   onFocus,
   onBlur,
   onClear,
   errorMessage,
   value,
+  preloadValue,
 }: SearchBarContainerProps) => {
   const navigate = useNavigate();
   const [isFocused, setIsFocused] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [hasBeenFocused, setHasBeenFocused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const {
     suggestions,
     isLoading,
     error,
     searchValue,
     setSearchValue,
-  } = useSearchSuggestions({ debounceMs });
+  } = useSearchSuggestions({ 
+    debounceMs,
+    isMobile 
+  });
 
   const isClearing = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize with preload value if provided and not yet focused
+  useEffect(() => {
+    if (preloadValue && !hasBeenFocused && !searchValue) {
+      setSearchValue(preloadValue);
+    }
+  }, [preloadValue, hasBeenFocused, searchValue, setSearchValue]);
+
+  // Hide suggestions and blur input after search
+  const hideSuggestionsAndBlur = useCallback(() => {
+    setShowSuggestions(false);
+    setIsFocused(false);
+    inputRef.current?.blur();
+  }, []);
 
   const handleSearch = useCallback((searchTerm: string) => {
     console.log('[SearchBarContainer] Search triggered with term:', searchTerm);
     
     if (!searchTerm.trim()) {
       console.log('[SearchBarContainer] Empty search term, ignoring');
+      hideSuggestionsAndBlur();
       return;
     }
 
@@ -57,37 +98,52 @@ export const SearchBarContainer = ({
     } else {
       // Navigate to search results page for all other cases
       console.log('[SearchBarContainer] Navigating to search results for term:', searchTerm);
-      navigate(`/search?search=${encodeURIComponent(searchTerm)}`);
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
-  }, [suggestions, onSelect, navigate]);
+    hideSuggestionsAndBlur();
+  }, [suggestions, onSelect, navigate, hideSuggestionsAndBlur]);
 
-  const handleSuggestionClick = useCallback((suggestion: { parcelId: string, fullAddress: string }) => {
+  const handleSuggestionClick = useCallback((suggestion: SearchSuggestion) => {
     console.log('[SearchBarContainer] Suggestion clicked:', suggestion);
-    onSelect?.(suggestion.parcelId, suggestion.fullAddress);
+    if (onSelect) {
+      onSelect(suggestion.parcelId, suggestion.fullAddress);
+    } else {
+      console.warn('[SearchBarContainer] No onSelect function provided');
+    }
   }, [onSelect]);
 
   const handleInputChange = useCallback((value: string) => {
     console.log('[SearchBarContainer] Input changed:', value);
     setSearchValue(value);
+    setShowSuggestions(true);
   }, [setSearchValue]);
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
+    setShowSuggestions(true);
     isClearing.current = false;
+    
+    // Clear preload value on first focus for convenience
+    if (!hasBeenFocused && preloadValue && searchValue === preloadValue) {
+      setSearchValue('');
+      setHasBeenFocused(true);
+    } else if (!hasBeenFocused) {
+      setHasBeenFocused(true);
+    }
+    
     onFocus?.();
-  }, [onFocus]);
+  }, [hasBeenFocused, preloadValue, searchValue, setSearchValue, onFocus]);
 
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     // Check if the related target is the clear button
     const relatedTarget = e.relatedTarget as HTMLElement;
     if (relatedTarget?.classList.contains('clearButton')) {
-      e.preventDefault();
-      e.stopPropagation();
       return;
     }
 
     if (!isClearing.current) {
       setIsFocused(false);
+      setShowSuggestions(false);
       onBlur?.();
     }
   }, [onBlur]);
@@ -95,6 +151,8 @@ export const SearchBarContainer = ({
   const handleClear = useCallback(() => {
     isClearing.current = true;
     setSearchValue('');
+    setShowSuggestions(false);
+    setHasBeenFocused(true); // Mark as focused so preload won't come back
     onClear?.();
     // Refocus the input after clearing
     inputRef.current?.focus();
@@ -105,20 +163,34 @@ export const SearchBarContainer = ({
   }, [setSearchValue, onClear]);
 
   // Transform suggestions to match AnnotatedSearchBar interface
-  const transformedSuggestions = suggestions.map(suggestion => ({
+  const transformedSuggestions = suggestions.map((suggestion: SearchSuggestion) => ({
     fullAddress: suggestion.fullAddress,
     parcelId: suggestion.parcelId,
   }));
 
   // Hide error message when input is focused
-  const displayErrorMessage = isFocused ? undefined : (errorMessage || error?.message);
+  const displayErrorMessage = isFocused ? undefined : (errorMessage || error || undefined);
 
   console.log('[SearchBarContainer] Rendering with:', {
     suggestionsCount: transformedSuggestions.length,
     isLoading,
     hasError: !!error,
-    isFocused
+    isFocused,
+    preloadValue,
+    hasBeenFocused
   });
+
+  // Show loading indicator when initially loading parcel pairings
+  if (isLoading && !isFocused) {
+    return (
+      <div style={{ padding: '2rem' }}>
+        <LoadingIndicator 
+          message="Loading property data..." 
+          size="medium" 
+        />
+      </div>
+    );
+  }
 
   return (
     <AnnotatedSearchBar
@@ -129,13 +201,14 @@ export const SearchBarContainer = ({
       onChange={handleInputChange}
       onSuggestionClick={handleSuggestionClick}
       suggestions={transformedSuggestions}
-      loading={isLoading}
+      loading={isLoading && isFocused}
       errorMessage={displayErrorMessage}
       onSearch={handleSearch}
       onFocus={handleFocus}
       onBlur={handleBlur}
       onClear={handleClear}
       inputRef={inputRef}
+      showSuggestions={showSuggestions && isFocused && !isLoading}
     />
   );
 }; 

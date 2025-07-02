@@ -5,8 +5,19 @@
   flex-direction: column;
   gap: 11px;
 
-  h2, p {
+  h3, p {
     margin: 0;
+  }
+
+  h3 {
+    text-transform: uppercase;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'Montserrat', sans-serif;
+
+    @include main.at-media-max('mobile-lg') {
+      font-size: 16px;
+    }
   }
 }
 

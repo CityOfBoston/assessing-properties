@@ -4,8 +4,8 @@
  */
 import { initializeApp } from 'firebase/app';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import type { PropertySearchSuggestions, PropertyDetailsData, PropertySearchResults, 
-  FeedbackData } from '../types';
+import type { PropertyDetailsData, PropertySearchResults, 
+  FeedbackData, StandardResponse } from '../types';
 
 // Firebase configuration.
 const firebaseConfig = {
@@ -21,84 +21,50 @@ const firebaseConfig = {
 // Initialize Firebase app.
 const app = initializeApp(firebaseConfig);
 
-// Generic response type for all Firebase callable functions
-interface FirebaseResponse<T> {
-  statusCode: number;
-  message: string;
-  data: T;
-}
+// Initialize Firebase Functions.
+const functions = getFunctions(app);
 
-// Helper function to handle Firebase callable function responses
-async function callFirebaseFunction<T, R>(
-  callableFunction: any,
-  params: T
-): Promise<R> {
-  try {
-    const result = await callableFunction(params);
-    const response: FirebaseResponse<R> = result.data;
-    
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return response.data;
-    } else {
-      throw new Error(`Firebase function error: ${response.message}`);
+/**
+ * Helper function to create and execute callable functions with consistent error handling
+ * @param functionName - The name of the callable function
+ * @param data - The data to send to the function
+ * @returns The data from the successful response
+ */
+async function callFunction<TInput, TOutput>(
+  functionName: string, 
+  data: TInput
+): Promise<TOutput> {
+  const callable = httpsCallable<TInput, StandardResponse<TOutput>>(
+    functions,
+    functionName
+  );
+  
+  const result = await callable(data);
+  
+  if (result.data.status === 'success') {
+    if (result.data.data === undefined) {
+      throw new Error('No data returned from function');
     }
-  } catch (error) {
-    console.error('Firebase function call failed:', error);
-    throw error;
+    return result.data.data;
   }
+  
+  throw new Error(result.data.message);
 }
 
-// Abstracted getFunctions call
-const functions = getFunctions(app, 'us-central1');
+// Backend callable functions
+export const storePropertyFeedback = async (feedback: FeedbackData): Promise<null> => {
+  return callFunction<FeedbackData, null>('storePropertyFeedback', feedback);
+};
 
-// Callable function getSearchSuggestions that takes a sequenceString and 
-// returns a PropertySearchSuggestions
-const getSearchSuggestionsCallable = httpsCallable<
-  { sequenceString: string }, 
-  FirebaseResponse<PropertySearchSuggestions>
->(functions, 'getSearchSuggestions');
+export const fetchPropertyDetailsByParcelId = async (parcelId: string): Promise<PropertyDetailsData> => {
+  return callFunction<{ parcelId: string }, PropertyDetailsData>('fetchPropertyDetailsByParcelId', { parcelId });
+};
 
-export const getSearchSuggestions = (sequenceString: string) =>
-  callFirebaseFunction<{ sequenceString: string }, PropertySearchSuggestions>(
-    getSearchSuggestionsCallable,
-    { sequenceString }
-  );
+export const fetchPropertySummariesByParcelIds = async (parcelIds: string[]): Promise<PropertySearchResults> => {
+  return callFunction<{ parcelIds: string[] }, PropertySearchResults>('fetchPropertySummariesByParcelIds', { parcelIds });
+};
 
-// Callable function getSearchResults that takes a sequenceString and 
-// returns a PropertySearchResults object
-const getSearchResultsCallable = httpsCallable<
-  { sequenceString: string }, 
-  FirebaseResponse<PropertySearchResults>
->(functions, 'getSearchResults');
+export const getCurrentParcelIdAddressPairings = async (): Promise<{ compressedData: string; fileName: string }> => {
+  return callFunction<{}, { compressedData: string; fileName: string }>('getCurrentParcelIdAddressPairings', {});
+};
 
-export const getSearchResults = (sequenceString: string) =>
-  callFirebaseFunction<{ sequenceString: string }, PropertySearchResults>(
-    getSearchResultsCallable,
-    { sequenceString }
-  );
-
-// Callable function getPropertyDetails that takes a parcelId and 
-// returns a PropertyDetailsData object
-const getPropertyDetailsCallable = httpsCallable<
-  { parcelId: string }, 
-  FirebaseResponse<PropertyDetailsData>
->(functions, 'getPropertyDetails');
-
-export const getPropertyDetails = (parcelId: string) =>
-  callFirebaseFunction<{ parcelId: string }, PropertyDetailsData>(
-    getPropertyDetailsCallable,
-    { parcelId }
-  );
-
-// Callable function postPropertyFeedback that takes a feedbackData object and 
-// returns a void
-const postPropertyFeedbackCallable = httpsCallable<
-  { feedbackData: FeedbackData }, 
-  FirebaseResponse<void>
->(functions, 'postPropertyFeedback');
-
-export const sendPropertyFeedback = (feedbackData: FeedbackData) =>
-  callFirebaseFunction<{ feedbackData: FeedbackData }, void>(
-    postPropertyFeedbackCallable,
-    { feedbackData }
-  );

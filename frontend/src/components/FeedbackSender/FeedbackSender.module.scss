@@ -1,9 +1,15 @@
 @use '../../styles/main.scss' as main;
 
 .feedbackForm {
+  display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 480px;
+  
+  > * {
+    width: 100%;
+    box-sizing: border-box;
+  }
 }
 
 .feedbackContainer {
@@ -13,55 +19,83 @@
   padding: 16px 24px;
   border: 1px solid var(--border-color, #dcdee0);
   border-radius: 4px;
+  box-sizing: border-box;
   
   // First container with radio buttons
   &:first-child {
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 40px;
+    font-family: 'Lora', sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    @include main.at-media('tablet') {
+      flex-direction: row;
+      align-items: center;
+      gap: 24px;
+    }
   }
 }
 
 .feedbackQuestion {
   margin: 0;
-  font-weight: 500;
+  font-weight: bold;
   flex-shrink: 0;
+  color: #1B1B1B;
+  font-family: 'Lora', sans-serif;
 }
 
 .radioGroup {
   display: flex;
-  flex: 1;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  gap: 16px;
   
   // Styling for the radio tiles
   :global(.usa-radio) {
-    margin-top: 0;
+    margin: 0;
+    flex: 1;
+    min-width: 80px;
+
+    @include main.at-media('tablet') {
+      min-width: 100px;
+    }
   }
   
   :global(.usa-radio__input--tile) + :global(.usa-radio__label) {
     margin: 0;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Lora', sans-serif;
+    font-weight: 500;
+    
+    // Add more space between radio button and text
+    &::before {
+      margin-right: 12px;
+    }
   }
 }
 
 .feedbackPrompt {
   margin-top: 0;
   margin-bottom: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
 }
 
 .disclaimerText {
   margin-bottom: 12px;
+  color: #58585B;
 }
 
 // Add spacing for text area and character count and set font to Lora
 :global(.usa-textarea) {
   margin-bottom: 8px;
-  font-family: 'Lora', serif; // Set font to Lora
+  font-family: 'Lora', serif;
   font-size: 1rem;
+  resize: vertical;
+  min-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 // Style the validation checklist
@@ -74,8 +108,8 @@
 :global(.usa-button) {
   margin-top: 24px;
   margin-bottom: 24px;
-  text-transform: uppercase; // Make button text uppercase
-  font-family: 'Montserrat', sans-serif; // Set font to Montserrat
+  text-transform: uppercase;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -83,4 +117,5 @@
 .contactInfo {
   margin: 0;
   font-size: 0.9rem;
+  color: #58585B;
 } 

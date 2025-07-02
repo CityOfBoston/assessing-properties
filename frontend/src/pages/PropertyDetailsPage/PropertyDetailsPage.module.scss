@@ -7,25 +7,11 @@
 }
 
 .error {
-  @include main.grid-container;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 2rem;
-
-  h1 {
-    color: #091F2F;
-    margin-bottom: 1rem;
-  }
-
-  p {
-    color: #58585B;
-    max-width: 600px;
-    margin: 0 auto;
-  }
 }
 
 .loadingContainer {
@@ -62,4 +48,15 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.fullWidthLoadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+  min-height: 400px;
+  background: #F2F2F2;
 } 

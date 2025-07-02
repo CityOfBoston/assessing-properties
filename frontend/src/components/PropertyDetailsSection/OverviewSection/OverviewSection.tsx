@@ -5,6 +5,38 @@ import PropertyDetailsSection from '../PropertyDetailsSection';
 import { OverviewSectionData } from '@src/types';
 
 /**
+ * Custom target icon component for property location
+ */
+const TargetIcon = () => (
+  <svg 
+    width="80" 
+    height="80" 
+    viewBox="0 0 80 80" 
+    className={styles.targetIcon}
+    style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 2,
+      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+    }}
+  >
+    {/* Large transparent blue hue circle */}
+    <circle cx="40" cy="40" r="35" fill="#005ea2" opacity="0.4"/>
+    
+    {/* Outer white circle with black outline */}
+    <circle cx="40" cy="40" r="12" fill="white" stroke="black" strokeWidth="1" opacity="0.9"/>
+    
+    {/* Blue core circle */}
+    <circle cx="40" cy="40" r="8" fill="#005ea2" opacity="0.8"/>
+    
+    {/* Inner white center */}
+    <circle cx="40" cy="40" r="3" fill="white" opacity="0.9"/>
+  </svg>
+);
+
+/**
  * OverviewSection component displays property overview information
  */
 export default function OverviewSection({ data }: { data: OverviewSectionData }) {
@@ -17,7 +49,7 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
     {
       icon: <img src="/cob-uswds/img/usa-icons/attach_money.svg"/>,
       header: 'FY25 Net Tax',
-      value: `$${data.netTax.toLocaleString()}`
+      value: data.netTax != null ? `$${data.netTax.toLocaleString()}` : 'N/A'
     },
     { 
       icon: <img src="/cob-uswds/img/usa-icons/person.svg"/>,
@@ -44,7 +76,7 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
 
           <div className={styles.sectionHeader}>
             <img src="/cob-uswds/img/usa-icons/people.svg" alt="Owners" className={styles.sectionIcon} />
-            <h1 className={styles.sectionTitle}>Current Owner(s)</h1>
+            <h2 className={styles.sectionTitle}>Current Owner(s)</h2>
           </div>
           <div className={styles.sectionContent}>
             {data.owners.map((owner, index) => (
@@ -59,17 +91,17 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
 
           <div className={styles.sectionHeader}>
             <img src="/cob-uswds/img/usa-icons/trending_up.svg" alt="Value" className={styles.sectionIcon} />
-            <h1 className={styles.sectionTitle}>Assessed Value</h1>
+            <h2 className={styles.sectionTitle}>Assessed Value</h2>
           </div>
           <div className={styles.sectionContent}>
-            <p>${data.assessedValue.toLocaleString()}</p>
+            <p>{data.assessedValue != null ? `$${data.assessedValue.toLocaleString()}` : 'N/A'}</p>
           </div>
 
           <div className={styles.divider} />
 
           <div className={styles.sectionHeader}>
             <img src="/cob-uswds/img/usa-icons/location_city.svg" alt="Property Type" className={styles.sectionIcon} />
-            <h1 className={styles.sectionTitle}>Property Type</h1>
+            <h2 className={styles.sectionTitle}>Property Type</h2>
           </div>
           <div className={styles.sectionContent}>
             <p>{data.propertyType}</p>
@@ -77,18 +109,23 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
         </div>
 
         <div className={styles.rightContent}>
+          {data.imageSrc && (
+            <div className={styles.imageContainer} style={{ position: 'relative' }}>
           <img 
             src={data.imageSrc} 
             alt="Property" 
             className={styles.propertyImage}
           />
-          <h1 className={styles.mapLink}><a
+              <TargetIcon />
+            </div>
+          )}
+          <h2 className={styles.mapLink}><a
             className={`usa-link usa-link--external`}
             rel="noreferrer"
             target="_blank"
             href={`https://app01.cityofboston.gov/AssessingMap/?find=${data.parcelId}`}
           >Open in map</a>
-          </h1>
+          </h2>
         </div>
       </section>
 
@@ -101,7 +138,16 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
       </div>
 
       <div className={styles.buttonGroup}>
-        <button className={`usa-button usa-button--primary`}>Pay Your Taxes</button>
+        <a
+          href={`https://www.boston.gov/real-estate-taxes?input1=${data.parcelId}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <IconButton 
+            text="Pay Your Taxes"
+            variant="primary"
+          />
+        </a>
         <IconButton src="/cob-uswds/img/usa-icons/print.svg" text="Print" />
       </div>
     </PropertyDetailsSection>

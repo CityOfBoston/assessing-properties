@@ -5,8 +5,9 @@ import WelcomeContent from '@components/WelcomeContent';
 import { SearchBarContainer } from '@containers/SearchBarContainer';
 import PropertySearchHelp from '@components/PropertySearchHelp';
 import ResponsiveTable from '@components/ResponsiveTable';
+import { LoadingIndicator } from '@src/components/LoadingIndicator';
 import { PropertySearchResult } from '@src/types';
-import { useSearchResults } from '@hooks/useSearchResults';
+import { useSearchResults } from '../../hooks/useSearchResults';
 import styles from './SearchResultsPage.module.scss';
 import { toWords } from 'number-to-words';
 
@@ -31,13 +32,14 @@ const searchTips = [
 
 export default function SearchResultsPage() {
   const [searchParams] = useSearchParams();
-  const query = searchParams.get('search') || '';
+  const query = searchParams.get('q') || '';
   const navigate = useNavigate();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   const { searchResults, isLoading, error, performSearch } = useSearchResults();
 
-  const handlePropertySelect = (pid: string) => {
+  const handlePropertySelect = (pid: string, fullAddress?: string) => {
+    console.log('[SearchResultsPage] handlePropertySelect called with pid:', pid, 'address:', fullAddress);
     // Navigate to property details page
     navigate(`/details?parcelId=${pid}`);
   };
@@ -66,7 +68,7 @@ export default function SearchResultsPage() {
 
   const errorMessage = getErrorMessage();
 
-  const tableData = results.map(result => ({
+  const tableData = results.map((result: PropertySearchResult) => ({
     'Parcel ID': result.parcelId.toString(),
     'Address': result.address,
     'Owner(s)': result.owners.join(', '),
@@ -88,6 +90,7 @@ export default function SearchResultsPage() {
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
               errorMessage={errorMessage}
+              preloadValue={query}
             />
           </div>
         </>
@@ -96,8 +99,10 @@ export default function SearchResultsPage() {
       <div className={styles.resultsArea}>
         {isLoading ? (
           <div className={styles.loadingContainer}>
-            <div className={styles.loadingSpinner}></div>
-            <p>Loading search results...</p>
+            <LoadingIndicator 
+              message="Loading search results..." 
+              size="medium" 
+            />
           </div>
         ) : results && results.length > 0 ? (
           <div className={styles.resultsContainer}>

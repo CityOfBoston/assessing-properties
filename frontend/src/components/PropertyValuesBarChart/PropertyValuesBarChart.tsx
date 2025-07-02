@@ -74,6 +74,14 @@ const getStepSize = (range: number, numPoints: number): number => {
   return step;
 };
 
+const formatYear = (year: number, isMobile: boolean): string => {
+  if (isMobile) {
+    // Convert to string and take last 2 digits
+    return `'${year.toString().slice(-2)}`;
+  }
+  return year.toString();
+};
+
 const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
   title,
   value,
@@ -81,8 +89,13 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
+  // Calculate dynamic left margin based on the largest value's digit count
+  const maxValue = Math.max(...data.map(item => item.value));
+  const maxValueDigits = Math.floor(Math.log10(maxValue)) + 1;
+  const dynamicLeftMargin = Math.max(60, 20 + (maxValueDigits * 8)); // Base 60px + 8px per digit
+  
   // Chart dimensions
-  const margin = { top: 0, right: 20, bottom: 20, left: 60 };
+  const margin = { top: 20, right: 20, bottom: 20, left: dynamicLeftMargin };
   const chartHeight = 300 - margin.top - margin.bottom;
   const fixedHeight = 300;
 
@@ -133,20 +146,29 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
     setTooltip(null);
   };
 
+  // Add a new handler for keyboard focus
+  const handleBarFocus = (event: React.FocusEvent<SVGGElement>, value: number) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltip({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10,
+      value,
+    });
+  };
+
   // Calculate dimensions and scales
-  const maxValue = Math.max(...data.map(item => item.value));
   const minValue = Math.min(...data.map(item => item.value));
   const range = maxValue - minValue;
-  const padding = range * 0.1;
-  const yDomain = [minValue - (range * 0.33), maxValue + padding]; // Extend 1/3 below min
+  const padding = range * 0.15; // Increased padding from 0.1 to 0.15
+  const yDomain = [minValue - (range * 0.33), maxValue + padding * 2]; // Double the top padding
   const step = getStepSize(range, data.length);
   
   // Generate evenly spaced ticks
-  const numTicks = Math.ceil(range / step) + 1;
+  const numTicks = Math.ceil((yDomain[1] - yDomain[0]) / step) + 1;
   const yTicks = Array.from(
     { length: numTicks },
-    (_, i) => roundToNiceNumber(minValue + i * step)
-  );
+    (_, i) => roundToNiceNumber(yDomain[0] + i * step)
+  ).filter(tick => tick <= yDomain[1] && tick >= 0); // Filter out negative ticks and ensure within domain
 
   // Scales
   const xScale = (index: number) => {
@@ -167,7 +189,12 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
     >
       <h3 className={styles.title}>{title}</h3>
       <div className={styles.value}>{value}</div>
-      <div className={styles.chartContainer} ref={containerRef}>
+      <div 
+        className={styles.chartContainer} 
+        ref={containerRef}
+        role="region"
+        aria-label="Property Value History Bar Chart"
+      >
         <svg 
           width={containerWidth || fixedWidth} 
           height={fixedHeight}
@@ -233,7 +260,7 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
                 fontSize={14}
                 fontFamily="Montserrat"
               >
-                {item.year}
+                {formatYear(item.year, isMobile)}
               </text>
             ))}
           </g>
@@ -267,25 +294,36 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
           ))}
 
           {/* Bars */}
-          {visibleData.map((item, i) => (
+          {visibleData.map((item, i) => {
+            const rawHeight = chartHeight + margin.top - yScale(item.value);
+            const minBarHeight = 12; // Increased from 4px to 8px
+            const barHeight = Math.max(rawHeight, minBarHeight);
+            const barY = yScale(item.value) - (barHeight - rawHeight);
+            return (
             <g
               key={`bar-${i}`}
+              tabIndex={0}
+              role="img"
+              aria-label={`Year: ${item.year}, Value: ${formatValue(item.value)}`}
               onMouseEnter={(e) => handleMouseEnter(e, item.value)}
               onMouseLeave={handleMouseLeave}
               onTouchStart={(e) => handleMouseEnter(e, item.value)}
               onTouchEnd={handleMouseLeave}
+              onFocus={(e) => handleBarFocus(e, item.value)}
+              onBlur={handleMouseLeave}
             >
               <rect
                 x={xScale(i)}
-                y={yScale(item.value)}
+                y={barY}
                 width={barWidth}
-                height={chartHeight + margin.top - yScale(item.value)}
+                height={barHeight}
                 fill={i === visibleData.length - 1 ? '#1871BD' : '#8A8A8A'}
                 rx={4}
                 ry={4}
               />
             </g>
-          ))}
+            );
+          })}
         </svg>
 
         {/* Tooltip */}
@@ -297,13 +335,14 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
               top: tooltip.y,
               transform: 'translate(-50%, -100%)',
             }}
+            aria-live="polite"
           >
             <p>{formatValue(tooltip.value)}</p>
           </div>
         )}
       </div>
-      <div className={styles.legend}>
-        <div className={styles.legendItem}>
+      <div className={styles.legend} role="list">
+        <div className={styles.legendItem} role="listitem">
           <div className={styles.legendPatch} style={{ backgroundColor: '#1871BD' }} />
           <span className={styles.legendLabel}>Assessed Value</span>
         </div>

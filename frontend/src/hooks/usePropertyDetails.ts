@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { getPropertyDetails } from '../firebaseConfig';
-import { PropertyDetailsData } from '../../types';
+import { fetchPropertyDetailsByParcelId } from './firebaseConfig';
+import type { PropertyDetailsData } from '../types';
 
 interface UsePropertyDetailsReturn {
   propertyDetails: PropertyDetailsData | null;
@@ -16,18 +16,24 @@ export const usePropertyDetails = (): UsePropertyDetailsReturn => {
 
   const fetchPropertyDetails = useCallback(async (parcelId: string) => {
     if (!parcelId.trim()) {
-      setPropertyDetails(null);
+      setError(new Error('Parcel ID is required'));
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const details = await getPropertyDetails(parcelId);
+      setIsLoading(true);
+      setError(null);
+      
+      console.log('[usePropertyDetails] Fetching property details for parcelId:', parcelId);
+      
+      const details = await fetchPropertyDetailsByParcelId(parcelId);
+      
+      console.log('[usePropertyDetails] Successfully fetched property details:', details);
+      
       setPropertyDetails(details);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('An error occurred while fetching property details'));
+      console.error('[usePropertyDetails] Error fetching property details:', err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch property details'));
       setPropertyDetails(null);
     } finally {
       setIsLoading(false);

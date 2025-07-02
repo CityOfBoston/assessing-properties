@@ -1,7 +1,8 @@
-import { usePropertyFeedback } from '../../hooks/usePropertyFeedback';
+import { usePropertyFeedback } from '@hooks/usePropertyFeedback';
 import { FeedbackSender, FeedbackSenderProps } from '../../components/FeedbackSender/FeedbackSender';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { FeedbackData } from '../../types';
+import styles from './FeedbackSenderContainer.module.scss';
 
 interface FeedbackSenderContainerProps extends Omit<FeedbackSenderProps, 'onSubmit'> {
   /**
@@ -20,7 +21,21 @@ export const FeedbackSenderContainer = ({
   onError,
   ...feedbackSenderProps
 }: FeedbackSenderContainerProps) => {
-  const { isLoading, error, isSuccess, sendFeedback } = usePropertyFeedback();
+  const { isLoading, error, isSuccess, sendFeedback, reset } = usePropertyFeedback();
+
+  // Handle success callback
+  useEffect(() => {
+    if (isSuccess) {
+      onSuccess?.();
+    }
+  }, [isSuccess, onSuccess]);
+
+  // Handle error callback
+  useEffect(() => {
+    if (error) {
+      onError?.(error);
+    }
+  }, [error, onError]);
 
   const handleSubmit = useCallback(async (data: { 
     helpful: boolean; 
@@ -40,12 +55,19 @@ export const FeedbackSenderContainer = ({
 
     try {
       await sendFeedback(feedbackData);
-      onSuccess?.();
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to send feedback');
-      onError?.(error);
+      // Error is already handled by the hook and passed to onError via useEffect
+      console.error('[FeedbackSenderContainer] Error in handleSubmit:', err);
     }
-  }, [sendFeedback, onSuccess, onError]);
+  }, [sendFeedback]);
+
+  if (isSuccess) {
+    return (
+      <div className={styles.successMessage}>
+        Thank you for your feedback.
+      </div>
+    );
+  }
 
   return (
     <FeedbackSender

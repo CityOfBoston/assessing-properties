@@ -33,7 +33,7 @@
 .searchForm {
   display: flex;
   width: 100%;
-  gap: 4px;
+  gap: 0px;
 }
 
 .inputWrapper {
@@ -50,6 +50,7 @@
   padding: 0 0.5rem;
   border: 1px solid #565c65;
   border-right: none;
+  border-radius: 4px 0 0 4px;
   font-size: 1rem;
   box-sizing: border-box;
   font-family: Lora, serif;
@@ -100,10 +101,12 @@
 .searchButton {
   height: 48px !important;
   min-height: 48px;
+  max-height: 48px;
   padding: 0 1rem;
   background-color: #1871bd;
   color: white;
-  border: none;
+  border: 1px solid #1871bd;
+  border-left: none;
   font-size: 1rem;
   cursor: pointer;
   font-weight: bold;
@@ -112,6 +115,10 @@
   border-radius: 0px 4px 4px 0px;
   font-family: Montserrat, sans-serif;
   
+  @include at-media-max('mobile-lg') {
+    padding: 0;
+  }
+  
   &:hover,
   &:focus {
     background-color: #FB4D42;
@@ -119,8 +126,25 @@
   }
 }
 
+.searchButtonIcon {
+  display: none;
+}
+
+@include at-media-max('mobile-lg') {
+  .searchButtonIcon {
+    display: inline-block !important;
+    width: 2em;
+    height: 2em;
+    vertical-align: middle;
+    filter: invert(1);
+  }
+  .searchButtonText {
+    display: none !important;
+  }
+}
+
 .searchButtonText {
-  font-weight: 500;
+  display: inline;
 }
 
 .searchIcon {
@@ -184,23 +208,25 @@
   &:not(:empty) {
     display: block; // Show only when there's content
   }
+  }
 
   @include at-media-max('mobile-lg') {
+  .suggestionsContainer {
     position: fixed;
-    top: calc(var(--search-bar-bottom) + 36px);
+    top: var(--search-bar-bottom);
     left: 0;
     right: 0;
-    width: 100vw;
-    min-height: calc(100vh - var(--search-bar-bottom) - 36px);
+    max-height: calc(100vh - var(--search-bar-bottom) - 8px);
+    min-height: 0;
     border: none;
-    box-shadow: none;
-    transform: translateY(100%);
-    transition: transform 0.3s ease-out;
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    border-radius: 0 0 8px 8px;
+    overflow-y: auto;
     background: white;
-    visibility: hidden;
-    opacity: 0;
+    z-index: 1000;
+    display: block;
+    visibility: visible;
+    opacity: 1;
   }
 }
 
@@ -258,6 +284,17 @@
     background-color: #f5f5f5;
   }
 
+  &.selected,
+  &:focus {
+    background-color: #f0f0f0;
+    outline: 2px solid #005ea2;
+    outline-offset: -2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
   @include at-media-max('mobile-lg') {
     height: auto;
     padding: 16px;
@@ -304,9 +341,9 @@
   color: black;
 
   @include at-media-max('mobile-lg') {
-    font-size: 18px;
+    font-size: 18px !important;
     font-weight: bold;
-    line-height: 1.2;
+    line-height: 1.3;
   }
 }
 
@@ -316,7 +353,8 @@
   text-align: right;
 
   @include at-media-max('mobile-lg') {
-    font-size: 16px;
+    font-size: 18px !important;
+    line-height: 1.3;
     text-align: left;
     color: #565c65;
   }
@@ -328,6 +366,17 @@
   justify-content: center;
   padding: 20px;
   gap: 12px;
+  color: #565c65;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+
+  @include at-media-max('mobile-lg') {
+    padding: 20px 1rem;
+    text-align: center;
+  }
 }
 
 .loadingSpinner {
@@ -339,7 +388,212 @@
   animation: spin 1s linear infinite;
 }
 
+.loadingText {
+  margin: 0;
+  font-weight: 500;
+
+  @include at-media-max('mobile-lg') {
+    font-size: 18px !important;
+    line-height: 1.3;
+  }
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Add a subtle pulse animation for the loading state */
+.suggestionsContainer:has(.loadingContainer) {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+// Mobile Modal Styles
+.mobileModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.modalBackdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modalContent {
+  position: relative;
+  flex: 1;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+  border-bottom: 1px solid #dfe3e8;
+  background-color: #f8f9fa;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modalCloseButton {
+  background: none;
+  border: none;
+  color: #005ea2;
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: Montserrat, sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #e6f3ff;
+  }
+
+  &:active {
+    background-color: #cce7ff;
+  }
+}
+
+.modalSearchContainer {
+  padding: 1rem;
+  border-bottom: 1px solid #dfe3e8;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.modalSearchForm {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  width: 100%;
+}
+
+.modalInputWrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.modalSearchInput {
+  flex: 1;
+  height: 48px !important;
+  min-height: 48px;
+  padding: 0 0.75rem;
+  border: 2px solid #565c65 !important;
+  border-radius: 4px !important;
+  font-size: 1rem;
+  font-family: Lora, serif;
+  background-color: white;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: #005ea2 !important;
+    box-shadow: 0 0 0 2px rgba(0, 94, 162, 0.25);
+  }
+
+  &::placeholder {
+    color: #565c65;
+  }
+}
+
+/* Ensure modal input wrapper behaves correctly */
+.modalSearchForm .inputWrapper {
+  width: 100%;
+}
+
+/* Override any inherited input styles when in modal */
+.modalSearchForm .inputWrapper .modalSearchInput {
+  border: 2px solid #565c65 !important;
+  border-radius: 4px !important;
+  border-right: 2px solid #565c65 !important;
+}
+
+.modalSuggestions {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modalSuggestionItem {
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  &:active {
+    background-color: #e6f3ff;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.selected,
+  &:focus {
+    background-color: #f0f0f0;
+    outline: 2px solid #005ea2;
+    outline-offset: -2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  @include at-media-max('mobile-lg') {
+    padding: 0.75rem;
+    border-bottom: none;
+
+    .fullAddress {
+      font-size: 18px !important;
+      line-height: 1.3;
+    }
+
+    .parcelId {
+      font-size: 18px !important;
+      line-height: 1.3;
+    }
+  }
 } 

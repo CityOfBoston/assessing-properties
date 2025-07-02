@@ -76,7 +76,7 @@ export default function AttributesSection({ data }: AttributesSectionData) {
     {
       title: 'Last Transaction',
       items: [
-        { label: 'Sale Price', value: data.salePrice ? `$${data.salePrice.toLocaleString()}` : undefined },
+        { label: 'Sale Price', value: data.salePrice != null ? `$${data.salePrice.toLocaleString()}` : 'N/A' },
         { label: 'Sale Date', value: data.saleDate },
         { label: 'Registry Book and Place', value: data.registryBookAndPlace },
       ],

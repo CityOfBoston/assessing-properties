@@ -1,0 +1,58 @@
+.loadingIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  
+  &.small {
+    .spinner {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .message {
+      font-size: 0.875rem;
+    }
+  }
+  
+  &.medium {
+    .spinner {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .message {
+      font-size: 1rem;
+    }
+  }
+  
+  &.large {
+    .spinner {
+      width: 48px;
+      height: 48px;
+    }
+    
+    .message {
+      font-size: 1.125rem;
+    }
+  }
+}
+
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #0071bc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.message {
+  margin: 0;
+  color: #565c65;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 

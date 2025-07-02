@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { IconButton } from '../IconButton';
 import styles from './FeedbackSender.module.scss';
 
 export interface FeedbackSenderProps {
@@ -125,9 +126,11 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
             }
           </div>
           
-          <button className="usa-button" type="submit">
-            Send feedback
-          </button>
+          <IconButton 
+            text="Send feedback"
+            variant="primary"
+            type="submit"
+          />
           
           <p className={styles.contactInfo}>
             We use this feedback to improve our website. If you need assistance, please contact the{' '}

@@ -63,3 +63,9 @@
     display: none;
   }
 } 
+
+@include at-media-max('mobile-lg') {
+  .hideOnMobile {
+    display: none !important;
+  }
+} 

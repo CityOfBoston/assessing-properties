@@ -2,6 +2,14 @@
 
 .header {
   margin: 0;
+  text-transform: uppercase;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
+
+  @include main.at-media-max('mobile-lg') {
+    font-size: 16px;
+  }
 }
 
 .text {

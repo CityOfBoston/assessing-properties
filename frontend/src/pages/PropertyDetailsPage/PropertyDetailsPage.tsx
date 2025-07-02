@@ -10,7 +10,8 @@ import {
   ApprovedPermitsSection,
   ContactUsSection,
 } from '@src/components/PropertyDetailsSection';
-import { usePropertyDetails } from '@hooks/usePropertyDetails';
+import { LoadingIndicator } from '@src/components/LoadingIndicator';
+import { usePropertyDetails } from '../../hooks/usePropertyDetails';
 import styles from './PropertyDetailsPage.module.scss';
 
 /**
@@ -44,10 +45,11 @@ export default function PropertyDetailsPage() {
     {
       name: 'Loading',
       component: (
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner}></div>
-          <p>Loading property details...</p>
-          {error && <p className={styles.errorText}>Error: {error.message}</p>}
+        <div className={styles.fullWidthLoadingContainer}>
+          <LoadingIndicator 
+            message={error ? `Error: ${error.message}` : "Loading property details..."} 
+            size="large" 
+          />
         </div>
       ),
     },

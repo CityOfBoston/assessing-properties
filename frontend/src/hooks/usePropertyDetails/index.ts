@@ -1,1 +1,0 @@
-export { usePropertyDetails } from './usePropertyDetails'; 

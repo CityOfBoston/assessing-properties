@@ -2,8 +2,9 @@
  * PropertyTaxesSection component displays property tax information and history
  */
 import PropertyDetailsSection from '../PropertyDetailsSection';
-import PropertyDetailsCardGroup from '@components/PropertyDetailsCardGroup';
-import FormulaAccordion from '@components/FormulaAccordion';
+import PropertyDetailsCardGroup from '../../PropertyDetailsCardGroup';
+import FormulaAccordion from '../../FormulaAccordion';
+import { IconButton } from '../../IconButton';
 import styles from './PropertyTaxesSection.module.scss';
 import { PropertyTaxesSectionData } from '@src/types';
 
@@ -29,11 +30,11 @@ export default function PropertyTaxesSection({
   const drawerOptions = [
     {
       title: 'FY25 Gross Tax',
-      value: `$${propertyGrossTax.toLocaleString()}`,
+      value: propertyGrossTax != null ? `$${propertyGrossTax.toLocaleString()}` : 'N/A',
     },
     {
       title: 'Residential Exemptions',
-      value: `-$${residentialExemption.toLocaleString()}`,
+      value: residentialExemption != null ? `-$${residentialExemption.toLocaleString()}` : 'N/A',
       message: residentialExemption === 0
         ? 'This type of parcel is not eligible for a residential exemption'
         : 'A residential Exemption has been granted for this parcel',
@@ -62,7 +63,7 @@ export default function PropertyTaxesSection({
     },
     {
       title: 'Personal Exemptions',
-      value: `-$${personalExemption.toLocaleString()}`,
+      value: personalExemption != null ? `-$${personalExemption.toLocaleString()}` : 'N/A',
       message: personalExemption === 0
         ? 'This type of parcel is not eligible for a personal exemption'
         : 'A personal Exemption has been granted for this parcel',
@@ -138,7 +139,7 @@ export default function PropertyTaxesSection({
     },
     {
       title: 'Community Preservation',
-      value: `-$${communityPreservation.toLocaleString()}`,
+      value: communityPreservation != null ? `-$${communityPreservation.toLocaleString()}` : 'N/A',
       description: (
         <div className={styles.text}>
           We calculate the CPA surcharge by first deducting $100,000 from the value of your property. Next, we recalculate the tax and apply your residential exemption and any personal exemptions, if you have them. To learn more visit the{' '}
@@ -155,13 +156,13 @@ export default function PropertyTaxesSection({
     },
     {
       title: <div className={styles.netTax}>FY25 Net Tax</div>,
-      value: <div className={styles.netTax}>${propertyNetTax.toLocaleString()}</div>,
+      value: <div className={styles.netTax}>{propertyNetTax != null ? `$${propertyNetTax.toLocaleString()}` : 'N/A'}</div>,
     },
   ];
 
   return (
     <PropertyDetailsSection title="Property Taxes">
-      <h2 className={styles.header}>FY25 Tax Rate</h2>
+      <h3 className={styles.header}>FY25 Tax Rate</h3>
       <div className={styles.text}>
         For more information on the breakdown of the tax calculation, visit{' '}
         <a
@@ -190,7 +191,7 @@ export default function PropertyTaxesSection({
         </a>
       </div>
 
-      <h2 className={styles.header}>Net Tax</h2>
+      <h3 className={styles.header}>Net Tax</h3>
       <div className={styles.text}>
         Through exemptions, the City releases you from paying part or all of your property taxes. There's also other legally required fees and benefits that will change the amount you pay for taxes. After all of these calculations, the 'Net taxes' include the' final amount you are required to pay.
       </div>
@@ -205,9 +206,10 @@ export default function PropertyTaxesSection({
           target="_blank"
           rel="noreferrer"
         >
-          <button className="usa-button" type="button">
-            Pay Your Taxes
-          </button>
+          <IconButton 
+            text="Pay Your Taxes"
+            variant="primary"
+          />
         </a>
       </div>
     </PropertyDetailsSection>

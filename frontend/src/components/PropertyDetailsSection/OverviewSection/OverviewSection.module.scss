@@ -41,10 +41,16 @@
   margin-right: 6px;
 }
 
+.imageContainer {
+  position: relative;
+  display: inline-block;
+}
+
 .propertyImage {
   width: 200px;
   height: 200px;
   object-fit: cover;
+  display: block;
 
   @include main.at-media-max('mobile-lg') {
     width: 100%;
@@ -52,15 +58,26 @@
   }
 }
 
+.targetIcon {
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
 .mapLink {
   display: block;
   margin-top: 12px;
   text-align: left;
-  font-size: 12px;
+  font-size: 18px;
+  font-family: 'Lora', serif;
 
   @include main.at-media-max('mobile-lg') {
     text-align: center;
     margin-top: 16px;
+    font-size: 16px;
   }
 }
 
@@ -78,21 +95,20 @@
   gap: 6px;
 }
 
-.mapLink {
-  font-weight: 300;
-  font-size: 18px;
-
-  @include main.at-media-max('mobile-lg') {
-    font-size: 16px;
-  }
-}
-
 .sectionIcon {
   width: 24px;
 }
 
 .sectionTitle {
   margin: 0;
+  text-transform: uppercase;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
+
+  @include main.at-media-max('mobile-lg') {
+    font-size: 18px;
+  }
 }
 
 .sectionContent {
@@ -136,21 +152,17 @@
   align-items: center;
 
   @include main.at-media-max('mobile-lg') {
+    flex-direction: column;
     width: 100%;
-    gap: 0;
+    gap: 8px;
+    box-sizing: border-box;
     
-    button {
-      flex: 1;
+    a {
+      width: 100%;
     }
-  }
 
-  // Style for "Pay Your Taxes" button
-  .usa-button--primary {
-    font-family: 'Montserrat', system-ui, sans-serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    height: 24px;
-    line-height: 24px;
-    padding: 0 16px;
+    button {
+      width: 100%;
+    }
   }
 } 
