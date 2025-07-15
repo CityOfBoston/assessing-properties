@@ -4,7 +4,7 @@
  */
 
 import {createCallable, createSuccessResponse, createErrorResponse} from "../lib/FunctionsClient";
-import {fetchPropertyDetailsByParcelIdHelper, fetchPropertyStaticMapImageByParcelIdHelper} from "../lib/EGISClient";
+import {fetchPropertyDetailsByParcelIdHelper, generatePropertyStaticMapImageFromGeometryHelper} from "../lib/EGISClient";
 import {isStaticMapImageCached, storeStaticMapImage, getStaticMapImageUrl} from "../lib/StorageClient";
 
 export const fetchPropertyDetailsByParcelId = createCallable(async (data: { parcelId: string }) => {
@@ -34,8 +34,11 @@ export const fetchPropertyDetailsByParcelId = createCallable(async (data: { parc
 
   console.log(`[FetchPropertyDetailsByParcelId] Input validation passed. Fetching details for parcelId: ${data.parcelId}`);
 
-  // Fetch property details using EGISClient
-  const propertyDetails = await fetchPropertyDetailsByParcelIdHelper(data.parcelId);
+  // Fetch property details and geometry using EGISClient (single call)
+  const propertyDetailsWithGeometry = await fetchPropertyDetailsByParcelIdHelper(data.parcelId);
+
+  // Extract property details and geometry
+  const {geometry, ...propertyDetails} = propertyDetailsWithGeometry;
 
   // Check if property was found (not the default "Property not found" case)
   if (propertyDetails.overview.fullAddress === "Property not found") {
@@ -43,10 +46,11 @@ export const fetchPropertyDetailsByParcelId = createCallable(async (data: { parc
     return createErrorResponse("Property not found", null);
   }
 
-  // Checks if static map image is cached. If not, generate it. If it is, get its signed URL.
+  // Checks if static map image is cached. If not, generate it using the geometry we already have. If it is, get its signed URL.
   const isCached = await isStaticMapImageCached(data.parcelId);
   if (!isCached) {
-    const staticMapImageData = await fetchPropertyStaticMapImageByParcelIdHelper(data.parcelId);
+    // Use the geometry from the property details call to generate the static map image
+    const staticMapImageData = await generatePropertyStaticMapImageFromGeometryHelper(data.parcelId, geometry);
     const signedUrl = await storeStaticMapImage(data.parcelId, staticMapImageData);
     propertyDetails.overview.imageSrc = signedUrl;
   } else {

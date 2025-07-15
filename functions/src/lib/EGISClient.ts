@@ -9,8 +9,12 @@
 import {PropertyDetailsData, PropertyDetails} from "../types";
 
 const baseUrl = "https://gisportal.boston.gov/arcgis/rest/services/Assessing/Assessing_Online_data/MapServer";
+const propertyAssessmentJoinUrl = `${baseUrl}/0`;
 const historicalPropertyDataLayerUrl = `${baseUrl}/1`;
 const currentPropertyDataLayerUrl = `${baseUrl}/2`;
+const propertyWebAppDedupedUrl = `${baseUrl}/4`;
+
+
 
 // Type definitions for ArcGIS Feature and FeatureSet
 interface ArcGISFeature {
@@ -148,7 +152,7 @@ export const fetchPropertySummariesByParcelIdsHelper = async (parcelIds: string[
 
   try {
     console.log(`[EGISClient] Using query: ${query}`);
-    const features = await fetchEGISData(currentPropertyDataLayerUrl, query);
+    const features = await fetchEGISData(propertyAssessmentJoinUrl, query);
 
     const results = features.map((feature) => ({
       parcelId: feature.attributes.PID,
@@ -207,30 +211,32 @@ export const fetchPropertySummaryByParcelIdHelper = async (parcelId: string): Pr
 
 /**
  * Helper function to get all property details for a property given a parcelId.
- * This involves getting all fields from currentPropertyDataLayerUrl and adding
+ * This involves getting all fields from propertyAssessmentJoinUrl (layer 0) and adding
  * a historical property value field that contains the results from historicalPropertyDataLayerUrl.
+ * Also returns geometry data for map generation.
  *
  * @param parcelId The parcel ID to search for.
- * @return A property details object with all current fields plus historical values.
+ * @return A property details object with all current fields plus historical values and geometry.
  */
-export const fetchPropertyDetailsByParcelIdHelper = async (parcelId: string): Promise<PropertyDetailsData> => {
+export const fetchPropertyDetailsByParcelIdHelper = async (parcelId: string): Promise<PropertyDetailsData & { geometry?: any }> => {
   console.log(`[EGISClient] Starting fetchPropertyDetailsByParcelId for parcelId: ${parcelId}`);
 
-  // Get current property data with all fields
-  console.log(`[EGISClient] Fetching current property data for parcelId: ${parcelId}`);
+  // Get current property data with all fields from the joined layer (layer 0)
+  console.log(`[EGISClient] Fetching current property data for parcelId: ${parcelId} from propertyAssessmentJoinUrl`);
 
   // Try different query formats to handle potential PID format issues
+  // Note: returnGeometry=true to get both field data and geometry in one call
   const currentQueryFormats = [
-    `?where=PID='${parcelId}'&outFields=*&returnGeometry=false&f=json`,
-    `?where=PID=${parcelId}&outFields=*&returnGeometry=false&f=json`,
-    `?where=PID LIKE '%${parcelId}%'&outFields=*&returnGeometry=false&f=json`,
+    `?where=PID='${parcelId}'&outFields=*&returnGeometry=true&f=json`,
+    `?where=PID=${parcelId}&outFields=*&returnGeometry=true&f=json`,
+    `?where=PID LIKE '%${parcelId}%'&outFields=*&returnGeometry=true&f=json`,
   ];
 
   let currentFeatures: ArcGISFeature[] = [];
   for (const query of currentQueryFormats) {
     try {
       console.log(`[EGISClient] Trying current data query format: ${query}`);
-      currentFeatures = await fetchEGISData(currentPropertyDataLayerUrl, query);
+      currentFeatures = await fetchEGISData(propertyAssessmentJoinUrl, query);
       if (currentFeatures.length > 0) {
         console.log(`[EGISClient] Found current data with query format: ${query}`);
         break;
@@ -267,29 +273,19 @@ export const fetchPropertyDetailsByParcelIdHelper = async (parcelId: string): Pr
   // Get historical property values
   console.log(`[EGISClient] Fetching historical property values for parcelId: ${parcelId}`);
 
-  // Try different query formats for historical data
-  const historicalQueryFormats = [
-    `?where=ParcelID='${parcelId}'&outFields=*&returnGeometry=false&f=json`,
-    `?where=ParcelID=${parcelId}&outFields=*&returnGeometry=false&f=json`,
-    `?where=ParcelID LIKE '%${parcelId}%'&outFields=*&returnGeometry=false&f=json`,
-  ];
+  // Use single query format for historical data
+  const historicalQuery = `?where=Parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
 
   let historicalFeatures: ArcGISFeature[] = [];
-  for (const query of historicalQueryFormats) {
-    try {
-      console.log(`[EGISClient] Trying historical data query format: ${query}`);
-      historicalFeatures = await fetchEGISData(historicalPropertyDataLayerUrl, query);
-      if (historicalFeatures.length > 0) {
-        console.log(`[EGISClient] Found historical data with query format: ${query}`);
-        break;
-      }
-    } catch (error) {
-      console.log(`[EGISClient] Historical data query format failed: ${query}`, error);
-      continue;
-    }
+  try {
+    console.log(`[EGISClient] Using historical data query: ${historicalQuery}`);
+    historicalFeatures = await fetchEGISData(historicalPropertyDataLayerUrl, historicalQuery);
+    console.log(`[EGISClient] Historical data found: ${historicalFeatures.length} records`);
+  } catch (error) {
+    console.log(`[EGISClient] Historical data query failed: ${historicalQuery}`, error);
+    // Continue with empty historical features if query fails
+    historicalFeatures = [];
   }
-
-  console.log(`[EGISClient] Historical data found: ${historicalFeatures.length} records`);
 
   // Debug: Log the first few historical features to see the structure
   if (historicalFeatures.length > 0) {
@@ -301,19 +297,46 @@ export const fetchPropertyDetailsByParcelIdHelper = async (parcelId: string): Pr
   const historicalValues: { [year: number]: number } = {};
   historicalFeatures.forEach((feature: ArcGISFeature, index: number) => {
     // Use the correct field names from the EGIS API
-    const yearId = feature.attributes.YearID;
-    const totalAssessedValue = feature.attributes.TotalAssessedValue;
+    const yearId = feature.attributes.Fiscal_Year;
+    const assessedValue = feature.attributes.Assessed_value;
 
-    console.log(`[EGISClient] Historical feature ${index}: YearID=${yearId}, TotalAssessedValue=${totalAssessedValue}`);
+    console.log(`[EGISClient] Historical feature ${index}: Fiscal_Year=${yearId}, Assessed_value=${assessedValue}`);
 
-    if (yearId && totalAssessedValue !== undefined) {
-      historicalValues[yearId] = totalAssessedValue;
+    if (yearId && assessedValue !== undefined) {
+      historicalValues[yearId] = assessedValue;
     }
   });
 
   console.log("[EGISClient] Parsed historical values:", historicalValues);
 
+  // Get exemption flags from propertyWebAppDedupedUrl
+  console.log(`[EGISClient] Fetching exemption flags for parcelId: ${parcelId}`);
+  
+  const exemptionQuery = `?where=parcel_id='${parcelId}'&outFields=residential_exemption_flag,personal_exemption_flag&returnGeometry=false&f=json`;
+  
+  let exemptionFeatures: ArcGISFeature[] = [];
+  let residentialExemption = false;
+  let personalExemption = false;
+  
+  try {
+    console.log(`[EGISClient] Using exemption query: ${exemptionQuery}`);
+    exemptionFeatures = await fetchEGISData(propertyWebAppDedupedUrl, exemptionQuery);
+    console.log(`[EGISClient] Exemption data found: ${exemptionFeatures.length} records`);
+    
+    if (exemptionFeatures.length > 0) {
+      const exemptionAttributes = exemptionFeatures[0].attributes;
+      residentialExemption = Boolean(exemptionAttributes.residential_exemption_flag);
+      personalExemption = Boolean(exemptionAttributes.personal_exemption_flag);
+      
+      console.log(`[EGISClient] Exemption flags - Residential: ${residentialExemption}, Personal: ${personalExemption}`);
+    }
+  } catch (error) {
+    console.log(`[EGISClient] Exemption query failed: ${exemptionQuery}`, error);
+    // Continue with default false values if query fails
+  }
+
   const attributes = currentFeatures[0].attributes;
+  const geometry = currentFeatures[0].geometry;
 
   // Create PropertyDetailsData using the PropertyDetails class constructor
   const propertyDetails = new PropertyDetails({
@@ -325,8 +348,8 @@ export const fetchPropertyDetailsByParcelIdHelper = async (parcelId: string): Pr
     propertyType: attributes.LU_DESC || "Property type not available",
     parcelId: attributes.PID || parcelId,
     propertyNetTax: attributes.GROSS_TAX || 0,
-    personalExemption: false, // Not directly provided by EGIS
-    residentialExemption: false, // Not directly provided by EGIS
+    personalExemption: personalExemption, // Use value from exemption query
+    residentialExemption: residentialExemption, // Use value from exemption query
     historicPropertyValues: historicalValues,
     bedroomNumber: attributes.BED_RMS,
     bedroomType: attributes.BDRM_COND,
@@ -376,13 +399,159 @@ export const fetchPropertyDetailsByParcelIdHelper = async (parcelId: string): Pr
   });
 
   console.log(`[EGISClient] Property details completed for parcelId: ${parcelId}. Historical values count: ${Object.keys(historicalValues).length}`);
-  return propertyDetails;
+
+  // Return both property details and geometry
+  return {
+    ...propertyDetails,
+    geometry: geometry,
+  };
+};
+
+/**
+ * Helper function to generate static map image for a property using existing geometry data.
+ * This avoids making an additional API call since we already have the geometry from the property details call.
+ *
+ * @param parcelId The parcel ID for logging purposes.
+ * @param geometry The geometry data from the property details call.
+ * @return A Buffer containing the PNG image data.
+ */
+export const generatePropertyStaticMapImageFromGeometryHelper = async (parcelId: string, geometry: any): Promise<Buffer> => {
+  console.log(`[EGISClient] Starting generatePropertyStaticMapImageFromGeometry for parcelId: ${parcelId}`);
+
+  try {
+    if (!geometry || !geometry.rings) {
+      console.log(`[EGISClient] No valid geometry provided for parcelId: ${parcelId}`);
+      throw new Error(`No valid geometry provided for parcelId: ${parcelId}`);
+    }
+
+    console.log("[EGISClient] Geometry spatial reference:", geometry.spatialReference);
+    console.log("[EGISClient] Geometry rings count:", geometry.rings.length);
+
+    // Calculate bounding box from the geometry rings
+    let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
+
+    geometry.rings.forEach((ring: number[][], ringIndex: number) => {
+      console.log(`[EGISClient] Processing ring ${ringIndex} with ${ring.length} points`);
+      ring.forEach(([x, y], pointIndex: number) => {
+        if (pointIndex < 5) { // Log first 5 points for debugging
+          console.log(`[EGISClient] Point ${pointIndex}: (${x}, ${y})`);
+        }
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      });
+    });
+
+    // Validate bounding box values
+    if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) {
+      throw new Error(`Invalid bounding box calculated: minX=${minX}, minY=${minY}, maxX=${maxX}, maxY=${maxY}`);
+    }
+
+    // Add padding to the bounding box (40% on each side for 2x zoom out)
+    const paddingX = Math.max((maxX - minX) * 0.4, 100); // Minimum 100 units padding
+    const paddingY = Math.max((maxY - minY) * 0.4, 100);
+
+    const bbox = [
+      minX - paddingX,
+      minY - paddingY,
+      maxX + paddingX,
+      maxY + paddingY,
+    ];
+
+    console.log(`[EGISClient] Calculated bounding box: [${bbox.join(", ")}]`);
+
+    // Try different export configurations
+    const exportConfigs = [
+      {
+        bboxSR: "2249",
+        imageSR: "2249",
+        size: "512,512",
+        layers: "0",
+        description: "MA State Plane, layers=0, 512x512",
+      },
+      {
+        bboxSR: "2249",
+        imageSR: "2249",
+        size: "512,512",
+        layers: "show:0",
+        description: "MA State Plane, layers=show:0, 512x512",
+      },
+      {
+        bboxSR: "2249",
+        imageSR: "2249",
+        size: "512,512",
+        layers: "0",
+        format: "jpg",
+        description: "MA State Plane, JPG format, 512x512",
+      },
+      {
+        bboxSR: "2249",
+        imageSR: "2249",
+        size: "512,512",
+        layers: "0",
+        format: "png",
+        transparent: "true",
+        description: "MA State Plane, transparent PNG, 512x512",
+      },
+    ];
+
+    for (const config of exportConfigs) {
+      try {
+        console.log(`[EGISClient] Trying export config: ${config.description}`);
+
+        const exportUrl = `${propertyAssessmentJoinUrl.replace("/0", "")}/export`;
+        const exportParams = new URLSearchParams({
+          bbox: bbox.join(","),
+          bboxSR: config.bboxSR,
+          imageSR: config.imageSR,
+          size: config.size,
+          layers: config.layers,
+          format: config.format || "png",
+          transparent: config.transparent || "false",
+          f: "image",
+        });
+
+        const fullExportUrl = `${exportUrl}?${exportParams.toString()}`;
+        console.log(`[EGISClient] Requesting static map image from: ${fullExportUrl}`);
+
+        const response = await fetch(fullExportUrl);
+
+        if (response.ok) {
+          // Get the image data as ArrayBuffer and convert to Buffer
+          const imageArrayBuffer = await response.arrayBuffer();
+          const imageBuffer = Buffer.from(imageArrayBuffer);
+
+          console.log(`[EGISClient] Successfully generated static map image for parcelId: ${parcelId}, size: ${imageBuffer.length} bytes using config: ${config.description}`);
+          return imageBuffer;
+        } else {
+          // Try to get the error details from the response
+          let errorDetails = "";
+          try {
+            const errorText = await response.text();
+            errorDetails = ` - ${errorText}`;
+          } catch (e) {
+            errorDetails = " - Could not read error details";
+          }
+          console.log(`[EGISClient] Export failed with config ${config.description}: ${response.status} ${response.statusText}${errorDetails}`);
+        }
+      } catch (configError) {
+        console.log(`[EGISClient] Export error with config ${config.description}:`, configError);
+      }
+    }
+
+    // If all configs fail, throw an error
+    throw new Error(`Failed to generate static map image with all coordinate system configurations for parcelId: ${parcelId}`);
+  } catch (error) {
+    console.error(`[EGISClient] Error generating static map image for parcelId: ${parcelId}:`, error);
+    throw error;
+  }
 };
 
 /**
  * Helper function to generate static map image for a property given a parcelId.
- * Uses currentPropertyDataLayerUrl with query at:
- * https://gisportal.boston.gov/arcgis/rest/services/Assessing/Assessing_Online_data/MapServer/2/query
+ * Uses propertyAssessmentJoinUrl (layer 0) with query at:
+ * https://gisportal.boston.gov/arcgis/rest/services/Assessing/Assessing_Online_data/MapServer/0/query
     ?where=PID='{parcelId}'
     &returnGeometry=true
     &outFields=PID
@@ -394,7 +563,7 @@ export const fetchPropertyDetailsByParcelIdHelper = async (parcelId: string): Pr
     &bboxSR=2249
     &imageSR=3857
     &size=800,600
-    &layers=show:2
+    &layers=show:0
     &format=png
     &transparent=false
     &f=image
@@ -409,33 +578,24 @@ export const fetchPropertyStaticMapImageByParcelIdHelper = async (parcelId: stri
   try {
     // First, let's check the map service information to understand available layers
     console.log("[EGISClient] Checking map service information...");
-    const serviceInfoUrl = `${baseUrl}/2?f=json`;
+    const serviceInfoUrl = `${baseUrl}/0?f=json`;
     const serviceInfoResponse = await fetch(serviceInfoUrl);
     if (serviceInfoResponse.ok) {
       const serviceInfo = await serviceInfoResponse.json();
       console.log("[EGISClient] Map service layers:", serviceInfo.layers?.map((l: any) => ({id: l.id, name: l.name})));
     }
 
-    // First, get the property geometry to determine the bounding box
-    const geometryQueryFormats = [
-      `?where=PID='${parcelId}'&returnGeometry=true&outFields=PID&f=json`,
-      `?where=PID=${parcelId}&returnGeometry=true&outFields=PID&f=json`,
-      `?where=PID LIKE '%${parcelId}%'&returnGeometry=true&outFields=PID&f=json`,
-    ];
+    // Get the property geometry to determine the bounding box
+    const geometryQuery = `?where=PID='${parcelId}'&returnGeometry=true&outFields=PID&f=json`;
 
     let geometryFeatures: ArcGISFeature[] = [];
-    for (const query of geometryQueryFormats) {
-      try {
-        console.log(`[EGISClient] Trying geometry query format: ${query}`);
-        geometryFeatures = await fetchEGISData(currentPropertyDataLayerUrl, query);
-        if (geometryFeatures.length > 0) {
-          console.log(`[EGISClient] Found geometry with query format: ${query}`);
-          break;
-        }
-      } catch (error) {
-        console.log(`[EGISClient] Geometry query format failed: ${query}`, error);
-        continue;
-      }
+    try {
+      console.log(`[EGISClient] Using geometry query: ${geometryQuery}`);
+      geometryFeatures = await fetchEGISData(propertyAssessmentJoinUrl, geometryQuery);
+      console.log(`[EGISClient] Geometry data found: ${geometryFeatures.length} records`);
+    } catch (error) {
+      console.log(`[EGISClient] Geometry query failed: ${geometryQuery}`, error);
+      throw new Error(`No property geometry found for parcelId: ${parcelId}`);
     }
 
     if (geometryFeatures.length === 0) {
@@ -494,35 +654,21 @@ export const fetchPropertyStaticMapImageByParcelIdHelper = async (parcelId: stri
         bboxSR: "2249",
         imageSR: "2249",
         size: "512,512",
-        layers: "2",
-        description: "MA State Plane, layers=2, 512x512",
+        layers: "0",
+        description: "MA State Plane, layers=0, 512x512",
       },
       {
         bboxSR: "2249",
         imageSR: "2249",
         size: "512,512",
-        layers: "show:2",
-        description: "MA State Plane, layers=show:2, 512x512",
+        layers: "show:0",
+        description: "MA State Plane, layers=show:0, 512x512",
       },
       {
         bboxSR: "2249",
         imageSR: "2249",
         size: "512,512",
-        layers: "0,2",
-        description: "MA State Plane, layers=0,2, 512x512",
-      },
-      {
-        bboxSR: "2249",
-        imageSR: "2249",
-        size: "512,512",
-        layers: "show:0,2",
-        description: "MA State Plane, layers=show:0,2, 512x512",
-      },
-      {
-        bboxSR: "2249",
-        imageSR: "2249",
-        size: "512,512",
-        layers: "2",
+        layers: "0",
         format: "jpg",
         description: "MA State Plane, JPG format, 512x512",
       },
@@ -530,7 +676,7 @@ export const fetchPropertyStaticMapImageByParcelIdHelper = async (parcelId: stri
         bboxSR: "2249",
         imageSR: "2249",
         size: "512,512",
-        layers: "2",
+        layers: "0",
         format: "png",
         transparent: "true",
         description: "MA State Plane, transparent PNG, 512x512",
@@ -541,7 +687,7 @@ export const fetchPropertyStaticMapImageByParcelIdHelper = async (parcelId: stri
       try {
         console.log(`[EGISClient] Trying export config: ${config.description}`);
 
-        const exportUrl = `${currentPropertyDataLayerUrl.replace("/2", "")}/export`;
+        const exportUrl = `${propertyAssessmentJoinUrl.replace("/0", "")}/export`;
         const exportParams = new URLSearchParams({
           bbox: bbox.join(","),
           bboxSR: config.bboxSR,
