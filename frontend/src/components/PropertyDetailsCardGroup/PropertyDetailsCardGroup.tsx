@@ -7,6 +7,7 @@ interface PropertyDetailsCardGroupProps {
     icon?: React.ReactNode;
     header: string;
     value: string;
+    isGrey?: boolean;
   }>;
   maxCardsPerRow?: number;
 }
@@ -28,6 +29,7 @@ const PropertyDetailsCardGroup: React.FC<PropertyDetailsCardGroupProps> = ({
             icon={card.icon}
             header={card.header}
             value={card.value}
+            isGrey={card.isGrey ? card.isGrey : false}
           />
         </div>
       ))}

@@ -42,10 +42,12 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
     {
       header: 'Residential Tax Rate',
       value: '$11.58 per $1,000',
+      isGrey: true,
     },
     {
       header: 'Commercial Tax Rate',
       value: '$25.96 per $1,000',
+      isGrey: true,
     },
   ];
 
@@ -54,14 +56,23 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
   const isPrelimPeriod = nowMonth >= 6 && nowMonth < 12; // July (6) to December (11)
   const displayFY = isPrelimPeriod ? fiscalYear - 1 : fiscalYear;
 
+  // Helper to format values: show '-' if not parsable to integer or is 0
+  function formatTaxValue(val: any) {
+    const parsed = parseInt(val, 10);
+    if (isNaN(parsed) || parsed === 0) return '-';
+    if (typeof val === 'number') return `$${val.toLocaleString()}`;
+    if (typeof val === 'string' && /^\$?\d/.test(val)) return val;
+    return '-';
+  }
+
   const drawerOptions = [
     {
       title: `FY${displayFY} Gross Tax`,
-      value: sectionData.propertyGrossTax != null ? `$${sectionData.propertyGrossTax.toLocaleString()}` : 'N/A',
+      value: formatTaxValue(sectionData.propertyGrossTax),
     },
     {
       title: 'Residential Exemptions',
-      value: sectionData.residentialExemptionAmount != null ? `-$${sectionData.residentialExemptionAmount.toLocaleString()}` : 'N/A',
+      value: formatTaxValue(sectionData.residentialExemptionAmount) !== '-' ? `-${formatTaxValue(sectionData.residentialExemptionAmount)}` : '---',
       message:
         (() => {
           if (residentialGranted) {
@@ -112,7 +123,7 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
     },
     {
       title: 'Personal Exemptions',
-      value: sectionData.personalExemptionAmount != null ? `-$${sectionData.personalExemptionAmount.toLocaleString()}` : 'N/A',
+      value: formatTaxValue(sectionData.personalExemptionAmount) !== '-' ? `-${formatTaxValue(sectionData.personalExemptionAmount)}` : '-',
       message:
         (() => {
           if (personalGranted) {
@@ -206,7 +217,7 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
     },
     {
       title: 'Community Preservation',
-      value: sectionData.communityPreservationAmount != null ? `-$${sectionData.communityPreservationAmount.toLocaleString()}` : 'N/A',
+      value: formatTaxValue(sectionData.communityPreservationAmount) !== '-' ? `-${formatTaxValue(sectionData.communityPreservationAmount)}` : '-',
       description: (
         <div className={styles.text}>
           We calculate the CPA surcharge by first deducting $100,000 from the value of your property. Next, we recalculate the tax and apply your residential exemption and any personal exemptions, if you have them. To learn more visit the{' '}
@@ -223,7 +234,7 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
     },
     {
       title: <div className={styles.netTax}>FY{displayFY} Net Tax</div>,
-      value: <div className={styles.netTax}>{sectionData.propertyNetTax != null ? `$${sectionData.propertyNetTax.toLocaleString()}` : 'N/A'}</div>,
+      value: <div className={styles.netTax}>{formatTaxValue(sectionData.propertyNetTax)}</div>,
     },
   ];
 
@@ -245,7 +256,7 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
         </div>
 
         <div className={styles.cardGroup}>
-          <PropertyDetailsCardGroup cards={taxRateCards} />
+          <PropertyDetailsCardGroup cards={taxRateCards}/>
         </div>
       <div className={styles.link}>
         <a

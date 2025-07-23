@@ -8,6 +8,11 @@
   background-color: #D4E8FA;
   min-width: 0;
 
+  &.grey {
+    background-color: transparent;
+    border: 2px solid #D2D2D2;
+  }
+
   @include main.at-media-max('mobile-lg') {
     padding: 8px;
     gap: 4px;
@@ -53,4 +58,4 @@
   font-size: 16px;
   color: #091F2F;
   text-align: left;
-} 
+}
