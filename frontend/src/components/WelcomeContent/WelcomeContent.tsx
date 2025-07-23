@@ -23,7 +23,7 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({
       />
       <div className={styles.contentWrapper}>
         <h1 className={titleClassName}>
-          Welcome to Properties
+          Welcome to Properties Assessment
         </h1>
         {additionalContent && (
           <div className={styles.mobileAdditionalContent}>
@@ -31,10 +31,7 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({
           </div>
         )}
         <p className={descriptionClassName}>
-          Find detailed information about properties in Boston. Whether you're a 
-          homeowner, business owner, researcher, or real estate or legal 
-          professional, use this tool to find assessed value, location, 
-          ownership, and tax information for any parcel in the city.
+          Use this tool to find detailed information about properties in Boston including: assessed value, location, ownership, and tax information for any parcel in the City of Boston.
         </p>
       </div>
       {additionalContent && (

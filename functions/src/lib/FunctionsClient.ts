@@ -107,8 +107,8 @@ export function createHttp(
   hasBatchOperation = false) {
   return onRequest(
     hasBatchOperation ?
-      {timeoutSeconds: 3600} :
-      {timeoutSeconds: 300},
+      {timeoutSeconds: 3600, memory: "1GiB"} :
+      {timeoutSeconds: 300, memory: "512MiB"},
     async (req, res) => {
       try {
         console.log(`[HttpFunction] ${accessLevel} function called`);

@@ -1,0 +1,593 @@
+@use '@styles/main' as main;
+
+.timeChanger {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  min-height: 300px;
+  max-height: 80vh;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 32px 0;
+  z-index: 1000;
+  font-size: 16px;
+  color: #1B1B1B;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  max-width: 100vw;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+
+  @include main.at-media-max('mobile-lg') {
+    padding: 16px 16px;
+    width: auto;
+    min-height: 250px;
+    max-height: 70vh;
+    gap: 12px;
+  }
+
+  &.timeChangerExiting {
+    animation: slideDown 0.3s ease-out;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes backdropFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.timeChangerBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(9, 31, 47, 0.3); // semi-transparent dark overlay
+  z-index: 999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: backdropFadeIn 0.3s ease-out;
+  transition: opacity 0.3s ease-out;
+
+  &.backdropExiting {
+    animation: backdropFadeOut 0.3s ease-out;
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.timeChangerCollapsed {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 10px 16px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  min-height: 0;
+  max-width: 320px;
+  max-height: 80px;
+  font-size: 15px;
+  gap: 0;
+
+  @include main.at-media-max('mobile-lg') {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: 16px;
+    max-width: 95vw;
+  }
+}
+
+.collapsedRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+
+  @include main.at-media-max('mobile-lg') {
+    gap: 4px;
+  }
+}
+
+.expandButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 0 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  box-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.collapseButton {
+  background: none;
+  border: none;
+  padding: 0 0 0 8px;
+  margin: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: none;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 16px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.timelineScroll {
+  width: 100%;
+  min-height: 120px;
+  overflow-x: auto;
+  overflow-y: visible;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 120px;
+  box-sizing: border-box;
+
+  @include main.at-media-max('mobile-lg') {
+    padding: 0 16px;
+    min-height: 80px;
+  }
+}
+
+.timelineContainer {
+  position: relative;
+  width: 100%;
+  max-width: 1600px;
+  min-height: 120px;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 40px 0;
+}
+
+.timelineStrip {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, #e3e8f0 0%, #b3c6e2 100%);
+  border-radius: 3px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.slider {
+  width: 100%;
+  margin: 0;
+  z-index: 4;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  height: 0;
+  appearance: none;
+  background: transparent;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border-radius: 3px;
+}
+.slider::-moz-range-track {
+  height: 6px;
+  background: transparent;
+  border-radius: 3px;
+}
+.slider::-ms-fill-lower, .slider::-ms-fill-upper {
+  background: transparent;
+  border-radius: 3px;
+}
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1871BD;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(24,113,189,0.15);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-top: -6px;
+  z-index: 5;
+  position: relative;
+}
+.slider:focus::-webkit-slider-thumb {
+  background: #2491FF;
+  box-shadow: 0 0 0 4px #2491FF33;
+}
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1871BD;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(24,113,189,0.15);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  z-index: 5;
+  position: relative;
+}
+.slider:focus::-moz-range-thumb {
+  background: #2491FF;
+  box-shadow: 0 0 0 4px #2491FF33;
+}
+.slider::-ms-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1871BD;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(24,113,189,0.15);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  z-index: 5;
+  position: relative;
+}
+.slider:focus::-ms-thumb {
+  background: #2491FF;
+  box-shadow: 0 0 0 4px #2491FF33;
+}
+.slider:focus {
+  outline: none;
+}
+.slider::-ms-tooltip {
+  display: none;
+}
+
+.timelineMarker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 0;
+  z-index: 3;
+  height: 100%;
+}
+
+.labelAbove {
+  position: absolute;
+  bottom: 60%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+.labelBelow {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+.labelRight {
+  left: 100% !important;
+  transform: translateX(-100%) !important;
+  text-align: right;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: #1871BD;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 1px #1871BD;
+  z-index: 3;
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-bottom: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.activeDot {
+  background: #2491FF;
+  box-shadow: 0 0 0 4px #2491FF33;
+}
+
+.connectorUp {
+  width: 1.5px;
+  height: 35px;
+  background: #1871BD;
+  position: absolute;
+  top: calc(50% - 35px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+.connectorDown {
+  width: 1.5px;
+  height: 35px;
+  background: #1871BD;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.markerLabel {
+  background: #fff;
+  color: #1871BD;
+  font-size: 15px;
+  text-align: center;
+  padding: 7px 14px;
+  border-radius: 7px;
+  min-width: 110px;
+  max-width: 180px;
+  box-shadow: 0 2px 8px rgba(24,113,189,0.10);
+  pointer-events: auto;
+  font-weight: 500;
+  line-height: 1.3;
+  word-break: break-word;
+  white-space: normal;
+  border: 1px solid #e3e8f0;
+  transition: font-size 0.2s, padding 0.2s;
+}
+
+.confirmButtonContainer {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @include main.at-media-max('mobile-lg') {
+    width: 100%;
+  }
+}
+
+.confirmButton {
+  margin: 8px 0 0 0;
+  background: #1871BD;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  @include main.at-media-max('mobile-lg') {
+    font-size: 16px !important;
+  }
+}
+.confirmButton:hover {
+  background: #2491FF;
+}
+
+.customRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 16px;
+  margin-top: 12px;
+  align-self: center;
+
+  @include main.at-media-max('mobile-lg') {
+    width: 100%;
+  }
+}
+
+.dateInput {
+  flex: 1;
+  font-size: 16px;
+  padding: 4px 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 4px;
+  position: relative;
+  z-index: 1200;
+
+  @include main.at-media-max('mobile-lg') {
+    /* iOS Safari hack: open upwards */
+    direction: rtl;
+    /* Android Chrome: try to force popup up */
+    /* No perfect solution, but position: relative and z-index help */
+  }
+}
+
+.dateInput.flash {
+  animation: dateFlash 0.4s;
+}
+
+@keyframes dateFlash {
+  0% {
+    background-color: #fff700;
+  }
+  70% {
+    background-color: #fff700;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.resetButton {
+  background: #f3f4f6;
+  border: 1.5px solid #dbeafe;
+  border-radius: 4px;
+  padding: 4px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #1B1B1B;
+  transition: background 0.2s;
+  font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  @include main.at-media-max('mobile-lg') {
+    margin: 0 !important;
+    font-size: 16px !important;
+  }
+}
+
+.resetButton:hover {
+  background: #e0e7ef;
+}
+
+.mobilePeriodText {
+  display: none;
+  text-align: center;
+  font-size: 18px !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  color: #1871BD;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+@include main.at-media-max('mobile-lg') {
+  .mobilePeriodText {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 8px;
+    margin-top: 0;
+    padding: 0 8px;
+    line-height: 1.4;
+  }
+  .hideOnMobile {
+    display: none !important;
+  }
+  .connectorUp, .connectorDown {
+    display: none !important;
+  }
+  .timelineContainer {
+    max-width: 900px;
+    min-width: 0;
+    min-height: 70px !important;
+    padding: 20px 0;
+  }
+  .markerLabel {
+    font-size: 12px;
+    min-width: 70px;
+    max-width: 100px;
+    padding: 4px 6px;
+  }
+  .confirmButton {
+    font-size: 15px;
+    padding: 12px 0;
+    min-height: 48px;
+    width: 100%;
+    border-radius: 8px;
+    margin: 12px 0 0 0;
+    box-sizing: border-box;
+  }
+  .resetButton {
+    font-size: 15px;
+    padding: 12px 24px;
+    min-height: 48px;
+    border-radius: 8px;
+    margin: 0 0 0 8px;
+    box-sizing: border-box;
+  }
+  .customRow {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: 16px;
+  }
+  .dateInput {
+    /* iOS Safari hack: open upwards */
+    direction: rtl;
+    /* Android Chrome: try to force popup up */
+    /* No perfect solution, but position: relative and z-index help */
+  }
+}
+
+@include main.at-media-max('mobile-lg') {
+  .markerLabel {
+    font-size: 10px;
+    min-width: 40px;
+    max-width: 60px;
+    padding: 2px 2px;
+  }
+  .confirmButton, .resetButton, .expandButton, .collapseButton {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+  .hideOnMobile {
+    display: none !important;
+  }
+}
+
+@media print {
+  .timeChangerBackdrop,
+  .timeChanger,
+  .timeChangerCollapsed {
+    display: none !important;
+  }
+} 

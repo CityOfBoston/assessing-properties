@@ -12,6 +12,7 @@ import {
 } from '@src/components/PropertyDetailsSection';
 import { LoadingIndicator } from '@src/components/LoadingIndicator';
 import { usePropertyDetails } from '../../hooks/usePropertyDetails';
+import TimeChanger from '@src/components/TimeChanger/TimeChanger';
 import styles from './PropertyDetailsPage.module.scss';
 
 /**
@@ -22,6 +23,29 @@ import styles from './PropertyDetailsPage.module.scss';
 export default function PropertyDetailsPage() {
   const [searchParams] = useSearchParams();
   const parcelId = searchParams.get('parcelId') || '';
+  const dateParam = searchParams.get('date');
+  // Parse 'YYYY-MM-DD' format, fallback to today
+  let date: Date;
+  if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+    const [year, month, day] = dateParam.split('-').map(Number);
+    if (
+      year &&
+      month &&
+      day &&
+      !isNaN(year) &&
+      !isNaN(month) &&
+      !isNaN(day)
+    ) {
+      date = new Date(year, month - 1, day);
+    } else {
+      date = new Date();
+    }
+  } else {
+    date = new Date();
+  }
+  // Only use the date part (no time)
+  date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
   const { propertyDetails, isLoading, error, fetchPropertyDetails } = usePropertyDetails();
 
   useEffect(() => {
@@ -56,36 +80,37 @@ export default function PropertyDetailsPage() {
   ] : [
     {
       name: 'Overview',
-      component: <OverviewSection data={propertyDetails.overview} />,
+      component: <OverviewSection data={propertyDetails.overview} date={date} />, // pass date
     },
     {
-      name: 'Property Value',
-      component: <PropertyValueSection {...propertyDetails.propertyValue} />,
+      name: 'Value',
+      component: <PropertyValueSection {...propertyDetails.propertyValue} date={date} />, // pass date
     },
     {
       name: 'Attributes',
-      component: <AttributesSection data={propertyDetails.propertyAttributes} />,
+      component: <AttributesSection data={propertyDetails.propertyAttributes} date={date} />, // pass date
     },
     {
-      name: 'Property Taxes',
-      component: <PropertyTaxesSection {...propertyDetails.propertyTaxes} />,
+      name: 'Taxes & Exemptions',
+      component: <PropertyTaxesSection {...propertyDetails.propertyTaxes} date={date} />, // pass date
     },
     {
       name: 'Abatements',
-      component: <AbatementsSection />,
+      component: <AbatementsSection date={date} />, // pass date
     },
     {
-      name: 'Approved Permits',
-      component: <ApprovedPermitsSection parcelId={parcelId} />,
+      name: 'Permits',
+      component: <ApprovedPermitsSection parcelId={parcelId} date={date} />, // pass date
     },
     {
       name: 'Contact Us',
-      component: <ContactUsSection />,
+      component: <ContactUsSection date={date} />, // pass date
     },
   ];
 
   return (
     <div className={styles.propertyDetailsPage}>
+      <TimeChanger />
       <PropertyDetailsLayout 
         sections={sections}
         parcelId={parcelId}

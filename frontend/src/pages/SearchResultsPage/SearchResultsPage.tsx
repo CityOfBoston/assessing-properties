@@ -79,21 +79,19 @@ export default function SearchResultsPage() {
   return (
     <SearchResultsLayout
       searchContent={
-        <>
-          <WelcomeContent hideTitleAndDescriptionOnMobile={true} />
-          <div style={{ marginTop: 24 }}>
-            <SearchBarContainer 
+        <WelcomeContent
+          additionalContent={
+            <SearchBarContainer
               onSelect={handlePropertySelect}
-              labelText="Search for a property"
-              tooltipHint="Enter an address or parcel ID to search"
+              labelText="Search by address or parcel ID"
+              tooltipHint="A unique, legal 10 digit number assigned by the City of Boston to each parcel of property."
               placeholderText="Enter address or parcel ID"
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              errorMessage={errorMessage}
-              preloadValue={query}
             />
-          </div>
-        </>
+          }
+          hideTitleAndDescriptionOnMobile={isSearchFocused}
+        />
       }
     >
       <div className={styles.resultsArea}>

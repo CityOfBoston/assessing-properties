@@ -114,6 +114,7 @@
   box-sizing: border-box;
   border-radius: 0px 4px 4px 0px;
   font-family: Montserrat, sans-serif;
+  text-transform: uppercase;
   
   @include at-media-max('mobile-lg') {
     padding: 0;
@@ -434,7 +435,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 .modalContent {

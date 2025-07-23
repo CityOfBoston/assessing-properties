@@ -14,15 +14,19 @@ interface ContactBoxProps {
 const ContactBox: React.FC<ContactBoxProps> = ({ iconSrc, children }) => {
   return (
     <div className={styles.contactBox}>
-      <img src={iconSrc} alt="Contact" />
+      <img src={iconSrc} alt="Contact" className={styles.icon}/>
       {children}
     </div>
   );
 };
 
-export default function ContactUsSection() {
+interface ContactUsSectionProps {
+  date?: Date;
+}
+
+export default function ContactUsSection({ date }: ContactUsSectionProps) {
   return (
-    <PropertyDetailsSection title="Contact Us">
+    <PropertyDetailsSection title="Contact Us" date={date}>
       <div className={styles.container}>
         <ContactBox iconSrc={assessingLogo}>
           <ul className={styles.list}>
@@ -59,20 +63,20 @@ export default function ContactUsSection() {
         <ContactBox iconSrc="/cob-uswds/img/usa-icons/phone.svg">
           <ul className={styles.list}>
             <li>
-              Tax Data Administration:{' '}
-              <a href="tel:617-635-3783">617-635-3783</a>
-            </li>
-            <li>
-              Personal Property:{' '}
-              <a href="tel:617-635-1165">617-635-1165</a>
+              For prior fiscal year tax payments, interest charges, fees, etc. contact the Collector's office at{' '}
+              <a href="tel:617-635-4131">617-635-4131</a>
             </li>
             <li>
               Main Number:{' '}
               <a href="tel:617-635-4321">617-635-4321</a>
             </li>
             <li>
-              For prior fiscal year tax payments, interest charges, fees, etc. contact the Collector's office at{' '}
-              <a href="tel:617-635-4131">617-635-4131</a>
+              Personal Property:{' '}
+              <a href="tel:617-635-1165">617-635-1165</a>
+            </li>
+            <li>
+              Tax Data Administration:{' '}
+              <a href="tel:617-635-3783">617-635-3783</a>
             </li>
           </ul>
         </ContactBox>

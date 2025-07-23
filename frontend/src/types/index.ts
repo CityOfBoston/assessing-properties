@@ -9,8 +9,10 @@ export interface OverviewSectionData {
   propertyType: string;
   parcelId: string;
   netTax: number;
-  personalExemption: boolean;
-  residentialExemption: boolean;
+  personalExemptionFlag: boolean;
+  residentialExemptionFlag: boolean;
+  personalExemptionAmount: number;
+  residentialExemptionAmount: number;
 }
 
 /**
@@ -26,67 +28,46 @@ export interface PropertyValueSectionData {
  * A type representing the attributes of a property.
  */
 export interface PropertyAttributesData {
-  // Bedrooms
-  bedroomNumber?: number;
-  bedroomType?: string;
-  totalRooms?: number;
+  // General
+  landUse?: string;
+  livingArea?: string;
+  style?: string;
+  storyHeight?: string;
+  floor?: string;
+  penthouseUnit?: string;
+  orientation?: string;
 
-  // Bathrooms
-  totalBathrooms?: number;
-  halfBathrooms?: number;
+  // Rooms
+  bedroomNumber?: string;
+  totalBathrooms?: string;
+  halfBathrooms?: string;
   bathStyle1?: string;
   bathStyle2?: string;
   bathStyle3?: string;
-
-  // Kitchen
-  numberOfKitchens?: number;
+  numberOfKitchens?: string;
   kitchenType?: string;
   kitchenStyle1?: string;
   kitchenStyle2?: string;
   kitchenStyle3?: string;
 
-  // Utilities
-  fireplaces?: number;
-  acType?: string;
-  heatType?: string;
-
-  // Interior
-  interiorCondition?: string;
-  interiorFinish?: string;
-
-  // Exterior
+  //Constructions
+  yearBuilt?: string;
   exteriorFinish?: string;
   exteriorCondition?: string;
-  view?: string;
-  grade?: string;
-
-  // Construction
-  yearBuilt?: number;
   roofCover?: string;
   roofStructure?: string;
   foundation?: string;
-  landUse?: string;
+  parkingSpots?: string;
+
+  // Utilities
+  heatType?: string;
+  acType?: string;
+  fireplaces?: string;
 
   // Last Transaction
-  salePrice?: number;
+  salePrice?: string;
   saleDate?: string;
   registryBookAndPlace?: string;
-
-  // Parking
-  parkingSpots?: number;
-  parkingOwnership?: string;
-  parkingType?: string;
-  tandemParking?: boolean;
-
-  // Details
-  propertyType?: string;
-  livingArea?: number;
-  floor?: number;
-  penthouseUnit?: boolean;
-  complex?: string;
-  storyHeight?: number;
-  style?: string;
-  orientation?: string;
 }
 
 /**
@@ -94,9 +75,11 @@ export interface PropertyAttributesData {
  */
 export interface PropertyTaxesSectionData {
   propertyGrossTax: number;
-  residentialExemption: number;
-  personalExemption: number;
-  communityPreservation: number;
+  residentialExemptionFlag: boolean;
+  personalExemptionFlag: boolean;
+  residentialExemptionAmount: number;
+  personalExemptionAmount: number;
+  communityPreservationAmount: number;
   propertyNetTax: number;
   parcelId: string
 }
@@ -135,60 +118,50 @@ export class PropertyDetails implements PropertyDetailsData {
     propertyType: string;
     parcelId: string;
     propertyNetTax: number;
-    personalExemption: boolean;
-    residentialExemption: boolean;
+    personalExemptionFlag: boolean;
+    residentialExemptionFlag: boolean;
 
     // Property Value fields
     historicPropertyValues: { [year: number]: number };
 
     // Property Attributes fields
-    bedroomNumber?: number;
-    bedroomType?: string;
-    totalRooms?: number;
-    totalBathrooms?: number;
-    halfBathrooms?: number;
+    landUse?: string;
+    livingArea?: string;
+    style?: string;
+    storyHeight?: string;
+    floor?: string;
+    penthouseUnit?: string;
+    orientation?: string;
+    bedroomNumber?: string;
+    totalBathrooms?: string;
+    halfBathrooms?: string;
     bathStyle1?: string;
     bathStyle2?: string;
     bathStyle3?: string;
-    numberOfKitchens?: number;
+    numberOfKitchens?: string;
     kitchenType?: string;
     kitchenStyle1?: string;
     kitchenStyle2?: string;
     kitchenStyle3?: string;
-    fireplaces?: number;
-    acType?: string;
-    heatType?: string;
-    interiorCondition?: string;
-    interiorFinish?: string;
+    yearBuilt?: string;
     exteriorFinish?: string;
     exteriorCondition?: string;
-    view?: string;
-    grade?: string;
-    yearBuilt?: number;
     roofCover?: string;
     roofStructure?: string;
     foundation?: string;
-    landUse?: string;
-    salePrice?: number;
+    parkingSpots?: string;
+    heatType?: string;
+    acType?: string;
+    fireplaces?: string;
+    salePrice?: string;
     saleDate?: string;
     registryBookAndPlace?: string;
-    parkingSpots?: number;
-    parkingOwnership?: string;
-    parkingType?: string;
-    tandemParking?: boolean;
-    livingArea?: number;
-    floor?: number;
-    penthouseUnit?: boolean;
-    complex?: string;
-    storyHeight?: number;
-    style?: string;
-    orientation?: string;
 
     // Property Taxes fields
     propertyGrossTax: number;
     residentialExemptionAmount: number;
     personalExemptionAmount: number;
-    communityPreservation: number;
+    communityPreservationAmount: number;
   }) {
     // Construct overview section
     this.overview = {
@@ -199,8 +172,10 @@ export class PropertyDetails implements PropertyDetailsData {
       propertyType: data.propertyType,
       parcelId: data.parcelId,
       netTax: data.propertyNetTax,
-      personalExemption: data.personalExemption,
-      residentialExemption: data.residentialExemption,
+      personalExemptionFlag: data.personalExemptionFlag,
+      residentialExemptionFlag: data.residentialExemptionFlag,
+      personalExemptionAmount: data.personalExemptionAmount,
+      residentialExemptionAmount: data.residentialExemptionAmount
     };
 
     // Construct property value section
@@ -210,9 +185,14 @@ export class PropertyDetails implements PropertyDetailsData {
 
     // Construct property attributes section
     this.propertyAttributes = {
+      landUse: data.landUse,
+      livingArea: data.livingArea,
+      style: data.style,
+      storyHeight: data.storyHeight,
+      floor: data.floor,
+      penthouseUnit: data.penthouseUnit,
+      orientation: data.orientation,  
       bedroomNumber: data.bedroomNumber,
-      bedroomType: data.bedroomType,
-      totalRooms: data.totalRooms,
       totalBathrooms: data.totalBathrooms,
       halfBathrooms: data.halfBathrooms,
       bathStyle1: data.bathStyle1,
@@ -223,42 +203,29 @@ export class PropertyDetails implements PropertyDetailsData {
       kitchenStyle1: data.kitchenStyle1,
       kitchenStyle2: data.kitchenStyle2,
       kitchenStyle3: data.kitchenStyle3,
-      fireplaces: data.fireplaces,
-      acType: data.acType,
-      heatType: data.heatType,
-      interiorCondition: data.interiorCondition,
-      interiorFinish: data.interiorFinish,
+      yearBuilt: data.yearBuilt,
       exteriorFinish: data.exteriorFinish,
       exteriorCondition: data.exteriorCondition,
-      view: data.view,
-      grade: data.grade,
-      yearBuilt: data.yearBuilt,
       roofCover: data.roofCover,
       roofStructure: data.roofStructure,
       foundation: data.foundation,
-      landUse: data.landUse,
+      parkingSpots: data.parkingSpots,
+      heatType: data.heatType,
+      acType: data.acType,
+      fireplaces: data.fireplaces,
       salePrice: data.salePrice,
       saleDate: data.saleDate,
-      registryBookAndPlace: data.registryBookAndPlace,
-      parkingSpots: data.parkingSpots,
-      parkingOwnership: data.parkingOwnership,
-      parkingType: data.parkingType,
-      tandemParking: data.tandemParking,
-      livingArea: data.livingArea,
-      floor: data.floor,
-      penthouseUnit: data.penthouseUnit,
-      complex: data.complex,
-      storyHeight: data.storyHeight,
-      style: data.style,
-      orientation: data.orientation,
+      registryBookAndPlace: data.registryBookAndPlace
     };
 
     // Construct property taxes section
     this.propertyTaxes = {
       propertyGrossTax: data.propertyGrossTax,
-      residentialExemption: data.residentialExemptionAmount,
-      personalExemption: data.personalExemptionAmount,
-      communityPreservation: data.communityPreservation,
+      residentialExemptionFlag: data.residentialExemptionFlag,
+      personalExemptionFlag: data.personalExemptionFlag,
+      residentialExemptionAmount: data.residentialExemptionAmount,
+      personalExemptionAmount: data.personalExemptionAmount,
+      communityPreservationAmount: data.communityPreservationAmount,
       propertyNetTax: data.propertyNetTax,
       parcelId: data.parcelId,
     };

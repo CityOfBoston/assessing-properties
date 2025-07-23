@@ -33,4 +33,4 @@ export const generateAndStoreParcelIdAddressPairings = createHttp("internal", as
     recordCount: parcelIdAddressPairings.length,
     timestamp: new Date().toISOString(),
   }, "Parcel ID address pairings generated and stored successfully");
-});
+}, true);

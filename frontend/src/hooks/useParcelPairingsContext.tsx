@@ -1,8 +1,13 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useParcelPairings } from './useParcelPairings';
 
+// Patch: define a type that allows the search function to accept an optional threshold
+type ParcelPairingsContextType = Omit<ReturnType<typeof useParcelPairings>, 'search'> & {
+  search: (query: string, thresholdOverride?: number) => ReturnType<ReturnType<typeof useParcelPairings>['search']>;
+};
+
 // Create context
-const ParcelPairingsContext = createContext<ReturnType<typeof useParcelPairings> | null>(null);
+const ParcelPairingsContext = createContext<ParcelPairingsContextType | null>(null);
 
 // Provider component
 interface ParcelPairingsProviderProps {
@@ -12,8 +17,13 @@ interface ParcelPairingsProviderProps {
 export const ParcelPairingsProvider: React.FC<ParcelPairingsProviderProps> = ({ children }) => {
   const parcelPairingsData = useParcelPairings();
 
+  // Patch: wrap search to allow threshold override
+  const contextValue: ParcelPairingsContextType = {
+    ...parcelPairingsData,
+    search: (query: string, thresholdOverride?: number) => parcelPairingsData.search(query, thresholdOverride),
+  };
   return (
-    <ParcelPairingsContext.Provider value={parcelPairingsData}>
+    <ParcelPairingsContext.Provider value={contextValue}>
       {children}
     </ParcelPairingsContext.Provider>
   );

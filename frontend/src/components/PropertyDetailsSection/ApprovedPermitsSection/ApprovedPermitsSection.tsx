@@ -3,16 +3,20 @@
  */
 import PropertyDetailsSection from '../PropertyDetailsSection';
 
-export default function ApprovedPermitsSection({ parcelId }: 
-  { parcelId: string }) {
+interface ApprovedPermitsSectionProps {
+  parcelId: string;
+  date?: Date;
+}
+
+export default function ApprovedPermitsSection({ parcelId, date }: ApprovedPermitsSectionProps) {
   return (
-    <PropertyDetailsSection title="Approved Building Permits">
+    <PropertyDetailsSection title="Approved Permits" date={date}>
       <div style={{ lineHeight: '28px', letterSpacing: '0.24px' }}>
-        Building permits help to establish compliance of construction work with the minimum standards of safety established by the State Building Code to ensure public health and safety.
+        Building permits help to establish compliance of construction work with the minimum standards of safety established by the State Building Code.
       </div>
 
       <div style={{ lineHeight: '28px', letterSpacing: '0.24px' }}>
-        This dataset includes information about building permits issued by the City of Boston from 2009 to the present. Permits that are being processed or have been denied, deleted, void or revoked are not included in the dataset.
+      This dataset includes information about building permits issued by the City of Boston from 2009 to the present. Permits that are being processed or have been denied, deleted, voided or revoked are not included in the dataset.
       </div>
 
       <div>

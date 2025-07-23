@@ -25,10 +25,10 @@ interface SearchSuggestion {
 
 export const SearchBarContainer = ({
   onSelect,
-  labelText = 'Search for a property',
-  tooltipHint = 'Enter an address or parcel ID to search',
+  labelText = 'Search by address or parcel ID',
+  tooltipHint = 'A unique, legal 10 digit number assigned by the City of Boston to each parcel of property.',
   placeholderText = 'Enter address or parcel ID',
-  debounceMs = 30,
+  debounceMs = 10,
   onFocus,
   onBlur,
   onClear,

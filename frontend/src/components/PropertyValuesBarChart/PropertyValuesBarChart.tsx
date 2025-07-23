@@ -106,6 +106,17 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
   const isMobile = containerWidth < 768;
   const visibleData = isMobile ? data.slice(-5) : data;
 
+  // If not enough data, show message
+  if (data.length <= 1) {
+    return (
+      <div className={styles.container} style={{ '--chart-max-width': `480px` } as React.CSSProperties}>
+        <h3 className={styles.title}>{title}</h3>
+        <div className={styles.value}>{value}</div>
+        <div className={styles.noHistory}>No History Available</div>
+      </div>
+    );
+  }
+
   // Calculate bar dimensions
   const availableWidth = containerWidth - margin.left - margin.right;
   const barWidth = isMobile 
@@ -162,13 +173,6 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
   const padding = range * 0.15; // Increased padding from 0.1 to 0.15
   const yDomain = [minValue - (range * 0.33), maxValue + padding * 2]; // Double the top padding
   const step = getStepSize(range, data.length);
-  
-  // Generate evenly spaced ticks
-  const numTicks = Math.ceil((yDomain[1] - yDomain[0]) / step) + 1;
-  const yTicks = Array.from(
-    { length: numTicks },
-    (_, i) => roundToNiceNumber(yDomain[0] + i * step)
-  ).filter(tick => tick <= yDomain[1] && tick >= 0); // Filter out negative ticks and ensure within domain
 
   // Scales
   const xScale = (index: number) => {
@@ -181,6 +185,16 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
     const scale = (value - yDomain[0]) / (yDomain[1] - yDomain[0]);
     return margin.top + chartHeight * (1 - scale);
   };
+
+  // Generate evenly spaced ticks
+  const numTicks = Math.ceil((yDomain[1] - yDomain[0]) / step) + 1;
+  let yTicks = Array.from(
+    { length: numTicks },
+    (_, i) => roundToNiceNumber(yDomain[0] + i * step)
+  ).filter(tick => tick <= yDomain[1] && tick >= 0); // Filter out negative ticks and ensure within domain
+
+  // Filter out ticks that would render under the x-axis
+  yTicks = yTicks.filter(tick => yScale(tick) <= chartHeight + margin.top - 10);
 
   return (
     <div 
@@ -343,8 +357,12 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
       </div>
       <div className={styles.legend} role="list">
         <div className={styles.legendItem} role="listitem">
+          <div className={styles.legendPatch} style={{ backgroundColor: '#8A8A8A' }} />
+          <span className={styles.legendLabel}>Historical Assessed Value(s)</span>
+        </div>
+        <div className={styles.legendItem} role="listitem">
           <div className={styles.legendPatch} style={{ backgroundColor: '#1871BD' }} />
-          <span className={styles.legendLabel}>Assessed Value</span>
+          <span className={styles.legendLabel}>Current Assessed Value</span>
         </div>
       </div>
     </div>

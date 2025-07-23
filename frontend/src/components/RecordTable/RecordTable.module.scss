@@ -25,6 +25,10 @@
   &:hover {
     background-color: #F2F2F2;
   }
+  &.activeRow,
+  &:focus-visible {
+    background-color: #F2F2F2;
+  }
 }
 
 .labelCell, .valueCell {

@@ -4,13 +4,13 @@
   display: flex;
   flex-direction: column;
   gap: 11px;
+  padding-top: 24px;
 
   h3, p {
     margin: 0;
   }
 
   h3 {
-    text-transform: uppercase;
     font-size: 18px;
     font-weight: bold;
     font-family: 'Montserrat', sans-serif;
@@ -51,4 +51,39 @@
   &.up::before {
     transform: rotate(-90deg);
   }
-} 
+}
+
+.description {
+  margin: 0;
+  line-height: 1.5rem;
+}
+
+.screenTable {
+  display: block;
+}
+.printTable {
+  display: none;
+}
+
+@media print {
+  .barGraph,
+  .historySection {
+    display: none !important;
+  }
+  .valueHistoryTable {
+    display: table !important;
+  }
+  .valueHistory {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .seeMoreButton {
+    display: none !important;
+  }
+  .screenTable {
+    display: none !important;
+  }
+  .printTable {
+    display: block !important;
+  }
+}

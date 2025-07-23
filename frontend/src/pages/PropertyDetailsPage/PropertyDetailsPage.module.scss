@@ -59,4 +59,16 @@
   text-align: center;
   min-height: 400px;
   background: #F2F2F2;
+}
+
+@media print {
+  .propertyDetailsPage {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+  }
+  .error, .fullWidthLoadingContainer {
+    display: none !important;
+  }
 } 

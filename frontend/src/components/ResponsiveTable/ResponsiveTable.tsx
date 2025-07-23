@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import FieldTable from '@components/FieldTable';
 import RecordTable from '@components/RecordTable';
 import styles from './ResponsiveTable.module.scss';
@@ -22,6 +22,9 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   showDetails = false,
   showMapLink = false,
 }) => {
+  const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
+  const [openedRowIndex, setOpenedRowIndex] = useState<number | null>(null);
+
   if (!data || data.length === 0) {
     return null;
   }
@@ -32,9 +35,8 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
       const parcelId = row['Parcel ID'] as string;
       const detailsLink = (
         <a
-          className="usa-link usa-link--external"
+          className="usa-link"
           rel="noreferrer"
-          target="_blank"
           href={`#/details?parcelId=${parcelId}`}
         >
           View Details
@@ -94,13 +96,24 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   return (
     <div className={styles.responsiveTable}>
       <div className={styles.fieldTable}>
-        <FieldTable data={processedData} />
+        <FieldTable
+          data={processedData}
+          activeRowIndex={activeRowIndex}
+          setActiveRowIndex={setActiveRowIndex}
+          openedRowIndex={openedRowIndex}
+          setOpenedRowIndex={setOpenedRowIndex}
+        />
       </div>
       <div className={styles.recordTable}>
         {mobileData.map((row, idx) => (
           <RecordTable
             key={idx}
             data={row}
+            rowIndex={idx}
+            activeRowIndex={activeRowIndex}
+            setActiveRowIndex={setActiveRowIndex}
+            openedRowIndex={openedRowIndex}
+            setOpenedRowIndex={setOpenedRowIndex}
           />
         ))}
       </div>

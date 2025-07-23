@@ -6,6 +6,7 @@ interface UseSearchSuggestionsOptions {
   maxSuggestions?: number;
   minQueryLength?: number;
   isMobile?: boolean;
+  threshold?: number;
 }
 
 interface SearchSuggestion {
@@ -17,7 +18,8 @@ export const useSearchSuggestions = ({
   debounceMs = 200,
   maxSuggestions = 20,
   minQueryLength = 1,
-  isMobile = false
+  isMobile = false,
+  threshold
 }: UseSearchSuggestionsOptions = {}) => {
   const [searchValue, setSearchValue] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
@@ -109,7 +111,7 @@ export const useSearchSuggestions = ({
 
       try {
         // Perform the fuzzy search
-        const searchResults = search(debouncedValue);
+        const searchResults = search(debouncedValue, threshold);
         
         // Check again if this search was cancelled or outdated
         if (currentSearchId !== searchIdRef.current || 
@@ -169,7 +171,7 @@ export const useSearchSuggestions = ({
 
     // Return cleanup function if one was created
     return cleanupFunction;
-  }, [debouncedValue, minQueryLength, search, maxSuggestions, isMobile]);
+  }, [debouncedValue, minQueryLength, search, maxSuggestions, isMobile, threshold]);
 
   const handleSetSearchValue = useCallback((value: string) => {
     // Cancel any ongoing search by incrementing the search ID

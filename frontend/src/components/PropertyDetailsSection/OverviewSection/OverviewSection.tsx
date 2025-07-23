@@ -39,7 +39,12 @@ const TargetIcon = () => (
 /**
  * OverviewSection component displays property overview information
  */
-export default function OverviewSection({ data }: { data: OverviewSectionData }) {
+interface OverviewSectionProps {
+  data: OverviewSectionData;
+  date?: Date;
+}
+
+export default function OverviewSection({ data, date }: OverviewSectionProps) {
   const cards = [
     {
       icon: <img src="/cob-uswds/img/usa-icons/account_circle.svg"/>,
@@ -54,17 +59,27 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
     { 
       icon: <img src="/cob-uswds/img/usa-icons/person.svg"/>,
       header: 'Personal Exemption',
-      value: data.personalExemption ? 'Yes' : 'No'
+      value:
+        data.personalExemptionAmount > 0
+          ? 'Granted'
+          : data.personalExemptionFlag
+            ? 'Not eligible'
+            : 'Eligible'
     },
     {
       icon: <img src="/cob-uswds/img/usa-icons/home.svg"/>,
       header: 'Residential Exemption',
-      value: data.residentialExemption ? 'Yes' : 'No'
+      value:
+        data.residentialExemptionAmount > 0
+          ? 'Granted'
+          : data.residentialExemptionFlag
+            ? 'Not eligible'
+            : 'Eligible'
     }
   ];
 
   return (
-    <PropertyDetailsSection title="Overview">
+    <PropertyDetailsSection title="Overview" date={date}>
       <section className={styles.section}>
         <div className={styles.leftContent}>
           <div className={styles.locationContainer}>
@@ -76,7 +91,7 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
 
           <div className={styles.sectionHeader}>
             <img src="/cob-uswds/img/usa-icons/people.svg" alt="Owners" className={styles.sectionIcon} />
-            <h2 className={styles.sectionTitle}>Current Owner(s)</h2>
+            <h3 className={styles.sectionTitle}>Current Owner(s)</h3>
           </div>
           <div className={styles.sectionContent}>
             {data.owners.map((owner, index) => (
@@ -91,7 +106,7 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
 
           <div className={styles.sectionHeader}>
             <img src="/cob-uswds/img/usa-icons/trending_up.svg" alt="Value" className={styles.sectionIcon} />
-            <h2 className={styles.sectionTitle}>Assessed Value</h2>
+            <h3 className={styles.sectionTitle}>Assessed Value</h3>
           </div>
           <div className={styles.sectionContent}>
             <p>{data.assessedValue != null ? `$${data.assessedValue.toLocaleString()}` : 'N/A'}</p>
@@ -101,7 +116,7 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
 
           <div className={styles.sectionHeader}>
             <img src="/cob-uswds/img/usa-icons/location_city.svg" alt="Property Type" className={styles.sectionIcon} />
-            <h2 className={styles.sectionTitle}>Property Type</h2>
+            <h3 className={styles.sectionTitle}>Property Type</h3>
           </div>
           <div className={styles.sectionContent}>
             <p>{data.propertyType}</p>
@@ -110,22 +125,29 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
 
         <div className={styles.rightContent}>
           {data.imageSrc && (
-            <div className={styles.imageContainer} style={{ position: 'relative' }}>
-          <img 
-            src={data.imageSrc} 
-            alt="Property" 
-            className={styles.propertyImage}
-          />
+            <a
+              href={`https://app01.cityofboston.gov/AssessingMap/?find=${data.parcelId}`}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open property location in map"
+              className={styles.imageContainer}
+              style={{ position: 'relative', display: 'block' }}
+            >
+              <img 
+                src={data.imageSrc} 
+                alt="Property" 
+                className={styles.propertyImage}
+              />
               <TargetIcon />
-            </div>
+            </a>
           )}
-          <h2 className={styles.mapLink}><a
+          <div className={styles.mapLink}><a
             className={`usa-link usa-link--external`}
             rel="noreferrer"
             target="_blank"
             href={`https://app01.cityofboston.gov/AssessingMap/?find=${data.parcelId}`}
           >Open in map</a>
-          </h2>
+          </div>
         </div>
       </section>
 
@@ -148,7 +170,7 @@ export default function OverviewSection({ data }: { data: OverviewSectionData })
             variant="primary"
           />
         </a>
-        <IconButton src="/cob-uswds/img/usa-icons/print.svg" text="Print" />
+        <IconButton src="/cob-uswds/img/usa-icons/print.svg" text="Print" onClick={() => window.print()} />
       </div>
     </PropertyDetailsSection>
   );

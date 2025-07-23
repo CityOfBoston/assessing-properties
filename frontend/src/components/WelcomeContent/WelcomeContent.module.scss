@@ -34,11 +34,11 @@
 
 .description {
   margin-top: 40px;
+  line-height: 1.5rem;
 
   @include at-media-max('mobile-lg') {
     margin-top: 0;
     font-size: 18px;
-    line-height: 1.5;
 
     &.hideOnMobile {
       display: none;

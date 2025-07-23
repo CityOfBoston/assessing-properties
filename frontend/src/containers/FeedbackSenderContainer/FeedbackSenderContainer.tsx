@@ -61,6 +61,12 @@ export const FeedbackSenderContainer = ({
     }
   }, [sendFeedback]);
 
+  if (isLoading) {
+    return (
+      <div className={styles.spinner} aria-label="Sending feedback..." />
+    );
+  }
+
   if (isSuccess) {
     return (
       <div className={styles.successMessage}>

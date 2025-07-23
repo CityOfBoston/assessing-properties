@@ -72,8 +72,7 @@
   margin-top: 12px;
   text-align: left;
   font-size: 18px;
-  font-family: 'Lora', serif;
-
+  
   @include main.at-media-max('mobile-lg') {
     text-align: center;
     margin-top: 16px;
@@ -93,6 +92,7 @@
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 6px;
+  font-size: 18px;
 }
 
 .sectionIcon {
@@ -102,7 +102,7 @@
 .sectionTitle {
   margin: 0;
   text-transform: uppercase;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   font-family: 'Montserrat', sans-serif;
 
@@ -154,7 +154,7 @@
   @include main.at-media-max('mobile-lg') {
     flex-direction: column;
     width: 100%;
-    gap: 8px;
+    gap: 0;
     box-sizing: border-box;
     
     a {
@@ -164,5 +164,32 @@
     button {
       width: 100%;
     }
+  }
+} 
+
+@media print {
+  .buttonGroup,
+  .mapLink,
+  .imageContainer {
+    display: none !important;
+  }
+  .section {
+    gap: 24px !important;
+    margin: 0 !important;
+  }
+  .divider {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+  .sectionHeader, .sectionTitle, .sectionContent, .ownerDisclaimer {
+    font-size: 13px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .propertyImage {
+    display: none !important;
+  }
+  .targetIcon {
+    display: none !important;
   }
 } 

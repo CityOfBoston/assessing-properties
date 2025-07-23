@@ -17,7 +17,7 @@ interface UseParcelPairingsReturn {
   fuse: Fuse<ParcelPairing> | null;
   isLoading: boolean;
   error: string | null;
-  search: (query: string) => ParcelPairing[];
+  search: (query: string, thresholdOverride?: number) => ParcelPairing[];
   refreshCache: () => Promise<void>;
 }
 
@@ -158,33 +158,33 @@ export function useParcelPairings(): UseParcelPairingsReturn {
   };
 
   // Lightweight search function for real-time suggestions
-  const search = (query: string): ParcelPairing[] => {
+  const search = (query: string, thresholdOverride?: number): ParcelPairing[] => {
     if (!fuse || !query.trim()) return [];
-    
+
     // Input validation and sanitization
     const sanitizedQuery = query.trim().toLowerCase();
-    
+
     // Protection against malicious queries
     if (sanitizedQuery.length > 200) {
       console.warn('[useParcelPairings] Query too long, truncating');
       return [];
     }
-    
+
     // For very short queries (1-2 chars), use optimized simple string matching
     if (sanitizedQuery.length <= 2) {
       const results: ParcelPairing[] = [];
       const limit = 15; // Increased limit for short queries
-      
+
       // For single character, be even more lenient
       if (sanitizedQuery.length === 1) {
         for (const pairing of pairings) {
           if (results.length >= limit) break;
-          
+
           const address = pairing.fullAddress.toLowerCase();
           const parcelId = pairing.parcelId.toLowerCase();
-          
+
           // Check if query starts any word in address or is anywhere in parcel ID
-          if (address.split(' ').some(word => word.startsWith(sanitizedQuery)) || 
+          if (address.split(' ').some(word => word.startsWith(sanitizedQuery)) ||
               parcelId.includes(sanitizedQuery)) {
             results.push(pairing);
           }
@@ -193,31 +193,59 @@ export function useParcelPairings(): UseParcelPairingsReturn {
         // For 2 characters, use contains matching
         for (const pairing of pairings) {
           if (results.length >= limit) break;
-          
+
           const address = pairing.fullAddress.toLowerCase();
           const parcelId = pairing.parcelId.toLowerCase();
-          
+
           if (address.includes(sanitizedQuery) || parcelId.includes(sanitizedQuery)) {
             results.push(pairing);
           }
         }
       }
-      
+
       return results;
     }
-    
+
     // For longer queries, use a lightweight Fuse.js search
     try {
-      const results = fuse.search(sanitizedQuery, { 
+      const results = fuse.search(sanitizedQuery, {
         limit: 20 // Increased limit for better results
       });
-      
-      // Use more lenient score filtering based on query length
-      const scoreThreshold = sanitizedQuery.length <= 4 ? 0.7 : 0.6;
-      
-      return results
+
+      // Use thresholdOverride if provided, otherwise use default logic
+      let scoreThreshold: number;
+      if (typeof thresholdOverride === 'number') {
+        scoreThreshold = thresholdOverride;
+      } else {
+        scoreThreshold = sanitizedQuery.length <= 4 ? 0.7 : 0.6;
+      }
+
+      // Filter by score
+      let filtered = results
         .filter(result => result.score !== undefined && result.score < scoreThreshold)
         .map(result => result.item);
+
+      // Find exact matches (case-insensitive) for parcelId or fullAddress
+      const exactMatches = pairings.filter(
+        p =>
+          p.parcelId.toLowerCase() === sanitizedQuery ||
+          p.fullAddress.toLowerCase() === sanitizedQuery
+      );
+
+      // Remove duplicates (in case Fuse already found the exact match)
+      const seen = new Set<string>();
+      const dedupedExact = exactMatches.filter(p => {
+        const key = p.parcelId + '|' + p.fullAddress;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      filtered = [
+        ...dedupedExact,
+        ...filtered.filter(p => !dedupedExact.some(e => e.parcelId === p.parcelId && e.fullAddress === p.fullAddress))
+      ];
+
+      return filtered;
     } catch (error) {
       console.error('[useParcelPairings] Error in fuzzy search:', error);
       return [];

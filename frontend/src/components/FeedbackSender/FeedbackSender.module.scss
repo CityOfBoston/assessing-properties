@@ -5,6 +5,7 @@
   flex-direction: column;
   width: 100%;
   max-width: 480px;
+  background-color: #fff;
   
   > * {
     width: 100%;
@@ -61,7 +62,7 @@
   
   :global(.usa-radio__input--tile) + :global(.usa-radio__label) {
     margin: 0;
-    padding: 12px 16px;
+    padding: 12px 0px 12px 16px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -71,6 +72,13 @@
     // Add more space between radio button and text
     &::before {
       margin-right: 12px;
+    }
+
+    // Add hover state
+    &:hover {
+      background-color: #1871BD;
+      color: #fff;
+      cursor: pointer;
     }
   }
 }
@@ -96,6 +104,7 @@
   min-height: 120px;
   width: 100%;
   box-sizing: border-box;
+  padding: 12px;
 }
 
 // Style the validation checklist

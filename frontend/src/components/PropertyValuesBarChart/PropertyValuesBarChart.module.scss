@@ -87,3 +87,21 @@
   height: 8px;
   background: #F2F2F2;
 } 
+
+.noHistory {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+} 
+
+@media print {
+  .container {
+    display: none !important;
+  }
+} 

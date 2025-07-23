@@ -80,9 +80,27 @@
     text-transform: uppercase;
     color: #091F2F;
     white-space: nowrap; /* Prevent text wrapping */
+    position: relative;
 
     &:hover {
-      color: #288BE4;
+      color: #1871BD;
+    }
+
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: #1871BD;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    &:hover::after {
+      transform: scaleX(1);
     }
   }
 
@@ -160,6 +178,7 @@
 
 .detailsTitle {
   margin: 48px 0;
+  text-transform: uppercase;
 
   @include main.at-media-max('mobile-lg') {
     padding: 0 24px;
@@ -172,5 +191,38 @@
 
   @include main.at-media-max('mobile-lg') {
     padding: 24px;
+  }
+} 
+
+@media print {
+  .headerWrapper,
+  .sectionNav,
+  .feedbackSenderWrapper,
+  .footer,
+  .banner,
+  :global(.cob-site-banner),
+  :global(.cob-slim-footer) {
+    display: none !important;
+  }
+  .propertyDetailsLayout {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    background: white !important;
+  }
+  .main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    background: white !important;
+  }
+  .detailsTitle {
+    font-size: 18px !important;
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+  }
+  .section {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 } 
