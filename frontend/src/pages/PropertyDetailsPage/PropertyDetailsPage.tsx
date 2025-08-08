@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyDetailsLayout from '@layouts/PropertyDetailsLayout';
 import {
@@ -12,8 +12,20 @@ import {
 } from '@src/components/PropertyDetailsSection';
 import { LoadingIndicator } from '@src/components/LoadingIndicator';
 import { usePropertyDetails } from '../../hooks/usePropertyDetails';
+import { useDateContext } from '@src/hooks/useDateContext';
 import TimeChanger from '@src/components/TimeChanger/TimeChanger';
 import styles from './PropertyDetailsPage.module.scss';
+
+/**
+ * Helper function to get fiscal year from a date
+ * Fiscal year starts July 1st of previous year, ends June 30th of current year
+ * e.g., July 1, 2024 - June 30, 2025 is FY2025
+ */
+function getFiscalYear(date: Date): number {
+  const year = date.getFullYear();
+  const month = date.getMonth(); // 0-indexed: 0=Jan, 6=July
+  return month >= 6 ? year + 1 : year;
+}
 
 /**
  * PropertyDetailPage displays comprehensive property information using the PropertyDetailsLayout
@@ -23,36 +35,29 @@ import styles from './PropertyDetailsPage.module.scss';
 export default function PropertyDetailsPage() {
   const [searchParams] = useSearchParams();
   const parcelId = searchParams.get('parcelId') || '';
-  const dateParam = searchParams.get('date');
-  // Parse 'YYYY-MM-DD' format, fallback to today
-  let date: Date;
-  if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
-    const [year, month, day] = dateParam.split('-').map(Number);
-    if (
-      year &&
-      month &&
-      day &&
-      !isNaN(year) &&
-      !isNaN(month) &&
-      !isNaN(day)
-    ) {
-      date = new Date(year, month - 1, day);
-    } else {
-      date = new Date();
-    }
-  } else {
-    date = new Date();
-  }
-  // Only use the date part (no time)
-  date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const { date } = useDateContext();
+  const lastFiscalYearRef = useRef<number | null>(null);
+  const lastParcelIdRef = useRef<string | null>(null);
 
   const { propertyDetails, isLoading, error, fetchPropertyDetails } = usePropertyDetails();
 
   useEffect(() => {
     if (parcelId) {
-      fetchPropertyDetails(parcelId);
+      const currentFiscalYear = getFiscalYear(date);
+      
+      // Fetch property details when parcelId changes or on first load
+      // For fiscal year changes, let useDateContext handle the page reload
+      const isFirstLoad = lastFiscalYearRef.current === null;
+      const isParcelIdChanged = lastParcelIdRef.current !== parcelId;
+      const isSameFiscalYear = lastFiscalYearRef.current === currentFiscalYear;
+      
+      if (isFirstLoad || (isParcelIdChanged && isSameFiscalYear)) {
+        lastFiscalYearRef.current = currentFiscalYear;
+        lastParcelIdRef.current = parcelId;
+        fetchPropertyDetails(parcelId, date.toISOString().slice(0, 10));
+      }
     }
-  }, [parcelId, fetchPropertyDetails]);
+  }, [parcelId, date, fetchPropertyDetails]);
 
   // If no parcelId is provided, show error
   if (!parcelId) {
@@ -80,31 +85,31 @@ export default function PropertyDetailsPage() {
   ] : [
     {
       name: 'Overview',
-      component: <OverviewSection data={propertyDetails.overview} date={date} />, // pass date
+      component: <OverviewSection data={propertyDetails.overview} />,
     },
     {
       name: 'Value',
-      component: <PropertyValueSection {...propertyDetails.propertyValue} date={date} />, // pass date
+      component: <PropertyValueSection {...propertyDetails.propertyValue} />,
     },
     {
       name: 'Attributes',
-      component: <AttributesSection data={propertyDetails.propertyAttributes} date={date} />, // pass date
+      component: <AttributesSection data={propertyDetails.propertyAttributes} />,
     },
     {
       name: 'Taxes & Exemptions',
-      component: <PropertyTaxesSection {...propertyDetails.propertyTaxes} date={date} />, // pass date
+      component: <PropertyTaxesSection {...propertyDetails.propertyTaxes} />,
     },
     {
       name: 'Abatements',
-      component: <AbatementsSection date={date} />, // pass date
+      component: <AbatementsSection />,
     },
     {
       name: 'Permits',
-      component: <ApprovedPermitsSection parcelId={parcelId} date={date} />, // pass date
+      component: <ApprovedPermitsSection parcelId={parcelId} />,
     },
     {
       name: 'Contact Us',
-      component: <ContactUsSection date={date} />, // pass date
+      component: <ContactUsSection />,
     },
   ];
 

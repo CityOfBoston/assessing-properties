@@ -28,7 +28,7 @@ export const PropertySearchResults: React.FC<PropertySearchResultsProps> = ({
     'OWNER': property.owner,
     'VALUE': property.value,
     'DETAILS': (
-      <a href={`/details?parcelId=${property.parcelId}`} className={styles.detailsLink}>
+      <a href={`/details?parcelId=${property.parcelId}`} className="usa-link">
         View Details
       </a>
     )

@@ -1,16 +1,10 @@
 import React, { useMemo, useState, useRef, useLayoutEffect, useEffect } from 'react';
 import styles from './TimeChanger.module.scss';
-import { useSearchParams } from 'react-router-dom';
+import { useDateContext } from '@src/hooks/useDateContext';
 import { getAllTimepoints } from '@src/utils/periods';
+import Timeline from '@src/components/Timeline';
 
-function formatDate(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
 
-function parseDate(str: string) {
-  const [y, m, d] = str.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
 
 function getDayOfYear(date: Date) {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1);
@@ -27,11 +21,8 @@ function getDateFromDayOfYear(year: number, day: number) {
 export interface TimeChangerProps {}
 
 const TimeChanger: React.FC<TimeChangerProps> = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const currentDateStr = searchParams.get('date');
-  const today = new Date();
-  const selectedDate = currentDateStr ? parseDate(currentDateStr) : today;
-  const year = selectedDate.getFullYear();
+  const { date: selectedDate, setDate, resetDate, formatDate, parseDate } = useDateContext();
+  const year = 2025; // Fixed to 2025 only
   const timepoints = useMemo(() => {
     const tps = getAllTimepoints(year);
     return [...tps].sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -78,10 +69,7 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
 
   const handleConfirm = () => {
     if (pendingDay !== null) {
-      setSearchParams(prev => {
-        prev.set('date', formatDate(getDateFromDayOfYear(year, pendingDay)));
-        return prev;
-      }, { replace: true });
+      setDate(getDateFromDayOfYear(year, pendingDay));
       setPendingDay(null);
       setExpanded(false); // Auto-collapse after confirming
     }
@@ -90,24 +78,27 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
   const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (val) {
-      setSearchParams(prev => {
-        prev.set('date', val);
-        return prev;
-      }, { replace: true });
+      const parsedDate = parseDate(val);
+      // Only allow 2025 dates
+      if (parsedDate.getFullYear() === 2025) {
+        setDate(parsedDate);
+      } else {
+        // If not 2025, reset to today's date in 2025
+        const today = new Date();
+        const todayIn2025 = new Date(2025, today.getMonth(), today.getDate());
+        setDate(todayIn2025);
+      }
     } else {
-      setSearchParams(prev => {
-        prev.delete('date');
-        return prev;
-      }, { replace: true });
+      resetDate();
     }
     setPendingDay(null);
   };
 
   const handleReset = () => {
-    setSearchParams(prev => {
-      prev.delete('date');
-      return prev;
-    }, { replace: true });
+    // Reset to today's date in 2025
+    const today = new Date();
+    const todayIn2025 = new Date(2025, today.getMonth(), today.getDate());
+    setDate(todayIn2025);
     setPendingDay(null);
     setExpanded(false); // Auto-collapse after reset
   };
@@ -131,18 +122,7 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
     }
   };
 
-  // Find the current period for the selected date
-  function getCurrentPeriod(date: Date) {
-    let prev = timepoints[0];
-    for (let i = 1; i < timepoints.length; i++) {
-      if (date < timepoints[i].date) {
-        return { from: prev, to: timepoints[i] };
-      }
-      prev = timepoints[i];
-    }
-    return { from: timepoints[timepoints.length - 1], to: null };
-  }
-  const currentPeriod = getCurrentPeriod(effectiveDate);
+
 
   const [flash, setFlash] = useState(false);
   const prevDateRef = useRef(formatDate(selectedDate));
@@ -173,6 +153,8 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
             type="date"
             value={formatDate(effectiveDate)}
             onChange={handleDateInput}
+            min="2025-01-01"
+            max="2025-12-31"
             className={styles.dateInput + (flash ? ' ' + styles.flash : '')}
             aria-label="Custom date"
           />
@@ -197,20 +179,12 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
           <img src='/cob-uswds/img/usa-icons/expand_more.svg' alt="Collapse" width={28} height={28} style={{ verticalAlign: 'middle' }} />
         </button>
       </div>
-      <div className={styles.mobilePeriodText}>
-        {currentPeriod && currentPeriod.to && (
-          <>Current period: <b>{currentPeriod.from.label}</b> → <b>{currentPeriod.to.label}</b></>
-        )}
-        {currentPeriod && !currentPeriod.to && (
-          <>Current period: <b>{currentPeriod.from.label}</b> → <b>End of year</b></>
-        )}
-      </div>
       <div className={styles.timelineScroll}>
-          <div 
-            className={styles.timelineContainer} 
-            ref={timelineRef}
-            style={{ minHeight: timelineHeight > 0 ? `${timelineHeight}px` : undefined }}
-          >
+        <div 
+          className={styles.timelineContainer} 
+          ref={timelineRef}
+          style={{ minHeight: timelineHeight > 0 ? `${timelineHeight}px` : undefined }}
+        >
           <div className={styles.timelineStrip} />
           <input
             type="range"
@@ -221,29 +195,15 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
             className={styles.slider}
             aria-label="Select test date"
           />
-          {timelineWidth > 0 && timepoints.map((tp, i) => {
-            const day = getDayOfYear(tp.date);
-            const thumbWidth = 18; // px, must match CSS
-            const usableWidth = timelineWidth - thumbWidth;
-            const leftPx = (usableWidth * (day - minDay)) / (maxDay - minDay) + thumbWidth / 2;
-            const isMarker = Math.abs(day - effectiveDay) < 2;
-            // Strict zig-zag: even index above, odd below
-            const isAbove = i % 2 === 0;
-            let labelClass = styles.markerLabel + ' ' + (isAbove ? styles.labelAbove : styles.labelBelow) + ' ' + styles.hideOnMobile;
-            let connectorClass = styles.connector + ' ' + (isAbove ? styles.connectorUp : styles.connectorDown);
-            return (
-              <div
-                key={tp.label}
-                className={styles.timelineMarker}
-                style={{ left: leftPx }}
-              >
-                {isAbove && <div className={labelClass}>{tp.label}<br />{formatDate(tp.date)}</div>}
-                <div className={styles.dot + (isMarker ? ' ' + styles.activeDot : '')} />
-                <div className={connectorClass} />
-                {!isAbove && <div className={labelClass}>{tp.label}<br />{formatDate(tp.date)}</div>}
-              </div>
-            );
-          })}
+          <Timeline
+            timepoints={timepoints}
+            selectedDate={effectiveDate}
+            year={year}
+            minDay={minDay}
+            maxDay={maxDay}
+            selectedDay={effectiveDay}
+            timelineWidth={timelineWidth}
+          />
         </div>
       </div>
       <div className={styles.confirmButtonContainer}>
@@ -258,6 +218,8 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
           type="date"
           value={formatDate(effectiveDate)}
           onChange={handleDateInput}
+          min="2025-01-01"
+          max="2025-12-31"
           className={styles.dateInput + (flash ? ' ' + styles.flash : '')}
           aria-label="Custom date"
         />

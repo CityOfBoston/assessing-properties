@@ -5,12 +5,10 @@ import ResponsiveTable from '@components/ResponsiveTable';
 import styles from './PropertyValueSection.module.scss';
 import { PropertyValueSectionData } from '@src/types';
 
-interface PropertyValueSectionProps extends PropertyValueSectionData {
-  date?: Date;
-}
+interface PropertyValueSectionProps extends PropertyValueSectionData {}
 
 export default function PropertyValueSection(props: PropertyValueSectionProps) {
-  const { date, ...sectionData } = props;
+  const sectionData = props;
   const [showAllValues, setShowAllValues] = useState(false);
   const valueHistoryRef = useRef<HTMLDivElement>(null);
   const valueHistoryHeaderRef = useRef<HTMLHeadingElement>(null);
@@ -42,7 +40,7 @@ export default function PropertyValueSection(props: PropertyValueSectionProps) {
   };
 
   return (
-    <PropertyDetailsSection title="Property Value" date={date}>
+    <PropertyDetailsSection title="Property Value">
       <p className={styles.description}>
       Your assessed property value is made up of two parts: the value of the 
       building and the value of the land. To calculate these values, assessors 
@@ -64,7 +62,7 @@ export default function PropertyValueSection(props: PropertyValueSectionProps) {
       />
 
       <div className={styles.valueHistory} ref={valueHistoryRef}>
-        <h3 tabIndex={-1} ref={valueHistoryHeaderRef}>Value History</h3>
+        <h3 tabIndex={-1} ref={valueHistoryHeaderRef}>VALUE HISTORY</h3>
         <p><strong>Note:</strong> The assessed value is the actual billed assessment.</p>
         <div className={styles.screenTable}>
           <ResponsiveTable data={tableData} />

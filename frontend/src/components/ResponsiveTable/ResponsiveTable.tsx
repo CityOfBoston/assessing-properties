@@ -71,9 +71,8 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
       newRow['Details'] = (
         <div className={styles.detailsLinks}>
           <a
-            className="usa-link usa-link--external"
+            className="usa-link"
             rel="noreferrer"
-            target="_blank"
             href={`#/details?parcelId=${parcelId}`}
           >
             View Details

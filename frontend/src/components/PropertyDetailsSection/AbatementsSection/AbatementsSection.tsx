@@ -3,24 +3,29 @@
  */
 import PropertyDetailsSection from '../PropertyDetailsSection';
 import { getAbatementPhase } from '@src/utils/periods';
+import { useDateContext } from '@src/hooks/useDateContext';
+import { getAbatementMessage } from '@src/utils/periodsLanguage';
 
-interface AbatementsSectionProps {
-  date?: Date;
-}
+interface AbatementsSectionProps {}
 
-export default function AbatementsSection({ date }: AbatementsSectionProps) {
-  const now = date || new Date();
-  const abatementYear = now.getFullYear();
+export default function AbatementsSection({}: AbatementsSectionProps) {
+  const { date } = useDateContext();
+  const now = date;
+  const calendarYear = now.getFullYear();
+  const nowMonth = now.getMonth();
+  // For abatements, we need to use the calendar year when applications are due
+  // For July 2025 (FY2026), abatements for FY2026 were due in February 2025 (calendar year 2025)
+  const abatementYear = nowMonth >= 6 ? calendarYear : calendarYear - 1;
   const abatementPhase = getAbatementPhase(now, abatementYear);
   return (
-    <PropertyDetailsSection title="Abatements" date={date}>
+    <PropertyDetailsSection title="Abatements">
       <div style={{ lineHeight: '28px', letterSpacing: '0.24px' }}>
-        An abatement is a reduction in the assessed value of a property. An abatement is granted where the property is determined to be over-assessed, improperly classified or disproportionately assessed. For more information please visit{' '}
+        {getAbatementMessage('description')}{' '}
         <a
           className="usa-link usa-link--external"
           rel="noreferrer"
           target="_blank"
-          href="https://www.boston.gov/departments/assessing/tax-exemptions-and-abatements"
+          href={getAbatementMessage('tax_exemptions_url')}
         >
           Tax exemptions and abatements
         </a>
@@ -38,7 +43,7 @@ export default function AbatementsSection({ date }: AbatementsSectionProps) {
             target="_blank"
             href=""
           >
-            Download Property Tax Abatements Application (PDF)
+            {getAbatementMessage('download_application')}
           </a>
         )}
       </div>

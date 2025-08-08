@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams} from 'react-router-dom';
 import SearchResultsLayout from '@layouts/SearchResultsLayout';
 import WelcomeContent from '@components/WelcomeContent';
@@ -35,6 +35,7 @@ export default function SearchResultsPage() {
   const query = searchParams.get('q') || '';
   const navigate = useNavigate();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const shouldBlurRef = useRef(false);
   
   const { searchResults, isLoading, error, performSearch } = useSearchResults();
 
@@ -44,11 +45,42 @@ export default function SearchResultsPage() {
     navigate(`/details?parcelId=${pid}`);
   };
 
+  const handleSearch = (searchTerm: string) => {
+    console.log('[SearchResultsPage] handleSearch called with term:', searchTerm);
+    
+    // Check if it's the same query as currently displayed
+    if (searchTerm === query) {
+      console.log('[SearchResultsPage] Same query, forcing reload by performing search directly');
+      // Set flag to blur after results are received
+      shouldBlurRef.current = true;
+      // Force reload by calling performSearch directly instead of navigating
+      performSearch(searchTerm);
+    } else {
+      // Navigate to new search results with the new query
+      console.log('[SearchResultsPage] Different query, navigating to new search');
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+    }
+  };
+
   useEffect(() => {
     if (query) {
       performSearch(query);
     }
   }, [query, performSearch]);
+
+  // Blur the search button when search completes (only for same-query reloads)
+  useEffect(() => {
+    if (!isLoading && shouldBlurRef.current) {
+      console.log('[SearchResultsPage] Search completed, blurring active element');
+      shouldBlurRef.current = false;
+      
+      // Blur the currently focused element (search button)
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && activeElement.blur) {
+        activeElement.blur();
+      }
+    }
+  }, [isLoading]);
 
   // Get results array or empty array if no results
   const results = searchResults?.results || [];
@@ -83,9 +115,11 @@ export default function SearchResultsPage() {
           additionalContent={
             <SearchBarContainer
               onSelect={handlePropertySelect}
+              onSearch={handleSearch}
               labelText="Search by address or parcel ID"
               tooltipHint="A unique, legal 10 digit number assigned by the City of Boston to each parcel of property."
               placeholderText="Enter address or parcel ID"
+              preloadValue={query}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
             />

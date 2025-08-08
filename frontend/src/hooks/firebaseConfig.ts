@@ -56,8 +56,8 @@ export const storePropertyFeedback = async (feedback: FeedbackData): Promise<nul
   return callFunction<FeedbackData, null>('storePropertyFeedback', feedback);
 };
 
-export const fetchPropertyDetailsByParcelId = async (parcelId: string): Promise<PropertyDetailsData> => {
-  return callFunction<{ parcelId: string }, PropertyDetailsData>('fetchPropertyDetailsByParcelId', { parcelId });
+export const fetchPropertyDetailsByParcelId = async (parcelId: string, date?: string): Promise<PropertyDetailsData> => {
+  return callFunction<{ parcelId: string; date?: string }, PropertyDetailsData>('fetchPropertyDetailsByParcelId', { parcelId, date });
 };
 
 export const fetchPropertySummariesByParcelIds = async (parcelIds: string[]): Promise<PropertySearchResults> => {

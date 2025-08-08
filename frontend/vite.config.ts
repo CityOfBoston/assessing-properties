@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import type { LogErrorOptions, ViteDevServer } from 'vite';
+import yaml from 'js-yaml';
 
 /**
  * USWDS Configuration
@@ -65,6 +66,25 @@ export default defineConfig({
 
     // Custom plugin to handle USWDS script errors
     uswdsErrorHandler,
+    
+    // YAML loader plugin
+    {
+      name: 'yaml-loader',
+      transform(code, id) {
+        if (id.endsWith('.yaml') || id.endsWith('.yml')) {
+          try {
+            const data = yaml.load(code);
+            return {
+              code: `export default ${JSON.stringify(data)};`,
+              map: null
+            };
+          } catch (error) {
+            console.error('Error parsing YAML:', error);
+            return null;
+          }
+        }
+      }
+    },
   ],
   
   /**

@@ -11,13 +11,22 @@ export interface PropertySearchPopupProps {
 
 export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
   onClose,
+  onSelect,
 }) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const navigate = useNavigate();
 
-  const handlePropertySelect = (pid: string) => {
-    // Navigate to property details page
+  const handlePropertySelect = (pid: string, fullAddress?: string) => {
+    // If a custom onSelect handler is provided, use it
+    if (onSelect) {
+      onSelect(pid, fullAddress || '');
+      onClose();
+      return;
+    }
+    
+    // Otherwise, use internal navigation
     navigate(`/details?parcelId=${pid}`);
+    onClose();
   };
 
   return (
@@ -32,8 +41,8 @@ export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
       <SearchBackground>
         <div className={styles.content}>
           <SearchBarContainer onSelect={handlePropertySelect} 
-          labelText="Search for a property"
-          tooltipHint="Enter an address or parcel ID to search"
+          labelText="Search by address or parcel ID"
+          tooltipHint="A unique, legal 10 digit number assigned by the City of Boston to each parcel of property."
           placeholderText="Enter address or parcel ID"
           onFocus={() => setIsSearchFocused(true)}
           onBlur={() => setIsSearchFocused(false)}

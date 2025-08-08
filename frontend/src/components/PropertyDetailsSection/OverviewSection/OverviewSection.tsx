@@ -3,6 +3,8 @@ import PropertyDetailsCardGroup from '@components/PropertyDetailsCardGroup';
 import IconButton from '@components/IconButton';
 import PropertyDetailsSection from '../PropertyDetailsSection';
 import { OverviewSectionData } from '@src/types';
+import { useDateContext } from '@src/hooks/useDateContext';
+import { getOverviewMessage } from '@src/utils/periodsLanguage';
 
 /**
  * Custom target icon component for property location
@@ -41,10 +43,30 @@ const TargetIcon = () => (
  */
 interface OverviewSectionProps {
   data: OverviewSectionData;
-  date?: Date;
 }
 
-export default function OverviewSection({ data, date }: OverviewSectionProps) {
+export default function OverviewSection({ data }: OverviewSectionProps) {
+  const { date } = useDateContext();
+  
+  // Determine if we're in the preliminary period (July-December)
+  const nowMonth = date.getMonth();
+  const isPrelimPeriod = nowMonth >= 6 && nowMonth < 12; // July (6) to December (11)
+  
+  // In preliminary period, exemption flags show application status for current FY
+  // Outside preliminary period, exemption flags don't indicate anything meaningful
+  const getExemptionStatus = (amount: number, flag: boolean) => {
+    if (amount > 0) {
+      return getOverviewMessage('granted');
+    }
+    if (isPrelimPeriod && flag) {
+      return getOverviewMessage('amount_to_be_decided');
+    }
+    if (isPrelimPeriod && !flag) {
+      return getOverviewMessage('preliminary_flag_false');
+    }
+    return getOverviewMessage('not_granted');
+  };
+  
   const cards = [
     {
       icon: <img src="/cob-uswds/img/usa-icons/account_circle.svg"/>,
@@ -53,33 +75,29 @@ export default function OverviewSection({ data, date }: OverviewSectionProps) {
     },
     {
       icon: <img src="/cob-uswds/img/usa-icons/attach_money.svg"/>,
-      header: 'FY25 Net Tax',
-      value: data.netTax != null ? `$${data.netTax.toLocaleString()}` : 'N/A'
+      header: isPrelimPeriod ? 'FY26 First Half Estimated Net Tax' : 'FY25 Net Tax',
+      value: (() => {
+        if (isPrelimPeriod) {
+          return data.totalBilledAmount != null ? `$${data.totalBilledAmount.toLocaleString()}` : 'N/A';
+        } else {
+          return data.netTax != null ? `$${data.netTax.toLocaleString()}` : 'N/A';
+        }
+      })()
     },
     { 
       icon: <img src="/cob-uswds/img/usa-icons/person.svg"/>,
       header: 'Personal Exemption',
-      value:
-        data.personalExemptionAmount > 0
-          ? 'Granted'
-          : data.personalExemptionFlag
-            ? 'Not eligible'
-            : 'Eligible'
+      value: getExemptionStatus(data.personalExemptionAmount, data.personalExemptionFlag)
     },
     {
       icon: <img src="/cob-uswds/img/usa-icons/home.svg"/>,
       header: 'Residential Exemption',
-      value:
-        data.residentialExemptionAmount > 0
-          ? 'Granted'
-          : data.residentialExemptionFlag
-            ? 'Not eligible'
-            : 'Eligible'
+      value: getExemptionStatus(data.residentialExemptionAmount, data.residentialExemptionFlag)
     }
   ];
 
   return (
-    <PropertyDetailsSection title="Overview" date={date}>
+    <PropertyDetailsSection title="Overview">
       <section className={styles.section}>
         <div className={styles.leftContent}>
           <div className={styles.locationContainer}>
@@ -98,7 +116,7 @@ export default function OverviewSection({ data, date }: OverviewSectionProps) {
               <p key={index}>{owner}</p>
             ))}
             <p className={styles.ownerDisclaimer}>
-              Owner information may not reflect any changes submitted to City of Boston Assessing after October 25, 2024. Authoritative ownership information is held by the Registry of Deeds.
+              {getOverviewMessage('owner_disclaimer')}
             </p>
           </div>
 
@@ -146,7 +164,7 @@ export default function OverviewSection({ data, date }: OverviewSectionProps) {
             rel="noreferrer"
             target="_blank"
             href={`https://app01.cityofboston.gov/AssessingMap/?find=${data.parcelId}`}
-          >Open in map</a>
+          >{getOverviewMessage('open_in_map')}</a>
           </div>
         </div>
       </section>
@@ -174,4 +192,4 @@ export default function OverviewSection({ data, date }: OverviewSectionProps) {
       </div>
     </PropertyDetailsSection>
   );
-} 
+}

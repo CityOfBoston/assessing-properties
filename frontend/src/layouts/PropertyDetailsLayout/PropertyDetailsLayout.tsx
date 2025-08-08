@@ -5,6 +5,7 @@ import Header from "../Header";
 import { IconButton } from "@components/IconButton";
 import { PropertySearchPopup } from "@components/PropertySearchPopup";
 import { FeedbackSenderContainer } from "@containers/FeedbackSenderContainer";
+import { BetaLabel } from "@components/BetaLabel";
 import styles from "./PropertyDetailsLayout.module.scss";
 
 // Add useMediaQuery hook
@@ -235,7 +236,7 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
       {/* Main content with sections */}
       <main ref={mainRef} className={styles.main}>
         <div>
-          <h1 className={styles.detailsTitle}>Property Details</h1>
+          <h1 className={styles.detailsTitle}>Property Details <BetaLabel variant="blue" /></h1>
           {sections.map((section, index) => (
             <div
               key={section.name}

@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './WelcomeContent.module.scss';
 import assessingLogo from '../../assets/assessing_logo_white.svg';
+import { BetaLabel } from '../BetaLabel';
 
 interface WelcomeContentProps {
   additionalContent?: React.ReactNode;
@@ -23,7 +24,7 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({
       />
       <div className={styles.contentWrapper}>
         <h1 className={titleClassName}>
-          Welcome to Properties Assessment
+          Welcome to Properties Assessment <BetaLabel variant="white" />
         </h1>
         {additionalContent && (
           <div className={styles.mobileAdditionalContent}>

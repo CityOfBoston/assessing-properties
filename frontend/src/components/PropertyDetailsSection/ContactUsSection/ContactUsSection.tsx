@@ -20,19 +20,17 @@ const ContactBox: React.FC<ContactBoxProps> = ({ iconSrc, children }) => {
   );
 };
 
-interface ContactUsSectionProps {
-  date?: Date;
-}
+interface ContactUsSectionProps {}
 
-export default function ContactUsSection({ date }: ContactUsSectionProps) {
+export default function ContactUsSection({}: ContactUsSectionProps) {
   return (
-    <PropertyDetailsSection title="Contact Us" date={date}>
+    <PropertyDetailsSection title="Contact Us">
       <div className={styles.container}>
         <ContactBox iconSrc={assessingLogo}>
           <ul className={styles.list}>
             <li>
               Email our staff at{' '}
-              <a href="mailto:TRACFAXSG@boston.gov">TRACFAXSG@boston.gov</a>
+              <a href="mailto:TRACFAXSG@boston.gov" className="usa-link">TRACFAXSG@boston.gov</a>
             </li>
             <li>
               For current fiscal year tax bill Questions, contact the{' '}
@@ -64,19 +62,19 @@ export default function ContactUsSection({ date }: ContactUsSectionProps) {
           <ul className={styles.list}>
             <li>
               For prior fiscal year tax payments, interest charges, fees, etc. contact the Collector's office at{' '}
-              <a href="tel:617-635-4131">617-635-4131</a>
+              <a href="tel:617-635-4131" className="usa-link">617-635-4131</a>
             </li>
             <li>
               Main Number:{' '}
-              <a href="tel:617-635-4321">617-635-4321</a>
+              <a href="tel:617-635-4321" className="usa-link">617-635-4321</a>
             </li>
             <li>
               Personal Property:{' '}
-              <a href="tel:617-635-1165">617-635-1165</a>
+              <a href="tel:617-635-1165" className="usa-link">617-635-1165</a>
             </li>
             <li>
               Tax Data Administration:{' '}
-              <a href="tel:617-635-3783">617-635-3783</a>
+              <a href="tel:617-635-3783" className="usa-link">617-635-3783</a>
             </li>
           </ul>
         </ContactBox>

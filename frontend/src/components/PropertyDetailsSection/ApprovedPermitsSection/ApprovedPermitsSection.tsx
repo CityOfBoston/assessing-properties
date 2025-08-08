@@ -2,15 +2,16 @@
  * ApprovedPermitsSection component displays building permits and approvals
  */
 import PropertyDetailsSection from '../PropertyDetailsSection';
+import { useDateContext } from '@src/hooks/useDateContext';
 
 interface ApprovedPermitsSectionProps {
   parcelId: string;
-  date?: Date;
 }
 
-export default function ApprovedPermitsSection({ parcelId, date }: ApprovedPermitsSectionProps) {
+export default function ApprovedPermitsSection({ parcelId }: ApprovedPermitsSectionProps) {
+  const { date } = useDateContext();
   return (
-    <PropertyDetailsSection title="Approved Permits" date={date}>
+    <PropertyDetailsSection title="Approved Permits">
       <div style={{ lineHeight: '28px', letterSpacing: '0.24px' }}>
         Building permits help to establish compliance of construction work with the minimum standards of safety established by the State Building Code.
       </div>

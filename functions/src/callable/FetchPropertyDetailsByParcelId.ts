@@ -4,10 +4,10 @@
  */
 
 import {createCallable, createSuccessResponse, createErrorResponse} from "../lib/FunctionsClient";
-import {fetchPropertyDetailsByParcelIdHelper, generatePropertyStaticMapImageFromGeometryHelper} from "../lib/EGISClient";
+import {fetchPropertyDetailsByParcelIdHelper, generatePropertyStaticMapImageFromGeometryHelper, getFiscalYearAndQuarter} from "../lib/EGISClient";
 import {isStaticMapImageCached, storeStaticMapImage, getStaticMapImageUrl} from "../lib/StorageClient";
 
-export const fetchPropertyDetailsByParcelId = createCallable(async (data: { parcelId: string }) => {
+export const fetchPropertyDetailsByParcelId = createCallable(async (data: { parcelId: string; date?: string }) => {
   // Validate input data
   if (!data.parcelId || typeof data.parcelId !== "string") {
     throw new Error("parcelId must be a string");
@@ -32,10 +32,38 @@ export const fetchPropertyDetailsByParcelId = createCallable(async (data: { parc
     throw new Error("ParcelId contains invalid characters");
   }
 
+  // Parse and validate date if provided
+  let date: Date | undefined;
+  if (data.date) {
+    if (typeof data.date !== "string") {
+      throw new Error("date must be a string in YYYY-MM-DD format");
+    }
+    
+    // Validate date format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+      throw new Error("date must be in YYYY-MM-DD format");
+    }
+    
+    const [year, month, day] = data.date.split('-').map(Number);
+    date = new Date(year, month - 1, day);
+    
+    // Validate the date is valid
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date provided");
+    }
+  }
+
+  // Get fiscal year and quarter if date is provided
+  let fiscalYearAndQuarter: { year: number; quarter: string } | undefined;
+  if (date) {
+    fiscalYearAndQuarter = getFiscalYearAndQuarter(date);
+    console.log(`[FetchPropertyDetailsByParcelId] Date provided: ${data.date}, Fiscal Year: ${fiscalYearAndQuarter.year}, Quarter: ${fiscalYearAndQuarter.quarter}`);
+  }
+
   console.log(`[FetchPropertyDetailsByParcelId] Input validation passed. Fetching details for parcelId: ${data.parcelId}`);
 
   // Fetch property details and geometry using EGISClient (single call)
-  const propertyDetailsWithGeometry = await fetchPropertyDetailsByParcelIdHelper(data.parcelId);
+  const propertyDetailsWithGeometry = await fetchPropertyDetailsByParcelIdHelper(data.parcelId, fiscalYearAndQuarter);
 
   // Extract property details and geometry
   const {geometry, ...propertyDetails} = propertyDetailsWithGeometry;

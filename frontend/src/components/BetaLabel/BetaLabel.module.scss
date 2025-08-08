@@ -1,0 +1,49 @@
+.betaLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1em 0.4em; // Smaller margins
+  background-color: transparent;
+  border-radius: 12px; // Less rounded, more rectangular
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px; // Fixed size optimized for 32px headers
+  font-weight: 700;
+  text-align: center;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  vertical-align: middle;
+  height: 24px; // Match 32px header height
+  min-width: 48px; // Ensure minimum width for better proportions
+  margin-top: -6px; // Fine-tune vertical alignment with header text
+  margin-left: 3px; // Add spacing between header text and label
+  
+  // Mobile responsive - optimized for 18px
+  @media (max-width: 768px) {
+    height: 16px;
+    font-size: 14px; // Proportionally smaller for 18px height
+    padding: 0.1em 0.3em; // Even smaller margins on mobile
+    border-width: 2px;
+    border-radius: 8px;
+    min-width: 32px;
+    margin-top: -2px; // Proportional adjustment for mobile
+  }
+}
+
+.blue {
+  border: 3px solid #005ea2; // Charles blue color - thicker border
+  color: #005ea2; // Charles blue color
+  
+  @media (max-width: 768px) {
+    border-width: 2px;
+  }
+}
+
+.white {
+  border: 3px solid #ffffff; // White border
+  color: #ffffff; // White color
+  
+  @media (max-width: 768px) {
+    border-width: 2px;
+  }
+}

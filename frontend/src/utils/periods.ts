@@ -1,4 +1,5 @@
 // Utility functions for property period calculations
+import { getTimepointLabel, getAbatementPhaseMessage, getExemptionPhaseMessage } from './periodsLanguage';
 
 export function getNextMonday(date: Date): Date {
   const d = new Date(date); // avoid mutating input
@@ -12,32 +13,32 @@ export function getNextMonday(date: Date): Date {
 }
 
 export const NEW_APPLICATION_PERIOD_BEGINS = {
-  label: 'New application period begins',
+  label: getTimepointLabel('new_application_period_begins'),
   getDate: (year: number) => new Date(year, 0, 1),
 };
 
 export const ABATEMENT_APPLICATION_DEADLINE = {
-  label: 'Abatement Application Deadline',
+  label: getTimepointLabel('abatement_application_deadline'),
   getDate: (year: number) => getNextMonday(new Date(year, 1, 1)),
 };
 
 export const EXEMPTIONS_IN_PROGRESS = {
-  label: 'Exemptions in progress',
+  label: getTimepointLabel('exemptions_in_progress'),
   getDate: (year: number) => new Date(year, 2, 1),
 };
 
 export const EXEMPTION_APPLICATION_DEADLINE = {
-  label: 'Exemption Application Deadline',
+  label: getTimepointLabel('exemption_application_deadline'),
   getDate: (year: number) => getNextMonday(new Date(year, 3, 1)),
 };
 
 export const NEW_FY_PRELIMINARY_TAX_PERIOD_BEGINS = {
-  label: 'New FY Preliminary Tax Period Begins',
+  label: getTimepointLabel('new_fy_preliminary_tax_period_begins'),
   getDate: (year: number) => new Date(year, 6, 1),
 };
 
 export const ABATEMENT_GRACE_PERIOD_DEADLINE = {
-  label: 'Abatement 28 Day Grace Period Deadline',
+  label: getTimepointLabel('abatement_grace_period_deadline'),
   getDate: (year: number) => {
     const abatementDeadline = ABATEMENT_APPLICATION_DEADLINE.getDate(year);
     const graceDate = new Date(abatementDeadline);
@@ -115,49 +116,78 @@ export function getAbatementPhase(date: Date, year: number) {
   const july1 = NEW_FY_PRELIMINARY_TAX_PERIOD_BEGINS.getDate(year);
   const nextJan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(year + 1);
   const fiscalYear = getFiscalYear(date);
+  
   // 1. Before Jan 1: between end of previous app period and Jan 1
   if (date < jan1) {
     return {
       phase: 'before_jan1',
-      message: `Applications for Abatements, Residential Exemptions, and Personal Exemptions for the upcoming FY${year} will become available for download on ${formatDateForDisplay(jan1)}.`
+      message: getAbatementPhaseMessage('before_jan1', {
+        next_year: year + 1,
+        jan1_date: formatDateForDisplay(jan1),
+        current_year: year
+      })
     };
   }
-  // 2. Jan 1 (inclusive) to abatement deadline (inclusive)
+  
+  // 2. Jan 1 (inclusive) to abatement deadline (inclusive) - Application period for NEXT fiscal year
   if (date >= jan1 && date <= abatementDeadline) {
     return {
       phase: 'open',
-      message: `To file an Abatement Application for the currently open FY${year}, please use the link below. The deadline for submission is ${formatDateForDisplay(abatementDeadline, { withTime: true })}.`,
+      message: getAbatementPhaseMessage('open', {
+        next_year: year + 1,
+        deadline_date: formatDateForDisplay(abatementDeadline, { withTime: true }),
+        current_year: year
+      }),
       deadline: abatementDeadline
     };
   }
+  
   // 3. After abatement deadline (exclusive) to grace period (inclusive)
   if (date > abatementDeadline && date <= graceDeadline) {
     return {
       phase: 'grace',
-      message: `The deadline for filing an Abatement application for FY${year} was ${formatDateForDisplay(abatementDeadline)}. However, additional documentation for applications already on file is still being accepted. If you were eligible but not granted an abatement in FY${year}, you will need to wait until the next application period.`,
+      message: getAbatementPhaseMessage('grace', {
+        next_year: year + 1,
+        deadline_date: formatDateForDisplay(abatementDeadline),
+        current_year: year
+      }),
       deadline: abatementDeadline
     };
   }
+  
   // 4. After grace period (i.e., starting 29 days after deadline) and before July 1st
   if (date > graceDeadline && date < july1) {
     return {
       phase: 'after_grace',
-      message: `The deadline for filing an Abatement application for FY${year} was ${formatDateForDisplay(abatementDeadline)}. If you were eligible but not granted an abatement in FY${year}, you will need to wait until the next application period. Applications for the upcoming FY${year + 1} will become available for download beginning ${formatDateForDisplay(nextJan1)}.`,
+      message: getAbatementPhaseMessage('after_grace', {
+        next_year: year + 1,
+        deadline_date: formatDateForDisplay(abatementDeadline),
+        next_fy: year + 2,
+        next_jan1_date: formatDateForDisplay(nextJan1),
+        current_year: year
+      }),
       deadline: abatementDeadline
     };
   }
-  // 5. After July 1st and before next Jan 1: show reference to last FY
+  
+  // 5. After July 1st and before next Jan 1: preliminary period - exemption flags show application status for current FY
   if (date >= july1 && date < nextJan1) {
     return {
-      phase: 'reference_only',
-      message: `The abatement values shown are for the past FY${year} and are for reference only. FY${year + 1} values will become available in January (${formatDateForDisplay(nextJan1)}). If you were eligible but not granted an abatement in FY${year}, you will need to wait until the next application period.`,
+      phase: 'preliminary',
+      message: getAbatementPhaseMessage('preliminary', {
+        current_fy: year + 1,
+        current_year: year + 1,
+        next_fy: year + 2,
+        next_jan1_date: formatDateForDisplay(nextJan1)
+      }),
       deadline: abatementDeadline
     };
   }
+  
   // Fallback (should not happen)
   return {
     phase: 'unknown',
-    message: ''
+    message: getAbatementPhaseMessage('unknown', {})
   };
 }
 
@@ -166,83 +196,74 @@ export const EXEMPTION_APPLICATION_DEADLINE_DATE = {
   getDate: (year: number) => getNextMonday(new Date(year, 3, 1)), // April 1st, next Monday if weekend
 };
 
-export function getExemptionPhase(date: Date, year: number, opts: { isEligible: boolean, grantedCount: number, type: 'Residential' | 'Personal' }) {
+export function getExemptionPhase(date: Date, year: number, opts: { grantedCount: number, type: 'Residential' | 'Personal' }) {
   const jan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(year);
   const deadline = EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(year);
   const july1 = NEW_FY_PRELIMINARY_TAX_PERIOD_BEGINS.getDate(year);
   const nextJan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(year + 1);
   const fiscalYear = getFiscalYear(date);
-  const { isEligible, grantedCount, type } = opts;
+  const { grantedCount, type } = opts;
+  
   // Before Jan 1
   if (date < jan1) {
     return {
       phase: 'before_jan1',
-      message: `Applications for Abatements, Residential Exemptions, and Personal Exemptions for the upcoming FY${year} will become available for download on ${formatDateForDisplay(jan1)}.`
+      message: getExemptionPhaseMessage('before_jan1', {
+        exemption_type: type,
+        next_year: year + 1,
+        jan1_date: formatDateForDisplay(jan1),
+        current_year: year
+      })
     };
   }
-  // Jan 1 to deadline (inclusive)
+  
+  // Jan 1 to deadline (inclusive) - Application period for NEXT fiscal year
   if (date >= jan1 && date <= deadline) {
-    if (!isEligible) {
-      return {
-        phase: 'not_eligible',
-        message: `This type of parcel was not eligible for a ${type.toLowerCase()} exemption in FY${year}.`
-      };
-    }
-    if (grantedCount > 0) {
-      return {
-        phase: 'granted',
-        message: `A ${type} Exemption has been granted for this parcel in FY${year}.`
-      };
-    }
-    // Eligible and not granted
     return {
       phase: 'open',
-      message: `To file a ${type} Exemption Application for the currently open FY${year}, use the link(s) below. The deadline for submission is ${formatDateForDisplay(deadline, { withTime: true })}.`,
+      message: getExemptionPhaseMessage('open', {
+        exemption_type: type,
+        next_year: year + 1,
+        deadline_date: formatDateForDisplay(deadline, { withTime: true }),
+        current_year: year
+      }),
       deadline
     };
   }
+  
   // After deadline until July 1st
   if (date > deadline && date < july1) {
-    if (!isEligible) {
-      return {
-        phase: 'not_eligible',
-        message: `This type of parcel was not eligible for a ${type.toLowerCase()} exemption in FY${year}.`
-      };
-    }
-    if (grantedCount > 0) {
-      return {
-        phase: 'granted',
-        message: `A ${type} Exemption was granted for this parcel in FY${year}.`
-      };
-    }
-    // Not granted
     return {
       phase: 'after_deadline',
-      message: `This parcel was eligible but not granted a ${type} Exemption in FY${year}. The deadline for filing a ${type} Exemption application for FY${year} was ${formatDateForDisplay(deadline)}. Applications for the upcoming FY${year + 1} will become available for download beginning ${formatDateForDisplay(nextJan1)}.`,
+      message: getExemptionPhaseMessage('after_deadline', {
+        exemption_type: type,
+        next_year: year + 1,
+        deadline_date: formatDateForDisplay(deadline),
+        next_fy: year + 2,
+        next_jan1_date: formatDateForDisplay(nextJan1),
+        current_year: year
+      }),
       deadline
     };
   }
-  // After July 1st and before next Jan 1: show reference to last FY
+  
+  // After July 1st and before next Jan 1: preliminary period - exemption flags show application status for current FY
   if (date >= july1 && date < nextJan1) {
-    if (!isEligible) {
-      return {
-        phase: 'not_eligible',
-        message: `This type of parcel was not eligible for a ${type.toLowerCase()} exemption in FY${year}.`
-      };
-    }
-    if (grantedCount > 0) {
-      return {
-        phase: 'granted',
-        message: `A ${type} Exemption was granted for this parcel in FY${year}.`
-      };
-    }
-    // Not granted
     return {
-      phase: 'reference_only',
-      message: `This parcel was eligible but not granted a ${type} Exemption in the past FY${year}. FY${year + 1} values will become available in January (${formatDateForDisplay(nextJan1)}).`,
+      phase: 'preliminary',
+      message: getExemptionPhaseMessage('preliminary', {
+        current_fy: year + 1,
+        exemption_type_lower: type.toLowerCase(),
+        next_fy: year + 2,
+        next_jan1_date: formatDateForDisplay(nextJan1)
+      }),
       deadline
     };
   }
+  
   // Fallback
-  return { phase: 'unknown', message: '' };
+  return { 
+    phase: 'unknown', 
+    message: getExemptionPhaseMessage('unknown', {})
+  };
 } 

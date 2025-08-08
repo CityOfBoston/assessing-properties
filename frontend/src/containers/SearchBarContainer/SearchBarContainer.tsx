@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface SearchBarContainerProps {
   onSelect?: (pid: string, fullAddress: string) => void;
+  onSearch?: (searchTerm: string) => void;
   labelText?: string;
   tooltipHint?: string;
   placeholderText?: string;
@@ -25,6 +26,7 @@ interface SearchSuggestion {
 
 export const SearchBarContainer = ({
   onSelect,
+  onSearch,
   labelText = 'Search by address or parcel ID',
   tooltipHint = 'A unique, legal 10 digit number assigned by the City of Boston to each parcel of property.',
   placeholderText = 'Enter address or parcel ID',
@@ -90,7 +92,15 @@ export const SearchBarContainer = ({
       return;
     }
 
-    // If there's exactly one suggestion and it matches the search term closely
+    // If custom onSearch handler is provided, use it
+    if (onSearch) {
+      console.log('[SearchBarContainer] Using custom search handler');
+      hideSuggestionsAndBlur();
+      onSearch(searchTerm);
+      return;
+    }
+
+    // Default behavior: If there's exactly one suggestion and it matches the search term closely
     if (suggestions.length === 1) {
       const suggestion = suggestions[0];
       console.log('[SearchBarContainer] Single suggestion found, selecting:', suggestion);
@@ -101,7 +111,7 @@ export const SearchBarContainer = ({
       navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
     hideSuggestionsAndBlur();
-  }, [suggestions, onSelect, navigate, hideSuggestionsAndBlur]);
+  }, [suggestions, onSelect, onSearch, navigate, hideSuggestionsAndBlur]);
 
   const handleSuggestionClick = useCallback((suggestion: SearchSuggestion) => {
     console.log('[SearchBarContainer] Suggestion clicked:', suggestion);

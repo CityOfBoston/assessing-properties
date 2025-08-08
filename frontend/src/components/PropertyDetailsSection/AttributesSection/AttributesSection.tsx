@@ -5,10 +5,9 @@ import { PropertyAttributesData } from '@src/types';
 
 interface AttributesSectionProps {
   data: PropertyAttributesData;
-  date?: Date;
 }
 
-export default function AttributesSection({ data, date }: AttributesSectionProps) {
+export default function AttributesSection({ data }: AttributesSectionProps) {
   const [showAllAttributes, setShowAllAttributes] = useState(false);
 
   const attributeGroups = [
@@ -71,7 +70,7 @@ export default function AttributesSection({ data, date }: AttributesSectionProps
   ];
 
   return (
-    <PropertyDetailsSection title="Attributes" date={date}>
+    <PropertyDetailsSection title="Attributes">
       <div className={`${styles.grid} ${showAllAttributes ? styles.expanded : ''}`}>
         {attributeGroups
           .map(group => ({

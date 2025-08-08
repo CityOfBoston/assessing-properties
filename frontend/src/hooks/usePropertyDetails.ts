@@ -6,7 +6,7 @@ interface UsePropertyDetailsReturn {
   propertyDetails: PropertyDetailsData | null;
   isLoading: boolean;
   error: Error | null;
-  fetchPropertyDetails: (parcelId: string) => Promise<void>;
+  fetchPropertyDetails: (parcelId: string, date?: string) => Promise<void>;
 }
 
 export const usePropertyDetails = (): UsePropertyDetailsReturn => {
@@ -14,7 +14,7 @@ export const usePropertyDetails = (): UsePropertyDetailsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchPropertyDetails = useCallback(async (parcelId: string) => {
+  const fetchPropertyDetails = useCallback(async (parcelId: string, date?: string) => {
     if (!parcelId.trim()) {
       setError(new Error('Parcel ID is required'));
       return;
@@ -24,9 +24,9 @@ export const usePropertyDetails = (): UsePropertyDetailsReturn => {
       setIsLoading(true);
       setError(null);
       
-      console.log('[usePropertyDetails] Fetching property details for parcelId:', parcelId);
+      console.log('[usePropertyDetails] Fetching property details for parcelId:', parcelId, 'date:', date);
       
-      const details = await fetchPropertyDetailsByParcelId(parcelId);
+      const details = await fetchPropertyDetailsByParcelId(parcelId, date);
       
       console.log('[usePropertyDetails] Successfully fetched property details:', details);
       

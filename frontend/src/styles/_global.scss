@@ -40,6 +40,11 @@ h1, h2 {
   letter-spacing: 0.05em;
 }
 
+// Global link color for non-external links
+.usa-link:not(.usa-link--external) {
+  color: #005ea2 !important;
+}
+
 // Global button overrides
 .usa-button,
 .usa-button--outline,

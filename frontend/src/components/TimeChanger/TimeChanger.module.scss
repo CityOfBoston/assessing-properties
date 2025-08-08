@@ -302,98 +302,7 @@
   display: none;
 }
 
-.timelineMarker {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 0;
-  z-index: 3;
-  height: 100%;
-}
 
-.labelAbove {
-  position: absolute;
-  bottom: 60%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-}
-.labelBelow {
-  position: absolute;
-  top: 60%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-}
-.labelRight {
-  left: 100% !important;
-  transform: translateX(-100%) !important;
-  text-align: right;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  background: #1871BD;
-  border-radius: 50%;
-  border: 1.5px solid #fff;
-  box-shadow: 0 0 0 1px #1871BD;
-  z-index: 3;
-  transition: background 0.2s, box-shadow 0.2s;
-  margin-bottom: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-.activeDot {
-  background: #2491FF;
-  box-shadow: 0 0 0 4px #2491FF33;
-}
-
-.connectorUp {
-  width: 1.5px;
-  height: 35px;
-  background: #1871BD;
-  position: absolute;
-  top: calc(50% - 35px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-}
-.connectorDown {
-  width: 1.5px;
-  height: 35px;
-  background: #1871BD;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-}
-
-.markerLabel {
-  background: #fff;
-  color: #1871BD;
-  font-size: 15px;
-  text-align: center;
-  padding: 7px 14px;
-  border-radius: 7px;
-  min-width: 110px;
-  max-width: 180px;
-  box-shadow: 0 2px 8px rgba(24,113,189,0.10);
-  pointer-events: auto;
-  font-weight: 500;
-  line-height: 1.3;
-  word-break: break-word;
-  white-space: normal;
-  border: 1px solid #e3e8f0;
-  transition: font-size 0.2s, padding 0.2s;
-}
 
 .confirmButtonContainer {
   min-height: 44px;
@@ -499,44 +408,9 @@
   background: #e0e7ef;
 }
 
-.mobilePeriodText {
-  display: none;
-  text-align: center;
-  font-size: 18px !important;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-  color: #1871BD;
-  margin-bottom: 8px;
-  margin-top: 0;
-}
+
 
 @include main.at-media-max('mobile-lg') {
-  .mobilePeriodText {
-    display: block;
-    font-size: 13px;
-    margin-bottom: 8px;
-    margin-top: 0;
-    padding: 0 8px;
-    line-height: 1.4;
-  }
-  .hideOnMobile {
-    display: none !important;
-  }
-  .connectorUp, .connectorDown {
-    display: none !important;
-  }
-  .timelineContainer {
-    max-width: 900px;
-    min-width: 0;
-    min-height: 70px !important;
-    padding: 20px 0;
-  }
-  .markerLabel {
-    font-size: 12px;
-    min-width: 70px;
-    max-width: 100px;
-    padding: 4px 6px;
-  }
   .confirmButton {
     font-size: 15px;
     padding: 12px 0;
@@ -569,18 +443,9 @@
 }
 
 @include main.at-media-max('mobile-lg') {
-  .markerLabel {
-    font-size: 10px;
-    min-width: 40px;
-    max-width: 60px;
-    padding: 2px 2px;
-  }
   .confirmButton, .resetButton, .expandButton, .collapseButton {
     font-size: 11px;
     padding: 4px 6px;
-  }
-  .hideOnMobile {
-    display: none !important;
   }
 }
 

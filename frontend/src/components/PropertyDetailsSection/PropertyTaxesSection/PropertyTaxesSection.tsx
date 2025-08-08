@@ -7,32 +7,53 @@ import FormulaAccordion from '../../FormulaAccordion';
 import { IconButton } from '../../IconButton';
 import styles from './PropertyTaxesSection.module.scss';
 import { PropertyTaxesSectionData } from '@src/types';
-import { getExemptionPhase, getFiscalYear } from '@src/utils/periods';
+import { getExemptionPhase, getFiscalYear, formatDateForDisplay, EXEMPTION_APPLICATION_DEADLINE_DATE } from '@src/utils/periods';
+import { getPropertyTaxMessage, getPersonalExemptionLink, getPersonalExemptionLabel } from '@src/utils/periodsLanguage';
 import MessageBox from '../../MessageBox';
+import { useDateContext } from '@src/hooks/useDateContext';
 
-interface PropertyTaxesSectionProps extends PropertyTaxesSectionData {
-  date?: Date;
-}
+interface PropertyTaxesSectionProps extends PropertyTaxesSectionData {}
 
 export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
-  const { date, ...sectionData } = props;
-  const now = date || new Date();
+  const { date } = useDateContext();
+  const sectionData = props;
+  const now = date;
   const fiscalYear = getFiscalYear(now);
   
-  // Determine eligibility and granted count for each exemption
-  const isResidentialEligible = !sectionData.residentialExemptionFlag;
-  const isPersonalEligible = !sectionData.personalExemptionFlag;
-  // Granted if amount > 0 (even if not eligible)
+  // Determine if we're in the preliminary period (July-December)
+  const nowMonth = now.getMonth();
+  const isPrelimPeriod = nowMonth >= 6 && nowMonth < 12; // July (6) to December (11)
+  // After July 1st, we're in the new fiscal year for tax rates
+  const displayFY = fiscalYear;
+  
+  // In preliminary period, exemption flags show approval status from previous year
+  // Outside preliminary period, exemption flags don't indicate eligibility
+  const residentialExemptionApproved = sectionData.residentialExemptionFlag;
+  const personalExemptionApproved = sectionData.personalExemptionFlag;
+  
+  // Granted if amount > 0
   const residentialGranted = sectionData.residentialExemptionAmount && sectionData.residentialExemptionAmount > 0;
   const personalGranted = sectionData.personalExemptionAmount && sectionData.personalExemptionAmount > 0;
   const residentialGrantedCount = residentialGranted ? 1 : 0;
   const personalGrantedCount = personalGranted ? 1 : 0;
 
+  // For exemption phases, we need to use the calendar year when applications are due
+  // For July 2025 (FY2026), exemptions for FY2026 were due in April 2025 (calendar year 2025)
+  const calendarYear = now.getFullYear();
+  const exemptionYear = nowMonth >= 6 ? calendarYear : calendarYear - 1;
+  
   // Get exemption phase for residential
   const residentialExemptionPhase = getExemptionPhase(
     now,
-    fiscalYear,
-    { isEligible: isResidentialEligible, grantedCount: residentialGrantedCount, type: 'Residential' }
+    exemptionYear,
+    { grantedCount: residentialGrantedCount, type: 'Residential' }
+  );
+
+  // Get exemption phase for personal
+  const personalExemptionPhase = getExemptionPhase(
+    now,
+    exemptionYear,
+    { grantedCount: personalGrantedCount, type: 'Personal' }
   );
 
   // Calculate residential exemption amount dynamically or use a default
@@ -51,68 +72,81 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
     },
   ];
 
-  // Determine which FY to display for values (previous FY during preliminary period)
-  const nowMonth = now.getMonth();
-  const isPrelimPeriod = nowMonth >= 6 && nowMonth < 12; // July (6) to December (11)
-  const displayFY = isPrelimPeriod ? fiscalYear - 1 : fiscalYear;
-
-  // Helper to format values: show '-' if not parsable to integer or is 0
+  // Helper to format values: show 'N/A' if not parsable to integer or is 0
   function formatTaxValue(val: any) {
     const parsed = parseInt(val, 10);
-    if (isNaN(parsed) || parsed === 0) return '-';
+    if (isNaN(parsed) || parsed === 0) return 'N/A';
     if (typeof val === 'number') return `$${val.toLocaleString()}`;
     if (typeof val === 'string' && /^\$?\d/.test(val)) return val;
-    return '-';
+    return 'N/A';
   }
 
   const drawerOptions = [
     {
-      title: `FY${displayFY} Gross Tax`,
-      value: formatTaxValue(sectionData.propertyGrossTax),
+      title: isPrelimPeriod ? `FY${displayFY} Estimated Tax (Q1 + Q2)` : `FY${displayFY} Gross Tax`,
+      value: formatTaxValue(isPrelimPeriod ? sectionData.estimatedTotalFirstHalf : sectionData.propertyGrossTax),
     },
     {
       title: 'Residential Exemptions',
-      value: formatTaxValue(sectionData.residentialExemptionAmount) !== '-' ? `-${formatTaxValue(sectionData.residentialExemptionAmount)}` : '---',
+      value: (() => {
+        if (residentialGranted) {
+          return isPrelimPeriod ? 'Amount to be decided' : `- ${formatTaxValue(sectionData.residentialExemptionAmount)}`;
+        }
+        if (isPrelimPeriod && residentialExemptionApproved) {
+          return getPropertyTaxMessage('to_be_decided');
+        }
+        return formatTaxValue(sectionData.residentialExemptionAmount) !== 'N/A' ? `- ${formatTaxValue(sectionData.residentialExemptionAmount)}` : 'N/A';
+      })(),
       message:
         (() => {
           if (residentialGranted) {
-            return 'A Residential Exemption has been granted for this parcel.';
-          } else if (!isResidentialEligible) {
-            return `This type of parcel was not eligible for a residential exemption in FY${displayFY}.`;
+            return getPropertyTaxMessage('residential_exemption_granted');
           }
           const phase = residentialExemptionPhase.phase;
           if (phase === 'open') {
-            return 'You may be eligible for a Residential Exemption. See below for application details.';
-          } else if (phase === 'after_deadline' || phase === 'after_grace' || phase === 'reference_only') {
-            return `This parcel was eligible but not granted a Residential Exemption in FY${displayFY}.`;
+            return getPropertyTaxMessage('residential_open_phase');
+          } else if (phase === 'preliminary') {
+            return residentialExemptionApproved 
+              ? getPropertyTaxMessage('residential_preliminary_submitted', { current_fy: displayFY })
+              : getPropertyTaxMessage('residential_preliminary_not_submitted', { current_fy: displayFY });
+          } else if (phase === 'after_deadline' || phase === 'after_grace') {
+            return getPropertyTaxMessage('residential_deadline_passed', {
+              next_year: fiscalYear,
+              deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(exemptionYear)),
+              next_fy: fiscalYear + 1
+            });
           } else {
-            return `This parcel was eligible but not granted a Residential Exemption in FY${displayFY}.`;
+            return getPropertyTaxMessage('residential_deadline_passed', {
+              next_year: fiscalYear,
+              deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(exemptionYear)),
+              next_fy: fiscalYear + 1
+            });
           }
         })(),
       description: (
         <div className={styles.exemptionContent}>
           <div className={styles.text}>
-            If you own and live in your property as a primary residence, you may qualify for the residential exemption. This fiscal year, the residential exemption will save qualified Boston homeowners up to ${residentialExemptionMaxAmount.toLocaleString()}. The exemption amount will be applied to your third-quarter tax bill issued in late December. If you didn’t get the credit on your bill and believe you should have, you can apply for a residential exemption.
+            {getPropertyTaxMessage('residential_exemption_description', { max_amount: residentialExemptionMaxAmount.toLocaleString() })}
           </div>
           <div className={styles.text} style={{ fontWeight: 'bold'}}>
             {residentialGranted
-              ? 'A Residential Exemption has been granted for this parcel.'
+              ? getPropertyTaxMessage('residential_exemption_granted')
               : residentialExemptionPhase.message}
           </div>
           <ul className={styles.list}>
             {residentialExemptionPhase.phase === 'open' && (
               <>
                 <li>
-                  <strong>Deadline for submission:</strong> Tuesday, April 1, {fiscalYear}
+                  <strong>{getPropertyTaxMessage('deadline_for_submission')}</strong> Tuesday, April 1, {exemptionYear + 1}
                 </li>
                 <li>
                   <a
                     className="usa-link usa-link--external"
                     rel="noreferrer"
                     target="_blank"
-                    href={`https://www.boston.gov/assessing-online/form/resexempt/FY${fiscalYear}/${sectionData.parcelId}`}
+                    href={getPropertyTaxMessage('residential_exemption_url', { current_fy: fiscalYear, parcel_id: sectionData.parcelId })}
                   >
-                    Download Residential Exemptions Application (PDF)
+                    {getPropertyTaxMessage('download_residential_exemption')}
                   </a>
                 </li>
               </>
@@ -123,42 +157,60 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
     },
     {
       title: 'Personal Exemptions',
-      value: formatTaxValue(sectionData.personalExemptionAmount) !== '-' ? `-${formatTaxValue(sectionData.personalExemptionAmount)}` : '-',
+      value: (() => {
+        if (personalGranted) {
+          return isPrelimPeriod ? 'Amount to be decided' : `- ${formatTaxValue(sectionData.personalExemptionAmount)}`;
+        }
+        if (isPrelimPeriod && personalExemptionApproved) {
+          return getPropertyTaxMessage('to_be_decided');
+        }
+        return formatTaxValue(sectionData.personalExemptionAmount) !== 'N/A' ? `- ${formatTaxValue(sectionData.personalExemptionAmount)}` : 'N/A';
+      })(),
       message:
         (() => {
           if (personalGranted) {
-            return 'A Personal Exemption has been granted for this parcel.';
-          } else if (!isPersonalEligible) {
-            return `This type of parcel was not eligible for a personal exemption in FY${displayFY}.`;
+            return getPropertyTaxMessage('personal_exemption_granted');
           }
-          const phase = getExemptionPhase(now, fiscalYear, { isEligible: isPersonalEligible, grantedCount: personalGrantedCount, type: 'Personal' }).phase;
+          const phase = personalExemptionPhase.phase;
           if (phase === 'open') {
-            return 'You may be eligible for a Personal Exemption. See below for application details.';
-          } else if (phase === 'after_deadline' || phase === 'after_grace' || phase === 'reference_only') {
-            return `This parcel was eligible but not granted a Personal Exemption in FY${displayFY}.`;
+            return getPropertyTaxMessage('personal_open_phase');
+          } else if (phase === 'preliminary') {
+            return personalExemptionApproved 
+              ? getPropertyTaxMessage('personal_preliminary_submitted', { current_fy: displayFY })
+              : getPropertyTaxMessage('personal_preliminary_not_submitted', { current_fy: displayFY });
+          } else if (phase === 'after_deadline' || phase === 'after_grace') {
+            return getPropertyTaxMessage('personal_deadline_passed', {
+              next_year: fiscalYear,
+              deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(exemptionYear)),
+              next_fy: fiscalYear + 1
+            });
           } else {
-            return `This parcel was eligible but not granted a Personal Exemption in FY${displayFY}.`;
+            return getPropertyTaxMessage('personal_deadline_passed', {
+              next_year: fiscalYear,
+              deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(exemptionYear)),
+              next_fy: fiscalYear + 1
+            });
           }
         })(),
       description: (
         <div className={styles.exemptionContent}>
           <div className={styles.text}>
-            Through an exemption, the City releases you from paying part or all of your property taxes.
-          </div>
+            {getPropertyTaxMessage('personal_exemption_description')}
+                  </div>
           <div className={styles.text} style={{ fontWeight: 'bold' }}>
             {personalGranted
-              ? 'A Personal Exemption has been granted for this parcel.'
-              : getExemptionPhase(now, fiscalYear, { isEligible: isPersonalEligible, grantedCount: personalGrantedCount, type: 'Personal' }).message}
-          </div>
+              ? getPropertyTaxMessage('personal_exemption_granted')
+              : personalExemptionPhase.message}
+              </div>
           <ul className={styles.list}>
             <li>
               <a
                 className="usa-link usa-link--external"
                 rel="noreferrer"
                 target="_blank"
-                href="https://www.boston.gov/departments/assessing/blind-exemption-37a"
+                href={getPersonalExemptionLink('blind_exemption')}
               >
-                Blind exemption 37A
+                {getPersonalExemptionLabel('blind_exemption')}
               </a>
             </li>
             <li>
@@ -166,9 +218,9 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
                 className="usa-link usa-link--external"
                 rel="noreferrer"
                 target="_blank"
-                href="https://www.boston.gov/departments/assessing/elderly-exemption-41c"
+                href={getPersonalExemptionLink('elderly_exemption')}
               >
-                Elderly exemption 41D
+                {getPersonalExemptionLabel('elderly_exemption')}
               </a>
             </li>
             <li>
@@ -176,9 +228,9 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
                 className="usa-link usa-link--external"
                 rel="noreferrer"
                 target="_blank"
-                href="https://www.boston.gov/departments/assessing/veterans-exemption-22"
+                href={getPersonalExemptionLink('veterans_exemption')}
               >
-                Veterans Exemption 22
+                {getPersonalExemptionLabel('veterans_exemption')}
               </a>
             </li>
             <li>
@@ -186,9 +238,9 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
                 className="usa-link usa-link--external"
                 rel="noreferrer"
                 target="_blank"
-                href="https://www.boston.gov/departments/assessing/surviving-spouse-minor-child-deceased-parent-elderly-exemption-17d"
+                href={getPersonalExemptionLink('surviving_spouse_exemption')}
               >
-                Surviving Spouse, Minor Child of Deceased Parent, Elderly Exemption 17D
+                {getPersonalExemptionLabel('surviving_spouse_exemption')}
               </a>
             </li>
             <li>
@@ -196,9 +248,9 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
                 className="usa-link usa-link--external"
                 rel="noreferrer"
                 target="_blank"
-                href="https://www.boston.gov/departments/assessing/national-guard-exemption"
+                href={getPersonalExemptionLink('national_guard_exemption')}
               >
-                National Guard Exemption
+                {getPersonalExemptionLabel('national_guard_exemption')}
               </a>
             </li>
             <li>
@@ -206,9 +258,9 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
                 className="usa-link usa-link--external"
                 rel="noreferrer"
                 target="_blank"
-                href="https://www.boston.gov/departments/assessing/co-op-housing-exemption"
+                href={getPersonalExemptionLink('coop_housing_exemption')}
               >
-                Co-op Housing Exemption
+                {getPersonalExemptionLabel('coop_housing_exemption')}
               </a>
             </li>
           </ul>
@@ -217,15 +269,15 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
     },
     {
       title: 'Community Preservation',
-      value: formatTaxValue(sectionData.communityPreservationAmount) !== '-' ? `-${formatTaxValue(sectionData.communityPreservationAmount)}` : '-',
+      value: formatTaxValue(sectionData.communityPreservationAmount) !== 'N/A' ? `+ ${formatTaxValue(sectionData.communityPreservationAmount)}` : '-',
       description: (
         <div className={styles.text}>
-          We calculate the CPA surcharge by first deducting $100,000 from the value of your property. Next, we recalculate the tax and apply your residential exemption and any personal exemptions, if you have them. To learn more visit the{' '}
+          {getPropertyTaxMessage('community_preservation_description')}{' '}
           <a
             className="usa-link usa-link--external"
             rel="noreferrer"
             target="_blank"
-            href="https://www.boston.gov/departments/assessing/community-preservation-act"
+            href={getPropertyTaxMessage('community_preservation_url')}
           >
             Community Preservation Act
           </a>
@@ -233,27 +285,27 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
       ),
     },
     {
-      title: <div className={styles.netTax}>FY{displayFY} Net Tax</div>,
-      value: <div className={styles.netTax}>{formatTaxValue(sectionData.propertyNetTax)}</div>,
+      title: <div className={styles.netTax}>{isPrelimPeriod ? `FY${displayFY} Estimated Total, First Half (Q1 + Q2)` : `FY${displayFY} Net Tax`}</div>,
+      value: <div className={styles.netTax}>{formatTaxValue(isPrelimPeriod ? sectionData.totalBilledAmount : sectionData.propertyNetTax)}</div>,
     },
   ];
 
   return (
-    <PropertyDetailsSection title="Property Taxes" date={date}>
+    <PropertyDetailsSection title="Property Taxes">
       <div className={styles.taxRateContainer}>
-        <h3 className={styles.header}>FY{fiscalYear} Tax Rate</h3>
+        <h3 className={styles.header}>{getPropertyTaxMessage('tax_rate_header', { current_fy: displayFY })}</h3>
         <div className={styles.text}>
-          For more information on the breakdown of the tax calculation, visit{' '}
+          {getPropertyTaxMessage('tax_rate_description')}{' '}
           <a
             className="usa-link usa-link--external"
             rel="noreferrer"
             target="_blank"
-            href="https://www.boston.gov/departments/assessing/how-we-tax-your-property"
+            href={getPropertyTaxMessage('how_we_tax_url')}
           >
             How we tax your property
           </a>
           .
-        </div>
+          </div>
 
         <div className={styles.cardGroup}>
           <PropertyDetailsCardGroup cards={taxRateCards}/>
@@ -263,9 +315,9 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
           className="usa-link usa-link--external"
           rel="noreferrer"
           target="_blank"
-          href="https://www.boston.gov/sites/default/files/file/2024/01/FY24%20Tax%20Rate%20History_1.pdf"
+          href={getPropertyTaxMessage('tax_rate_history_url')}
         >
-          View tax rate history (PDF)
+          {getPropertyTaxMessage('view_tax_rate_history')}
         </a>
       </div>
 
@@ -275,33 +327,54 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
       <MessageBox>
         {(() => {
           const nowMonth = now.getMonth();
-          const nowYear = now.getFullYear();
           if (nowMonth >= 6 && nowMonth < 12) { // July (6) to December (11)
             return (
               <>
-                Property tax information for the <strong>upcoming FY{fiscalYear}</strong> will be available for abatements and exemptions on January 1, {fiscalYear}.<br />
-                Currently, we are displaying values from the <strong>past FY{fiscalYear - 1}</strong> for reference purposes only.
+                {getPropertyTaxMessage('prelim_period_message', { 
+                  current_fy: fiscalYear, 
+                  prev_fy: fiscalYear - 1, 
+                  next_fy: fiscalYear + 1, 
+                  next_year: calendarYear + 1 
+                })}<br />
+                Applications for FY{fiscalYear + 1} will become available on January 1, {calendarYear + 1}.
               </>
             );
           } else if (nowMonth < 6) { // January (0) to June (5)
             return (
               <>
-                Property tax information for the <strong>currently open FY{fiscalYear}</strong> is shown below.
+                {getPropertyTaxMessage('regular_period_message', { 
+                  current_fy: fiscalYear, 
+                  next_fy: fiscalYear + 1, 
+                  next_year: calendarYear + 1 
+                })}
               </>
             );
           } else { // fallback
             return (
               <>
-                Property tax information for FY{fiscalYear} is shown below.
+                {getPropertyTaxMessage('fallback_message', { current_fy: fiscalYear })}
               </>
             );
           }
         })()}
       </MessageBox>
 
-      <h3 className={styles.header}>Net Tax</h3>
+      <h3 className={styles.header}>
+        {isPrelimPeriod 
+          ? getPropertyTaxMessage('net_tax_preliminary_header', { 
+              current_fy: displayFY, 
+              prev_year: displayFY - 1 
+            })
+          : getPropertyTaxMessage('net_tax_header')
+        }
+      </h3>
       <div className={styles.text}>
-        Through exemptions, the City releases you from paying part or all of your property taxes. There's also other legally required fees and benefits that will change the amount you pay for taxes. After all of these calculations, the 'Net taxes' include the' final amount you are required to pay.
+        {isPrelimPeriod 
+          ? getPropertyTaxMessage('net_tax_preliminary_description', { 
+              next_year: displayFY + 1 
+            })
+          : getPropertyTaxMessage('net_tax_description')
+        }
       </div>
 
       <div className={styles.accordion}>
@@ -310,18 +383,18 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
 
       <div className={styles.buttonContainer}>
         <a
-          href={`https://www.boston.gov/real-estate-taxes?input1=${sectionData.parcelId}`}
+          href={getPropertyTaxMessage('pay_taxes_url', { parcel_id: sectionData.parcelId })}
           target="_blank"
           rel="noreferrer"
           className={styles.payTaxesLink}
         >
           <IconButton 
-            text="Pay Your Taxes"
+            text={getPropertyTaxMessage('pay_your_taxes')}
             variant="primary"
           />
         </a>
         <span className={styles.printPayTaxesLink}>
-          Pay your taxes via https://www.boston.gov/real-estate-taxes?input1={sectionData.parcelId}
+          Pay your taxes via {getPropertyTaxMessage('pay_taxes_url', { parcel_id: sectionData.parcelId })}
         </span>
       </div>
     </PropertyDetailsSection>

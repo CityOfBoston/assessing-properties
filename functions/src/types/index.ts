@@ -9,6 +9,7 @@ export interface OverviewSectionData {
   propertyType: string;
   parcelId: string;
   netTax: number;
+  totalBilledAmount: number;
   personalExemptionFlag: boolean;
   residentialExemptionFlag: boolean;
   personalExemptionAmount: number;
@@ -81,7 +82,11 @@ export interface PropertyTaxesSectionData {
   personalExemptionAmount: number;
   communityPreservationAmount: number;
   propertyNetTax: number;
-  parcelId: string
+  parcelId: string;
+  personalExemptionAmount1: number;
+  personalExemptionAmount2: number;
+  estimatedTotalFirstHalf: number;
+  totalBilledAmount: number;
 }
 
 /**
@@ -162,6 +167,10 @@ export class PropertyDetails implements PropertyDetailsData {
     residentialExemptionAmount: number;
     personalExemptionAmount: number;
     communityPreservationAmount: number;
+    personalExemptionAmount1: number;
+    personalExemptionAmount2: number;
+    estimatedTotalFirstHalf: number;
+    totalBilledAmount: number;
   }) {
     // Construct overview section
     this.overview = {
@@ -175,7 +184,8 @@ export class PropertyDetails implements PropertyDetailsData {
       personalExemptionFlag: data.personalExemptionFlag,
       residentialExemptionFlag: data.residentialExemptionFlag,
       personalExemptionAmount: data.personalExemptionAmount,
-      residentialExemptionAmount: data.residentialExemptionAmount
+      residentialExemptionAmount: data.residentialExemptionAmount,
+      totalBilledAmount: data.totalBilledAmount,
     };
 
     // Construct property value section
@@ -228,6 +238,10 @@ export class PropertyDetails implements PropertyDetailsData {
       communityPreservationAmount: data.communityPreservationAmount,
       propertyNetTax: data.propertyNetTax,
       parcelId: data.parcelId,
+      personalExemptionAmount1: data.personalExemptionAmount1,
+      personalExemptionAmount2: data.personalExemptionAmount2,
+      estimatedTotalFirstHalf: data.estimatedTotalFirstHalf,
+      totalBilledAmount: data.totalBilledAmount,
     };
   }
 }
