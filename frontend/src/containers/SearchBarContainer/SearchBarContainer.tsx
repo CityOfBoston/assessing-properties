@@ -3,6 +3,7 @@ import { AnnotatedSearchBar } from '../../components/AnnotatedSearchBar';
 import { LoadingIndicator } from '../../components/LoadingIndicator';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getComponentText } from '@utils/contentMapper';
 
 interface SearchBarContainerProps {
   onSelect?: (pid: string, fullAddress: string) => void;
@@ -39,6 +40,7 @@ export const SearchBarContainer = ({
   preloadValue,
 }: SearchBarContainerProps) => {
   const navigate = useNavigate();
+  const searchBarContent = getComponentText('AnnotatedSearchBar');
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasBeenFocused, setHasBeenFocused] = useState(false);
@@ -219,6 +221,18 @@ export const SearchBarContainer = ({
       onClear={handleClear}
       inputRef={inputRef}
       showSuggestions={showSuggestions && isFocused && !isLoading}
+      searchButtonText={searchBarContent.searchButtonText}
+      clearButtonText={searchBarContent.clearButtonText}
+      cancelButtonText={searchBarContent.cancelButtonText}
+      loadingText={searchBarContent.loadingText}
+      noResultsText={searchBarContent.noResultsText}
+      parcelIdPrefix={searchBarContent.parcelIdPrefix}
+      searchInputAriaLabel={searchBarContent.searchInputAriaLabel}
+      clearButtonAriaLabel={searchBarContent.clearButtonAriaLabel}
+      searchButtonAriaLabel={searchBarContent.searchButtonAriaLabel}
+      suggestionsAriaLabel={searchBarContent.suggestionsAriaLabel}
+      modalAriaLabel={searchBarContent.modalAriaLabel}
+      closeModalAriaLabel={searchBarContent.closeModalAriaLabel}
     />
   );
 }; 

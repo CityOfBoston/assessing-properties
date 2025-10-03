@@ -1,83 +1,102 @@
 /**
  * ContactUsSection component displays contact information and support resources
  */
-import React from 'react';
 import PropertyDetailsSection from '../PropertyDetailsSection';
 import styles from './ContactUsSection.module.scss';
-import assessingLogo from '@assets/assessing_logo.svg';
+import ReactMarkdown from 'react-markdown';
+import { getComponentText } from '@utils/contentMapper';
 
-interface ContactBoxProps {
-  iconSrc: string;
-  children: React.ReactNode;
+interface ContactUsSectionProps {
+  title: string;
 }
 
-const ContactBox: React.FC<ContactBoxProps> = ({ iconSrc, children }) => {
-  return (
-    <div className={styles.contactBox}>
-      <img src={iconSrc} alt="Contact" className={styles.icon}/>
-      {children}
-    </div>
-  );
-};
+export default function ContactUsSection({ title }: ContactUsSectionProps) {
+  const content = getComponentText('ContactUsSection');
+  const { paragraphs } = content;
 
-interface ContactUsSectionProps {}
 
-export default function ContactUsSection({}: ContactUsSectionProps) {
   return (
-    <PropertyDetailsSection title="Contact Us">
+    <PropertyDetailsSection title={title}>
       <div className={styles.container}>
-        <ContactBox iconSrc={assessingLogo}>
-          <ul className={styles.list}>
-            <li>
-              Email our staff at{' '}
-              <a href="mailto:TRACFAXSG@boston.gov" className="usa-link">TRACFAXSG@boston.gov</a>
-            </li>
-            <li>
-              For current fiscal year tax bill Questions, contact the{' '}
-              <a
-                className="usa-link usa-link--external"
-                rel="noreferrer"
-                target="_blank"
-                href="https://www.boston.gov/departments/assessing"
-              >
-                Taxpayer Referral & Assistance Center
-              </a>
-            </li>
-            <li>
-              Visit{' '}
-              <a
-                className="usa-link usa-link--external"
-                rel="noreferrer"
-                target="_blank"
-                href="https://www.boston.gov/departments/assessing"
-              >
-                The Assessing Department
-              </a>{' '}
-              for more information
-            </li>
-          </ul>
-        </ContactBox>
+        <div className={styles.paragraph}>
+          <ReactMarkdown>
+            {paragraphs.exemptions.text}
+          </ReactMarkdown>
+          {' '}
+          <a
+            className="usa-link usa-link--external"
+            rel="noreferrer"
+            target="_blank"
+            href={paragraphs.exemptions.link.url}
+          >
+            {paragraphs.exemptions.link.text}
+          </a>
+          {' '}
+          {paragraphs.exemptions.suffix}
+          {' '}
+          <a
+            href={paragraphs.exemptions.phone.url}
+            className="usa-link"
+            aria-label={paragraphs.exemptions.phone.label}
+          >
+            {paragraphs.exemptions.phone.text}
+          </a>
+          {' '}
+          or emailing
+          {' '}
+          <a
+            href={paragraphs.exemptions.email.url}
+            className="usa-link"
+          >
+            {paragraphs.exemptions.email.text}
+          </a>
+          .
+        </div>
 
-        <ContactBox iconSrc="/cob-uswds/img/usa-icons/phone.svg">
-          <ul className={styles.list}>
-            <li>
-              For prior fiscal year tax payments, interest charges, fees, etc. contact the Collector's office at{' '}
-              <a href="tel:617-635-4131" className="usa-link">617-635-4131</a>
-            </li>
-            <li>
-              Main Number:{' '}
-              <a href="tel:617-635-4321" className="usa-link">617-635-4321</a>
-            </li>
-            <li>
-              Personal Property:{' '}
-              <a href="tel:617-635-1165" className="usa-link">617-635-1165</a>
-            </li>
-            <li>
-              Tax Data Administration:{' '}
-              <a href="tel:617-635-3783" className="usa-link">617-635-3783</a>
-            </li>
-          </ul>
-        </ContactBox>
+        <div className={styles.paragraph}>
+          <ReactMarkdown>
+            {paragraphs.billing.text}
+          </ReactMarkdown>
+          {' '}
+          <a
+            href={paragraphs.billing.phone.url}
+            className="usa-link"
+            aria-label={paragraphs.billing.phone.label}
+          >
+            {paragraphs.billing.phone.text}
+          </a>
+          .
+        </div>
+
+        <div className={styles.paragraph}>
+          <ReactMarkdown>
+            {paragraphs.values.text}
+          </ReactMarkdown>
+          {' '}
+          <a
+            href={paragraphs.values.phone.url}
+            className="usa-link"
+            aria-label={paragraphs.values.phone.label}
+          >
+            {paragraphs.values.phone.text}
+          </a>
+          .
+        </div>
+
+        <div className={styles.paragraph}>
+          <ReactMarkdown>
+            {paragraphs.ownership.text}
+          </ReactMarkdown>
+          {' '}
+          <a
+            href={paragraphs.ownership.phone.url}
+            className="usa-link"
+            aria-label={paragraphs.ownership.phone.label}
+          >
+            {paragraphs.ownership.phone.text}
+          </a>
+          .
+        </div>
       </div>
     </PropertyDetailsSection>
   );

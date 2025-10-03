@@ -38,15 +38,15 @@ export const fetchPropertyDetailsByParcelId = createCallable(async (data: { parc
     if (typeof data.date !== "string") {
       throw new Error("date must be a string in YYYY-MM-DD format");
     }
-    
+
     // Validate date format
     if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
       throw new Error("date must be in YYYY-MM-DD format");
     }
-    
-    const [year, month, day] = data.date.split('-').map(Number);
+
+    const [year, month, day] = data.date.split("-").map(Number);
     date = new Date(year, month - 1, day);
-    
+
     // Validate the date is valid
     if (isNaN(date.getTime())) {
       throw new Error("Invalid date provided");

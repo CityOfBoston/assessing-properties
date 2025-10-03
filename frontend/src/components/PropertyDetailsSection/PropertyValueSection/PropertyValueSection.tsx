@@ -3,12 +3,17 @@ import PropertyDetailsSection from '../PropertyDetailsSection';
 import PropertyValuesBarChart from '@components/PropertyValuesBarChart';
 import ResponsiveTable from '@components/ResponsiveTable';
 import styles from './PropertyValueSection.module.scss';
+import sharedStyles from '../PropertyDetailsSection.module.scss';
 import { PropertyValueSectionData } from '@src/types';
+import { getComponentText } from '@utils/contentMapper';
 
-interface PropertyValueSectionProps extends PropertyValueSectionData {}
+interface PropertyValueSectionProps extends PropertyValueSectionData {
+  title: string;
+}
 
 export default function PropertyValueSection(props: PropertyValueSectionProps) {
   const sectionData = props;
+  const content = getComponentText('PropertyValueSection');
   const [showAllValues, setShowAllValues] = useState(false);
   const valueHistoryRef = useRef<HTMLDivElement>(null);
   const valueHistoryHeaderRef = useRef<HTMLHeadingElement>(null);
@@ -23,7 +28,7 @@ export default function PropertyValueSection(props: PropertyValueSectionProps) {
 
   // Format data for the table (descending order: latest to earliest)
   const tableData = displayData.map(({ year, value }) => ({
-    'Year': year,
+    'Fiscal Year': year.toString(),
     'Assessed Value': value != null ? `$${value.toLocaleString()}` : 'N/A',
   }));
 
@@ -40,42 +45,40 @@ export default function PropertyValueSection(props: PropertyValueSectionProps) {
   };
 
   return (
-    <PropertyDetailsSection title="Property Value">
-      <p className={styles.description}>
-      Your assessed property value is made up of two parts: the value of the 
-      building and the value of the land. To calculate these values, assessors 
-      use a combination of three approaches, read more about{' '}
+    <PropertyDetailsSection title={props.title}>
+      <div className={sharedStyles.paragraph}>
+        {content.description}{' '}
         <a
           className="usa-link usa-link--external"
           rel="noreferrer"
           target="_blank"
-          href="https://www.boston.gov/departments/assessing/how-we-estimate-your-propertys-value"
+          href={content.howWeEstimateLink.url}
         >
-          how we estimate your property's value
+          {content.howWeEstimateLink.text}
         </a>.
-      </p>
+      </div>
     
       <PropertyValuesBarChart
-        title="Property Value History"
+        title={content.chart.title}
         value={formattedValue}
         data={sortedData.slice(-5)}
       />
 
       <div className={styles.valueHistory} ref={valueHistoryRef}>
-        <h3 tabIndex={-1} ref={valueHistoryHeaderRef}>VALUE HISTORY</h3>
-        <p><strong>Note:</strong> The assessed value is the actual billed assessment.</p>
+        <h3 tabIndex={-1} ref={valueHistoryHeaderRef}>{content.valueHistory.title}</h3>
+        <div className={sharedStyles.paragraph}><strong>Note:</strong> {content.valueHistory.note}</div>
         <div className={styles.screenTable}>
           <ResponsiveTable data={tableData} />
         </div>
         <div className={styles.printTable}>
-          <ResponsiveTable data={sortedData.slice().reverse().map(({ year, value }) => ({ 'Year': year, 'Assessed Value': value != null ? `$${value.toLocaleString()}` : 'N/A' }))} />
+          <ResponsiveTable data={sortedData.slice().reverse().map(({ year, value }) => ({ 'Fiscal Year': `FY${(year + 1).toString().slice(-2)}`, 'Assessed Value': value != null ? `$${value.toLocaleString()}` : 'N/A' }))} />
         </div>
         {sortedData.length > 5 && (
           <button
             className={styles.seeMoreButton}
             onClick={handleSeeMoreLess}
           >
-            {showAllValues ? 'See Less' : 'See More'}
+            {showAllValues ? content.valueHistory.buttons.seeLess : content.valueHistory.buttons.seeMore}
             <span className={`${styles.arrow} ${showAllValues ? styles.up : ''}`} style={{ color: '#1871BD' }} />
           </button>
         )}

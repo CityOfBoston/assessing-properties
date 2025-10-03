@@ -1,20 +1,32 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import WelcomePage from '@pages/WelcomePage';
 import SearchResultsPage from '@pages/SearchResultsPage';
 import PropertyDetailsPage from '@src/pages/PropertyDetailsPage';
+import MaintenancePage from '@pages/MaintenancePage';
 import { ParcelPairingsProvider } from '@src/hooks/useParcelPairingsContext';
 import { DateProvider } from '@src/hooks/useDateContext';
+import { getComponentText } from '@utils/contentMapper';
 import '@styles/main.scss';
 
 export const App = () => {
+  const config = getComponentText('config');
   return (
     <ParcelPairingsProvider>
       <Router>
         <DateProvider>
           <Routes>
-            <Route path="/" element={<WelcomePage />} />
-            <Route path="/search" element={<SearchResultsPage />} />
-            <Route path="/details" element={<PropertyDetailsPage />} />
+            {config.maintenance.enabled ? (
+              <>
+                <Route path="/maintenance" element={<MaintenancePage />} />
+                <Route path="*" element={<Navigate to="/maintenance" replace />} />
+              </>
+            ) : (
+              <>
+                <Route path="/" element={<WelcomePage />} />
+                <Route path="/search" element={<SearchResultsPage />} />
+                <Route path="/details" element={<PropertyDetailsPage />} />
+              </>
+            )}
           </Routes>
         </DateProvider>
       </Router>

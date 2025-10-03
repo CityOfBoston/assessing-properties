@@ -2,21 +2,21 @@
  * Helper function to determine fiscal year and quarter based on a date.
  * If the date is before 7/1 of the year of the date, return the year of the date and quarter "3".
  * Otherwise, return the next year to the year of the date and quarter "1".
- * 
+ *
  * @param date The date to determine fiscal year and quarter for
  * @return Object containing year and quarter
  */
 export function getFiscalYearAndQuarter(date: Date): { year: number; quarter: string } {
   const year = date.getFullYear();
   const month = date.getMonth(); // 0-indexed: 0=Jan, 6=July
-  
+
   // If date is before July 1st (month < 6), return current year with quarter 3
   if (month < 6) {
-    return { year, quarter: "3" };
+    return {year, quarter: "3"};
   }
-  
+
   // If date is on or after July 1st (month >= 6), return next year with quarter 1
-  return { year: year + 1, quarter: "1" };
+  return {year: year + 1, quarter: "1"};
 }
 
 /**
@@ -36,8 +36,7 @@ const residentialPropertyAttributesDataLayerUrl = `${baseUrl}/6`;
 const currentOwnersDataLayerUrl = `${baseUrl}/7`;
 const propertiesWebAppDataLayerUrl = `${baseUrl}/8`;
 const condoAttributesDataLayerUrl = `${baseUrl}/9`;
-//const outbuildingsDataLayerUrl = `${baseUrl}/10`;
-
+const outbuildingsDataLayerUrl = `${baseUrl}/10`;
 
 // Type definitions for ArcGIS Feature and FeatureSet
 interface ArcGISFeature {
@@ -133,41 +132,41 @@ const fetchEGISData = async (url: string, query: string): Promise<ArcGISFeature[
 /**
  * Helper function to filter results for the highest fiscal year and quarter.
  * This is used when no specific date is provided and we want the most recent data.
- * 
+ *
  * @param features Array of ArcGIS features to filter
  * @return Filtered array with only the highest fiscal year and quarter entries
  */
 function filterForHighestFiscalYearAndQuarter(features: ArcGISFeature[]): ArcGISFeature[] {
   if (features.length === 0) return features;
-  
+
   // Debug: Log sample feature attributes to understand the data structure
-  console.log(`[EGISClient] Sample feature attributes:`, features[0]?.attributes);
-  
+  console.log("[EGISClient] Sample feature attributes:", features[0]?.attributes);
+
   // Debug: Log all fiscal years and quarters present
-  const fiscalYears = features.map(f => f.attributes.fiscal_year).filter(Boolean);
-  const quarters = features.map(f => f.attributes.quarter).filter(Boolean);
-  console.log(`[EGISClient] Fiscal years found:`, [...new Set(fiscalYears)]);
-  console.log(`[EGISClient] Quarters found:`, [...new Set(quarters)]);
-  
+  const fiscalYears = features.map((f) => f.attributes.fiscal_year).filter(Boolean);
+  const quarters = features.map((f) => f.attributes.quarter).filter(Boolean);
+  console.log("[EGISClient] Fiscal years found:", [...new Set(fiscalYears)]);
+  console.log("[EGISClient] Quarters found:", [...new Set(quarters)]);
+
   // Find the highest fiscal year
-  const maxYear = Math.max(...features.map(f => f.attributes.fiscal_year || 0));
-  console.log(`[EGISClient] Highest fiscal year:`, maxYear);
-  
+  const maxYear = Math.max(...features.map((f) => f.attributes.fiscal_year || 0));
+  console.log("[EGISClient] Highest fiscal year:", maxYear);
+
   // Filter to only the highest year
-  const maxYearFeatures = features.filter(f => f.attributes.fiscal_year === maxYear);
+  const maxYearFeatures = features.filter((f) => f.attributes.fiscal_year === maxYear);
   console.log(`[EGISClient] Features with highest fiscal year (${maxYear}):`, maxYearFeatures.length);
-  
+
   if (maxYearFeatures.length === 0) return features;
-  
+
   // Find the highest quarter within the highest year
-  const maxQuarter = Math.max(...maxYearFeatures.map(f => parseInt(f.attributes.quarter) || 0));
+  const maxQuarter = Math.max(...maxYearFeatures.map((f) => parseInt(f.attributes.quarter) || 0));
   console.log(`[EGISClient] Highest quarter in year ${maxYear}:`, maxQuarter);
-  
+
   // Filter to only the highest quarter within the highest year
-  const result = maxYearFeatures.filter(f => parseInt(f.attributes.quarter) === maxQuarter);
-  
+  const result = maxYearFeatures.filter((f) => parseInt(f.attributes.quarter) === maxQuarter);
+
   console.log(`[EGISClient] Filtered ${features.length} features to ${result.length} features (FY${maxYear} Q${maxQuarter})`);
-  
+
   return result;
 }
 
@@ -182,7 +181,7 @@ function filterForHighestFiscalYearAndQuarter(features: ArcGISFeature[]): ArcGIS
  * @return The prioritized value
  */
 function prioritizeValue<T>(residentialValue: T | null | undefined, condoValue: T | null | undefined, exemptionValue: T | null | undefined): T | null | undefined {
-  const isValid = (v: any) => v !== null && v !== undefined && (typeof v === 'number' ? true : v !== '');
+  const isValid = (v: any) => v !== null && v !== undefined && (typeof v === "number" ? true : v !== "");
   if (isValid(residentialValue)) return residentialValue;
   if (isValid(condoValue)) return condoValue;
   if (isValid(exemptionValue)) return exemptionValue;
@@ -194,12 +193,12 @@ function prioritizeValue<T>(residentialValue: T | null | undefined, condoValue: 
  */
 function constructFullAddress(attrs: Record<string, any>): string {
   // Get and trim all parts, and apply proper case to each
-  const stNum = attrs.street_number ? String(attrs.street_number).trim() : '';
-  const stNumSuffix = attrs.street_number_suffix ? String(attrs.street_number_suffix).trim() : '';
-  const stName = attrs.street_name ? toProperCase(String(attrs.street_name).trim()) : '';
-  const unitNum = attrs.apt_unit ? String(attrs.apt_unit).trim() : '';
-  const city = attrs.city ? toProperCase(String(attrs.city).trim()) : '';
-  const zip = attrs.location_zip_code ? String(attrs.location_zip_code).trim() : '';
+  const stNum = attrs.street_number ? String(attrs.street_number).trim() : "";
+  const stNumSuffix = attrs.street_number_suffix ? String(attrs.street_number_suffix).trim() : "";
+  const stName = attrs.street_name ? toProperCase(String(attrs.street_name).trim()) : "";
+  const unitNum = attrs.apt_unit ? String(attrs.apt_unit).trim() : "";
+  const city = attrs.city ? (String(attrs.city).trim() === "=" ? "Boston" : toProperCase(String(attrs.city).trim())) : "";
+  const zip = attrs.location_zip_code ? String(attrs.location_zip_code).trim() : "";
 
   // Compose street number (may be a range)
   let fullStreetNumber = stNum;
@@ -209,57 +208,42 @@ function constructFullAddress(attrs: Record<string, any>): string {
 
   // Compose street address
   let address = fullStreetNumber;
-  if (stName) address += (address ? ' ' : '') + stName;
+  if (stName) address += (address ? " " : "") + stName;
   if (unitNum) address += ` #${unitNum}`;
   // Always add comma before city if city is present
   if (city) address += `, ${city}`;
   if (zip) address += `, ${zip}`;
 
-  return address || 'Address not available';
+  return address || "Address not available";
 }
 
 // Basic proper case function for text
 function toProperCase(str: string | undefined): string {
-  if (!str) return '';
-  
+  if (!str) return "";
+
   // If all uppercase and short (likely an abbreviation), keep as is
   if (/^[A-Z0-9 .,'&-]+$/.test(str) && str.length <= 6) return str;
-  
+
   // Basic proper case
-  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  return str.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Simple function to format owner names - just reorder and proper case
-function formatOwnerName(str: string | undefined): string {
-  if (!str) return '';
-  
+// Convert string to camel case (capitalize first letter of each word)
+function toCamelCase(str: string | undefined): string {
+  if (!str) return "";
+
   // If all uppercase and short (likely an abbreviation), keep as is
   if (/^[A-Z0-9 .,'&-]+$/.test(str) && str.length <= 6) return str;
-  
-  // If contains space but no comma or ampersand, assume it's a simple last name + first name format
-  if (str.includes(' ') && !/[,&]/.test(str)) {
-    const words = str.trim().split(/\s+/);
-    if (words.length === 2) { // If exactly two words, assume last name + first name
-      const [lastName, firstName] = words;
-      // Convert to "Firstname Lastname" format with proper case
-      const result = `${firstName} ${lastName}`;
-      return toProperCase(result);
-    }
-    if (words.length === 3) { // Handle middle names/initials
-      const [lastName, firstName, middleName] = words;
-      // If middle part looks like an initial (1-2 chars), keep it uppercase
-      if (middleName.length <= 2) {
-        const result = `${firstName} ${middleName} ${lastName}`;
-        return toProperCase(result).replace(new RegExp(`\\b${middleName}\\b`, 'i'), middleName.toUpperCase());
-      }
-      // Otherwise treat as first, middle, last
-      const result = `${firstName} ${middleName} ${lastName}`;
-      return toProperCase(result);
-    }
-  }
-  
-  // For anything else (business names, complex names), just do proper case
-  return toProperCase(str);
+
+  // First split only by spaces to handle multi-word names
+  return str.toLowerCase()
+    .split(" ")
+    .map((part) =>
+      // For each part (which might contain hyphens or apostrophes),
+      // split by word boundaries but preserve special characters
+      part.replace(/\b\w+\b/g, (word) => word.charAt(0).toUpperCase() + word.slice(1))
+    )
+    .join(" ");
 }
 
 /**
@@ -267,11 +251,11 @@ function formatOwnerName(str: string | undefined): string {
  * If the format is not matched, returns the original string trimmed. Handles null/undefined/empty gracefully.
  * Also applies proper case formatting to the result.
  * @param value The input string
- * @returns The portion after the last ' - ', or the original string trimmed, with proper case applied
+ * @return The portion after the last ' - ', or the original string trimmed, with proper case applied
  */
 export function parseAfterDash(value: string | null | undefined): string {
-  if (!value) return '';
-  const idx = value.indexOf(' - ');
+  if (!value) return "";
+  const idx = value.indexOf(" - ");
   const result = idx !== -1 ? value.slice(idx + 3).trim() : value.trim();
   return toProperCase(result);
 }
@@ -290,7 +274,7 @@ export const fetchAllParcelIdAddressPairingsHelper = async (): Promise<{parcelId
   const query = "?where=1=1&outFields=parcel_id,street_number,street_number_suffix,street_name,street_name_suffix,apt_unit,city,location_zip_code&returnGeometry=false&f=json";
   console.log(`[EGISClient] Parcel ID address pairings query: ${query}`);
   console.log(`[EGISClient] Full parcel ID address pairings URL: ${propertiesWebAppDataLayerUrl}/query${query}`);
-  
+
   const features = await fetchEGISData(propertiesWebAppDataLayerUrl, query);
 
   console.log(`[EGISClient] Processing ${features.length} features for parcel ID and address pairings`);
@@ -321,51 +305,51 @@ export const fetchAllParcelIdAddressPairingsHelper = async (): Promise<{parcelId
  * @return Array of property summary objects with parcelId, fullAddress, owner, and assessedValue.
  */
 export const fetchPropertySummariesByParcelIdsHelper = async (
-  parcelIds: string[], 
+  parcelIds: string[],
   fiscalYearAndQuarter?: { year: number; quarter: string }
 ): Promise<Array<{parcelId: string, fullAddress: string, owner: string, assessedValue: number}>> => {
   console.log(`[EGISClient] Starting fetchPropertySummariesByParcelIds for ${parcelIds.length} parcelIds`);
-  
+
   if (fiscalYearAndQuarter) {
     console.log(`[EGISClient] Using fiscal year: ${fiscalYearAndQuarter.year}, quarter: ${fiscalYearAndQuarter.quarter}`);
   } else {
-    console.log(`[EGISClient] No fiscal year/quarter specified, using latest available data`);
+    console.log("[EGISClient] No fiscal year/quarter specified, using latest available data");
   }
 
   // Build OR query for multiple parcel IDs
   const parcelIdConditions = parcelIds.map((id) => `parcel_id='${id}'`).join(" OR ");
-  
+
   // Add fiscal year and quarter filtering if provided
   let whereClause = `(${parcelIdConditions})`;
   if (fiscalYearAndQuarter) {
     whereClause += ` AND fiscal_year=${fiscalYearAndQuarter.year} AND quarter=${fiscalYearAndQuarter.quarter}`;
   }
-  
+
   const query = `?where=${whereClause}&outFields=parcel_id,street_name,street_number,street_number_suffix,apt_unit,city,location_zip_code,owner,total_value,fiscal_year,quarter&returnGeometry=false&f=json`;
 
   try {
     console.log(`[EGISClient] Property summaries query: ${query}`);
     console.log(`[EGISClient] Full property summaries URL: ${propertiesWebAppDataLayerUrl}/query${query}`);
-    
+
     const features = await fetchEGISData(propertiesWebAppDataLayerUrl, query);
 
     // Filter for highest fiscal year and quarter only if no specific date was provided
     let filteredFeatures = features;
     console.log(`[EGISClient] Raw features before filtering: ${features.length} records`);
-    console.log(`[EGISClient] fiscalYearAndQuarter parameter:`, fiscalYearAndQuarter);
-    
+    console.log("[EGISClient] fiscalYearAndQuarter parameter:", fiscalYearAndQuarter);
+
     if (!fiscalYearAndQuarter) {
-      console.log(`[EGISClient] No specific fiscal year/quarter provided, filtering for latest data...`);
+      console.log("[EGISClient] No specific fiscal year/quarter provided, filtering for latest data...");
       filteredFeatures = filterForHighestFiscalYearAndQuarter(features);
       console.log(`[EGISClient] After filtering for latest data: ${filteredFeatures.length} records`);
     } else {
-      console.log(`[EGISClient] Using specific fiscal year/quarter, no additional filtering needed`);
+      console.log("[EGISClient] Using specific fiscal year/quarter, no additional filtering needed");
     }
 
     const results = filteredFeatures.map((feature) => ({
       parcelId: feature.attributes.parcel_id,
       fullAddress: constructFullAddress(feature.attributes),
-      owner: formatOwnerName(feature.attributes.owner),
+      owner: toCamelCase(feature.attributes.owner) || "",
       assessedValue: feature.attributes.total_value,
     }));
 
@@ -396,7 +380,7 @@ export const fetchPropertySummaryByParcelIdHelper = async (parcelId: string): Pr
   try {
     console.log(`[EGISClient] Property summary query: ${query}`);
     console.log(`[EGISClient] Full property summary URL: ${propertiesWebAppDataLayerUrl}/query${query}`);
-    
+
     const features = await fetchEGISData(propertiesWebAppDataLayerUrl, query);
 
     // Filter for highest fiscal year and quarter
@@ -407,7 +391,7 @@ export const fetchPropertySummaryByParcelIdHelper = async (parcelId: string): Pr
       const result = {
         parcelId: feature.attributes.PID,
         fullAddress: constructFullAddress(feature.attributes),
-        owner: toProperCase(feature.attributes.OWNER),
+        owner: toCamelCase(feature.attributes.OWNER) || "",
         assessedValue: feature.attributes.TOTAL_VALUE, // Use TOTAL_VALUE field
       };
 
@@ -433,15 +417,15 @@ export const fetchPropertySummaryByParcelIdHelper = async (parcelId: string): Pr
  * @return A property details object with all current fields plus historical values and geometry.
  */
 export const fetchPropertyDetailsByParcelIdHelper = async (
-  parcelId: string, 
+  parcelId: string,
   fiscalYearAndQuarter?: { year: number; quarter: string }
 ): Promise<PropertyDetailsData & { geometry?: any }> => {
   console.log(`[EGISClient] Starting fetchPropertyDetailsByParcelId for parcelId: ${parcelId}`);
-  
+
   if (fiscalYearAndQuarter) {
     console.log(`[EGISClient] Using fiscal year: ${fiscalYearAndQuarter.year}, quarter: ${fiscalYearAndQuarter.quarter}`);
   } else {
-    console.log(`[EGISClient] No fiscal year/quarter specified, using default data`);
+    console.log("[EGISClient] No fiscal year/quarter specified, using default data");
   }
 
   // Get geometry from the joined layer (layer 0)
@@ -449,42 +433,42 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
   const geometryQuery = `?where=PID='${parcelId}'&returnGeometry=true&outFields=PID&f=json`;
   console.log(`[EGISClient] Geometry query: ${geometryQuery}`);
   console.log(`[EGISClient] Full geometry URL: ${geomertricDataLayerUrl}/query${geometryQuery}`);
-  let geometryFeatures: ArcGISFeature[] = [];
-  let geometry: any = null;
-  
+  let geometricDataFeatures: ArcGISFeature[] = [];
+  let geometricData: any = null;
+
   try {
     console.log(`[EGISClient] Using geometry query: ${geometryQuery}`);
-    geometryFeatures = await fetchEGISData(geomertricDataLayerUrl, geometryQuery);
-    if (geometryFeatures.length > 0) {
-      geometry = geometryFeatures[0].geometry;
+    geometricDataFeatures = await fetchEGISData(geomertricDataLayerUrl, geometryQuery);
+    if (geometricDataFeatures.length > 0) {
+      geometricData = geometricDataFeatures[0].geometry;
       console.log(`[EGISClient] Geometry found for parcelId: ${parcelId}`);
     }
   } catch (error) {
     console.log(`[EGISClient] Geometry query failed: ${geometryQuery}`, error);
   }
 
-  console.log("[EGISClient] Geometry:", geometry);
+  console.log("[EGISClient] Geometry:", geometricData);
 
   // Get historical property values from layer 1
   console.log(`[EGISClient] Fetching historical property values for parcelId: ${parcelId}`);
   const historicalQuery = `?where=Parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
-  
+
   console.log(`[EGISClient] Historical data query: ${historicalQuery}`);
   console.log(`[EGISClient] Full historical data URL: ${valueHistoryDataLayerUrl}/query${historicalQuery}`);
-  
-  let historicalFeatures: ArcGISFeature[] = [];
+
+  let valueHistoryFeatures: ArcGISFeature[] = [];
   try {
     console.log(`[EGISClient] Using historical data query: ${historicalQuery}`);
-    historicalFeatures = await fetchEGISData(valueHistoryDataLayerUrl, historicalQuery);
-    console.log(`[EGISClient] Historical data found: ${historicalFeatures.length} records`);
+    valueHistoryFeatures = await fetchEGISData(valueHistoryDataLayerUrl, historicalQuery);
+    console.log(`[EGISClient] Historical data found: ${valueHistoryFeatures.length} records`);
   } catch (error) {
     console.log(`[EGISClient] Historical data query failed: ${historicalQuery}`, error);
   }
 
   // Parse historical values
   const historicalValues: { [year: number]: number } = {};
-  
-  historicalFeatures.forEach((feature: ArcGISFeature, index: number) => {
+
+  valueHistoryFeatures.forEach((feature: ArcGISFeature, index: number) => {
     const yearId = feature.attributes.fiscal_year;
     const assessedValue = feature.attributes.assessed_value;
     console.log(`[EGISClient] Historical feature ${index}: Fiscal_Year=${yearId}, Assessed_value=${assessedValue}`);
@@ -496,26 +480,26 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
   // Get owners from layer 3
   console.log(`[EGISClient] Fetching owners for parcelId: ${parcelId}`);
   let ownersQuery = `?where=parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
-  
+
   // Add fiscal year and quarter filtering if provided
   if (fiscalYearAndQuarter) {
     ownersQuery = `?where=parcel_id='${parcelId}' AND fiscal_year=${fiscalYearAndQuarter.year} AND quarter=${fiscalYearAndQuarter.quarter}&outFields=*&returnGeometry=false&f=json`;
   }
-  
+
   console.log(`[EGISClient] Owners query: ${ownersQuery}`);
   console.log(`[EGISClient] Full owners URL: ${currentOwnersDataLayerUrl}/query${ownersQuery}`);
-  
+
   let owners: string[] = ["Owner not available"];
   try {
-    let ownersFeatures = await fetchEGISData(currentOwnersDataLayerUrl, ownersQuery);
-    
+    let currentOwnersFeatures = await fetchEGISData(currentOwnersDataLayerUrl, ownersQuery);
+
     // If no fiscal year/quarter specified, filter for highest
     if (!fiscalYearAndQuarter) {
-      ownersFeatures = filterForHighestFiscalYearAndQuarter(ownersFeatures);
+      currentOwnersFeatures = filterForHighestFiscalYearAndQuarter(currentOwnersFeatures);
     }
-    
-    if (ownersFeatures.length > 0) {
-      owners = ownersFeatures.map((feature: ArcGISFeature) => formatOwnerName(feature.attributes.owner_name)).filter(Boolean);
+
+    if (currentOwnersFeatures.length > 0) {
+      owners = currentOwnersFeatures.map((feature: ArcGISFeature) => toCamelCase(feature.attributes.owner_name) || "").filter(Boolean);
     }
   } catch (error) {
     console.log(`[EGISClient] Owners query failed: ${ownersQuery}`, error);
@@ -526,163 +510,380 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
   // Get residential property attributes data from layer 6
   console.log(`[EGISClient] Fetching residential property attributes for parcelId: ${parcelId}`);
   let residentialAttrsQuery = `?where=parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
-  
+
   // Add fiscal year and quarter filtering if provided
   if (fiscalYearAndQuarter) {
     residentialAttrsQuery = `?where=parcel_id='${parcelId}' AND fiscal_year=${fiscalYearAndQuarter.year} AND quarter=${fiscalYearAndQuarter.quarter}&outFields=*&returnGeometry=false&f=json`;
   }
-  
+
   console.log(`[EGISClient] Residential attributes query: ${residentialAttrsQuery}`);
   console.log(`[EGISClient] Full residential attributes URL: ${residentialPropertyAttributesDataLayerUrl}/query${residentialAttrsQuery}`);
-  
-  let residentialAttrsFeatures: ArcGISFeature[] = [];
+
+  let residentialPropertyFeatures: ArcGISFeature[] = [];
   try {
-    residentialAttrsFeatures = await fetchEGISData(residentialPropertyAttributesDataLayerUrl, residentialAttrsQuery);
-    console.log(`[EGISClient] Residential attributes data found: ${residentialAttrsFeatures.length} records`);
-    
+    residentialPropertyFeatures = await fetchEGISData(residentialPropertyAttributesDataLayerUrl, residentialAttrsQuery);
+    console.log(`[EGISClient] Residential attributes data found: ${residentialPropertyFeatures.length} records`);
+
     // If no fiscal year/quarter specified, filter for highest
     if (!fiscalYearAndQuarter) {
-      residentialAttrsFeatures = filterForHighestFiscalYearAndQuarter(residentialAttrsFeatures);
-      console.log(`[EGISClient] After filtering, residential attributes data: ${residentialAttrsFeatures.length} records`);
+      residentialPropertyFeatures = filterForHighestFiscalYearAndQuarter(residentialPropertyFeatures);
+      console.log(`[EGISClient] After filtering, residential attributes data: ${residentialPropertyFeatures.length} records`);
     }
   } catch (error) {
     console.log(`[EGISClient] Residential attributes query failed: ${residentialAttrsQuery}`, error);
   }
 
-  const residentialAttrs = residentialAttrsFeatures[0]?.attributes || {};
-  console.log("[EGISClient] Residential attributes:", residentialAttrs);
+  // Check if we have multiple residential features with different attributes
+  const hasMultipleBuildings = residentialPropertyFeatures.length > 1 &&
+    residentialPropertyFeatures.some((feature, i) => {
+      if (i === 0) return false;
+      const prev = residentialPropertyFeatures[i - 1].attributes;
+      const curr = feature.attributes;
+      const differences = [];
+
+      // Compare all relevant attributes and track differences
+      if (prev.composite_land_use !== curr.composite_land_use) differences.push("land_use");
+      if (prev.gross_area !== curr.gross_area) differences.push("gross_area");
+      if (prev.building_style !== curr.building_style) differences.push("style");
+      if (prev.story_height !== curr.story_height) differences.push("story_height");
+      if (prev.floor !== curr.floor) differences.push("floor");
+      if (prev.penthouse_unit !== curr.penthouse_unit) differences.push("penthouse");
+      if (prev.orientation !== curr.orientation) differences.push("orientation");
+      if (prev.bedrooms !== curr.bedrooms) differences.push("bedrooms");
+      if (prev.full_bath !== curr.full_bath) differences.push("full_bath");
+      if (prev.half_bath !== curr.half_bath) differences.push("half_bath");
+      if (prev.bath_style_1 !== curr.bath_style_1) differences.push("bath_style_1");
+      if (prev.bath_style_2 !== curr.bath_style_2) differences.push("bath_style_2");
+      if (prev.bath_style_3 !== curr.bath_style_3) differences.push("bath_style_3");
+      if (prev.kitchens !== curr.kitchens) differences.push("kitchens");
+      if (prev.kitchen_type !== curr.kitchen_type) differences.push("kitchen_type");
+      if (prev.kitchen_style_1 !== curr.kitchen_style_1) differences.push("kitchen_style_1");
+      if (prev.kitchen_style_2 !== curr.kitchen_style_2) differences.push("kitchen_style_2");
+      if (prev.kitchen_style_3 !== curr.kitchen_style_3) differences.push("kitchen_style_3");
+      if (prev.year_built !== curr.year_built) differences.push("year_built");
+      if (prev.exterior_finish !== curr.exterior_finish) differences.push("exterior_finish");
+      if (prev.exterior_condition !== curr.exterior_condition) differences.push("exterior_condition");
+      if (prev.roof_cover !== curr.roof_cover) differences.push("roof_cover");
+      if (prev.roof_structure !== curr.roof_structure) differences.push("roof_structure");
+      if (prev.foundation !== curr.foundation) differences.push("foundation");
+      if (prev.num_of_parking_spots !== curr.num_of_parking_spots) differences.push("parking");
+      if (prev.heat_type !== curr.heat_type) differences.push("heat");
+      if (prev.ac_type !== curr.ac_type) differences.push("ac");
+      if (prev.fireplaces !== curr.fireplaces) differences.push("fireplaces");
+
+      // Log comparison details
+      if (differences.length > 0) {
+        console.log(`[EGISClient] Found differences between features ${i-1} and ${i}:`, {
+          differences,
+          feature1: {
+            id: residentialPropertyFeatures[i-1].attributes.OBJECTID,
+            landUse: prev.composite_land_use,
+            grossArea: prev.gross_area,
+            style: prev.building_style,
+            bedrooms: prev.bedrooms,
+            baths: `${prev.full_bath}/${prev.half_bath}`,
+            kitchens: prev.kitchens,
+          },
+          feature2: {
+            id: curr.OBJECTID,
+            landUse: curr.composite_land_use,
+            grossArea: curr.gross_area,
+            style: curr.building_style,
+            bedrooms: curr.bedrooms,
+            baths: `${curr.full_bath}/${curr.half_bath}`,
+            kitchens: curr.kitchens,
+          },
+        });
+      }
+
+      return differences.length > 0;
+    });
+  console.log("[EGISClient] Multiple buildings check:", {
+    hasMultipleBuildings,
+    count: residentialPropertyFeatures.length,
+    features: residentialPropertyFeatures.map((f) => f.attributes.OBJECTID),
+  });
+
+  // Get the primary residential attributes (first building or only building)
+  const primaryResidentialAttrs = residentialPropertyFeatures[0]?.attributes || {};
+
+  // Prepare building attributes if we have multiple residential features
+  const buildingAttrs = hasMultipleBuildings ?
+    residentialPropertyFeatures.map((feature: ArcGISFeature, index: number) => ({
+      buildingNumber: index + 1,
+      landUse: parseAfterDash(feature.attributes.composite_land_use),
+      grossArea: feature.attributes.gross_area,
+      style: toProperCase(parseAfterDash(feature.attributes.building_style)),
+      storyHeight: toProperCase(feature.attributes.story_height),
+      floor: toProperCase(feature.attributes.floor),
+      penthouseUnit: toProperCase(feature.attributes.penthouse_unit),
+      orientation: toProperCase(feature.attributes.orientation),
+      bedroomNumber: feature.attributes.bedrooms,
+      totalBathrooms: feature.attributes.full_bath,
+      halfBathrooms: feature.attributes.half_bath,
+      bathStyle1: toProperCase(parseAfterDash(feature.attributes.bath_style_1)),
+      bathStyle2: toProperCase(parseAfterDash(feature.attributes.bath_style_2)),
+      bathStyle3: toProperCase(parseAfterDash(feature.attributes.bath_style_3)),
+      numberOfKitchens: feature.attributes.kitchens,
+      kitchenType: toProperCase(parseAfterDash(feature.attributes.kitchen_type)),
+      kitchenStyle1: toProperCase(parseAfterDash(feature.attributes.kitchen_style_1)),
+      kitchenStyle2: toProperCase(parseAfterDash(feature.attributes.kitchen_style_2)),
+      kitchenStyle3: toProperCase(parseAfterDash(feature.attributes.kitchen_style_3)),
+      yearBuilt: feature.attributes.year_built,
+      exteriorFinish: toProperCase(parseAfterDash(feature.attributes.exterior_finish)),
+      exteriorCondition: toProperCase(parseAfterDash(feature.attributes.exterior_condition)),
+      roofCover: toProperCase(parseAfterDash(feature.attributes.roof_cover)),
+      roofStructure: toProperCase(parseAfterDash(feature.attributes.roof_structure)),
+      foundation: toProperCase(parseAfterDash(feature.attributes.foundation)),
+      parkingSpots: feature.attributes.num_of_parking_spots,
+      heatType: toProperCase(parseAfterDash(feature.attributes.heat_type)),
+      acType: toProperCase(parseAfterDash(feature.attributes.ac_type)),
+      fireplaces: feature.attributes.fireplaces,
+    })) :
+    undefined;
+
+  console.log("[EGISClient] Residential attributes:", {
+    hasMultipleBuildings,
+    count: residentialPropertyFeatures.length,
+    primaryAttributes: primaryResidentialAttrs,
+    buildingAttributes: buildingAttrs,
+  });
 
   // Get condo attributes data from layer 9
   console.log(`[EGISClient] Fetching condo attributes for parcelId: ${parcelId}`);
   let condoAttrsQuery = `?where=parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
-  
+
   // Add fiscal year and quarter filtering if provided
   if (fiscalYearAndQuarter) {
     condoAttrsQuery = `?where=parcel_id='${parcelId}' AND fiscal_year=${fiscalYearAndQuarter.year} AND quarter=${fiscalYearAndQuarter.quarter}&outFields=*&returnGeometry=false&f=json`;
   }
-  
+
   console.log(`[EGISClient] Condo attributes query: ${condoAttrsQuery}`);
   console.log(`[EGISClient] Full condo attributes URL: ${condoAttributesDataLayerUrl}/query${condoAttrsQuery}`);
-  
-  let condoAttrsFeatures: ArcGISFeature[] = [];
+
+  let condoAttributesFeatures: ArcGISFeature[] = [];
   try {
-    condoAttrsFeatures = await fetchEGISData(condoAttributesDataLayerUrl, condoAttrsQuery);
-    console.log(`[EGISClient] Condo attributes data found: ${condoAttrsFeatures.length} records`);
-    
+    condoAttributesFeatures = await fetchEGISData(condoAttributesDataLayerUrl, condoAttrsQuery);
+    console.log(`[EGISClient] Condo attributes data found: ${condoAttributesFeatures.length} records`);
+
     // If no fiscal year/quarter specified, filter for highest
     if (!fiscalYearAndQuarter) {
-      condoAttrsFeatures = filterForHighestFiscalYearAndQuarter(condoAttrsFeatures);
-      console.log(`[EGISClient] After filtering, condo attributes data: ${condoAttrsFeatures.length} records`);
+      condoAttributesFeatures = filterForHighestFiscalYearAndQuarter(condoAttributesFeatures);
+      console.log(`[EGISClient] After filtering, condo attributes data: ${condoAttributesFeatures.length} records`);
     }
   } catch (error) {
     console.log(`[EGISClient] Condo attributes query failed: ${condoAttrsQuery}`, error);
   }
 
-  const condoAttrs = condoAttrsFeatures[0]?.attributes || {};
+  const condoAttrs = condoAttributesFeatures[0]?.attributes || {};
   console.log("[EGISClient] Condo attributes:", condoAttrs);
+
+  // Get outbuildings data from layer 10
+  console.log(`[EGISClient] Fetching outbuildings for parcelId: ${parcelId}`);
+  let outbuildingsQuery = `?where=parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
+
+  // Add fiscal year and quarter filtering if provided
+  if (fiscalYearAndQuarter) {
+    outbuildingsQuery = `?where=parcel_id='${parcelId}' AND fiscal_year=${fiscalYearAndQuarter.year} AND quarter=${fiscalYearAndQuarter.quarter}&outFields=*&returnGeometry=false&f=json`;
+  }
+
+  console.log(`[EGISClient] Outbuildings query: ${outbuildingsQuery}`);
+  console.log(`[EGISClient] Full outbuildings URL: ${outbuildingsDataLayerUrl}/query${outbuildingsQuery}`);
+
+  let outbuildingsFeatures: ArcGISFeature[] = [];
+  try {
+    outbuildingsFeatures = await fetchEGISData(outbuildingsDataLayerUrl, outbuildingsQuery);
+    console.log(`[EGISClient] Outbuildings data found: ${outbuildingsFeatures.length} records`);
+
+    // If no fiscal year/quarter specified, filter for highest
+    if (!fiscalYearAndQuarter) {
+      outbuildingsFeatures = filterForHighestFiscalYearAndQuarter(outbuildingsFeatures);
+      console.log(`[EGISClient] After filtering, outbuildings data: ${outbuildingsFeatures.length} records`);
+    }
+  } catch (error) {
+    console.log(`[EGISClient] Outbuildings query failed: ${outbuildingsQuery}`, error);
+  }
+
+  // Process outbuildings data
+  const outbuildingAttrs = outbuildingsFeatures.map((feature) => ({
+    type: toProperCase(parseAfterDash(feature.attributes.code)),
+    size: feature.attributes.tot_units,
+    quality: toProperCase(parseAfterDash(feature.attributes.quality)),
+    condition: toProperCase(parseAfterDash(feature.attributes.condition)),
+  }));
 
   // Get exemption data from exemptionDataLayerUrl
   console.log(`[EGISClient] Fetching exemption data for parcelId: ${parcelId}`);
-  let table4Query = `?where=parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
-  
+  let propertyWebAppQuery = `?where=parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
+
   // Add fiscal year and quarter filtering if provided
   if (fiscalYearAndQuarter) {
-    table4Query = `?where=parcel_id='${parcelId}' AND fiscal_year=${fiscalYearAndQuarter.year} AND quarter=${fiscalYearAndQuarter.quarter}&outFields=*&returnGeometry=false&f=json`;
+    propertyWebAppQuery = `?where=parcel_id='${parcelId}' AND fiscal_year=${fiscalYearAndQuarter.year} AND quarter=${fiscalYearAndQuarter.quarter}&outFields=*&returnGeometry=false&f=json`;
   }
-  
-  console.log(`[EGISClient] Exemption data query: ${table4Query}`);
-  console.log(`[EGISClient] Full exemption data URL: ${propertiesWebAppDataLayerUrl}/query${table4Query}`);
-  
-  let table4Features: ArcGISFeature[] = [];
+
+  console.log(`[EGISClient] Property web app data query: ${propertyWebAppQuery}`);
+  console.log(`[EGISClient] Full property web app data URL: ${propertiesWebAppDataLayerUrl}/query${propertyWebAppQuery}`);
+
+  let propertyWebAppFeatures: ArcGISFeature[] = [];
   try {
-    table4Features = await fetchEGISData(propertiesWebAppDataLayerUrl, table4Query);
-    console.log(`[EGISClient] Exemption data found: ${table4Features.length} records`);
-    
+    propertyWebAppFeatures = await fetchEGISData(propertiesWebAppDataLayerUrl, propertyWebAppQuery);
+    console.log(`[EGISClient] Property web app data found: ${propertyWebAppFeatures.length} records`);
+
     // If no fiscal year/quarter specified, filter for highest
     if (!fiscalYearAndQuarter) {
-      table4Features = filterForHighestFiscalYearAndQuarter(table4Features);
-      console.log(`[EGISClient] After filtering, exemption data: ${table4Features.length} records`);
+      propertyWebAppFeatures = filterForHighestFiscalYearAndQuarter(propertyWebAppFeatures);
+      console.log(`[EGISClient] After filtering, property web app data: ${propertyWebAppFeatures.length} records`);
     }
   } catch (error) {
-    console.log(`[EGISClient] Exemption query failed: ${table4Query}`, error);
+    console.log(`[EGISClient] Property web app query failed: ${propertyWebAppQuery}`, error);
   }
 
-  console.log("[EGISClient] Table 4 features:", table4Features);
+  console.log("[EGISClient] Property web app features:", propertyWebAppFeatures);
 
-  const table4Attrs = table4Features[0]?.attributes || {};
+  const propertyWebAppData = propertyWebAppFeatures[0]?.attributes || {};
 
-  console.log("[EGISClient] Table 4 attributes:", table4Attrs);
+  console.log("[EGISClient] Property web app data:", propertyWebAppData);
+
+  // Helper function to extract master parcel ID from apartment complex identifier
+  const extractMasterParcelId = (complexIdentifier: string | undefined): string | undefined => {
+    if (!complexIdentifier || !complexIdentifier.trim()) return undefined;
+    // Split by space or special characters and take the first part
+    const match = complexIdentifier.match(/^[A-Za-z0-9]+/);
+    const result = match ? match[0] : undefined;
+    console.log("[EGISClient] Master parcel ID:", result);
+    return result;
+  };
+
+  // Check if this unit belongs to an apartment complex (has non-empty complex field)
+  const isPartOfComplex = !!condoAttrs?.complex?.trim();
+  const masterParcelId = isPartOfComplex ? extractMasterParcelId(condoAttrs.complex) : undefined;
+
+  // Log property structure and layout decision
+  const layout = residentialPropertyFeatures.length > 1 ? "multiple_buildings" :
+    isPartOfComplex ? "condo_unit_split" :
+      "standard";
+  console.log("[EGISClient] Property layout:", {
+    layout,
+    buildings: residentialPropertyFeatures.length,
+    complex: {
+      field: condoAttrs?.complex || "",
+      id: masterParcelId,
+    },
+  });
+
+  const condoMainAttributes = isPartOfComplex ? {
+    masterParcelId,
+    grade: condoAttrs.grade,
+    exteriorCondition: toProperCase(parseAfterDash(condoAttrs.exterior_condition)),
+    exteriorFinish: toProperCase(parseAfterDash(condoAttrs.exterior_finish)),
+    foundation: toProperCase(parseAfterDash(condoAttrs.foundation)),
+    roofCover: toProperCase(parseAfterDash(condoAttrs.roof_cover)),
+    roofStructure: toProperCase(parseAfterDash(condoAttrs.roof_structure)),
+  } : {};
+
 
   // Compose the final object
+  console.log("[EGISClient] Constructing PropertyDetails with:", {
+    layout,
+    hasMultipleBuildings,
+    buildingAttrsCount: buildingAttrs?.length,
+    isPartOfComplex,
+  });
+
+  console.log("[EGISClient] Final data structure:", {
+    layout,
+    hasMultipleBuildings,
+    isPartOfComplex,
+    buildingCount: buildingAttrs?.length,
+    outbuildingCount: outbuildingAttrs?.length,
+    residentialFeatures: residentialPropertyFeatures.map((f) => ({
+      id: f.attributes.OBJECTID,
+      landUse: f.attributes.composite_land_use,
+      grossArea: f.attributes.gross_area,
+      style: f.attributes.building_style,
+      bedrooms: f.attributes.bedrooms,
+      baths: `${f.attributes.full_bath}/${f.attributes.half_bath}`,
+      kitchens: f.attributes.kitchens,
+    })),
+    condoData: condoAttrs ? {
+      complex: condoAttrs.complex,
+      masterParcelId,
+    } : undefined,
+  });
+
   const propertyDetails = new PropertyDetails({
+    hasComplexCondoData: layout === "condo_unit_split",
+    buildingAttributes: hasMultipleBuildings ? buildingAttrs : undefined,
+    outbuildingAttributes: outbuildingAttrs,
+    ...condoMainAttributes,
     // Overview fields
-    fullAddress: constructFullAddress(table4Attrs),
+    fullAddress: constructFullAddress(propertyWebAppData),
     owners: owners,
     imageSrc: "", // Not applicable for EGIS data
-    assessedValue: table4Attrs.total_value || 0,
-    propertyType: toProperCase(table4Attrs.property_type) || "Not available",
+    assessedValue: propertyWebAppData.total_value || 0,
+    propertyType: toProperCase(propertyWebAppData.property_type) || "Not available",
     parcelId: parcelId,
-    propertyNetTax: table4Attrs.net_tax || 0,
-    personalExemptionFlag: table4Attrs.personal_exemption_flag,
-    residentialExemptionFlag: table4Attrs.residential_exemption_flag,
-    totalBilledAmount: table4Attrs.total_billed_amt || 0,
+    propertyNetTax: propertyWebAppData.net_tax || 0,
+    personalExemptionFlag: propertyWebAppData.personal_exemption_flag,
+    residentialExemptionFlag: propertyWebAppData.residential_exemption_flag,
+    totalBilledAmount: propertyWebAppData.total_billed_amt || 0,
     // Property Value fields
     historicPropertyValues: historicalValues,
-    // Property Attributes fields - prioritize residential > condo > exemption data
-    landUse: prioritizeValue(parseAfterDash(residentialAttrs.composite_land_use), parseAfterDash(condoAttrs.composite_land_use), parseAfterDash(table4Attrs.land_use)) || "Not available",
-    livingArea: table4Attrs.living_area || "Not available", // Not in condo or residential layer
-    style: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.building_style)), toProperCase(parseAfterDash(condoAttrs.building_style)), toProperCase(parseAfterDash(table4Attrs.building_style))) || "Not available",
-    storyHeight: prioritizeValue(toProperCase(residentialAttrs.story_height), toProperCase(condoAttrs.story_height), toProperCase(table4Attrs.story_height)) || "Not available",
-    floor: prioritizeValue(toProperCase(residentialAttrs.floor), toProperCase(condoAttrs.floor), toProperCase(table4Attrs.floor)) || undefined,
-    penthouseUnit: prioritizeValue(toProperCase(residentialAttrs.penthouse_unit), toProperCase(condoAttrs.penthouse_unit), toProperCase(table4Attrs.penthouse_unit)) || undefined,
-    orientation: prioritizeValue(toProperCase(residentialAttrs.orientation), toProperCase(condoAttrs.orientation), toProperCase(table4Attrs.orientation)) || undefined,
-    bedroomNumber: prioritizeValue(residentialAttrs.bedrooms, condoAttrs.bedrooms, table4Attrs.bedrooms) || undefined,
+    // Property Attributes fields
+    landUse: prioritizeValue(parseAfterDash(primaryResidentialAttrs.composite_land_use), parseAfterDash(condoAttrs.composite_land_use), parseAfterDash(propertyWebAppData.land_use)) || "Not available",
+    grossArea: propertyWebAppData.gross_area || "Not available",
+    style: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.building_style)), toProperCase(parseAfterDash(condoAttrs.building_style)), toProperCase(parseAfterDash(propertyWebAppData.building_style))) || "Not available",
+    storyHeight: prioritizeValue(toProperCase(primaryResidentialAttrs.story_height), toProperCase(condoAttrs.story_height), toProperCase(propertyWebAppData.story_height)) || "Not available",
+    floor: prioritizeValue(toProperCase(primaryResidentialAttrs.floor), toProperCase(condoAttrs.floor), toProperCase(propertyWebAppData.floor)) || undefined,
+    penthouseUnit: prioritizeValue(toProperCase(primaryResidentialAttrs.penthouse_unit), toProperCase(condoAttrs.penthouse_unit), toProperCase(propertyWebAppData.penthouse_unit)) || undefined,
+    orientation: prioritizeValue(toProperCase(primaryResidentialAttrs.orientation), toProperCase(condoAttrs.orientation), toProperCase(propertyWebAppData.orientation)) || undefined,
+    bedroomNumber: prioritizeValue(primaryResidentialAttrs.bedrooms, condoAttrs.bedrooms, propertyWebAppData.bedrooms) || undefined,
     totalBathrooms: (() => {
-      const residentialFullBath = residentialAttrs.full_bath;
-      const residentialHalfBath = residentialAttrs.half_bath;
+      const residentialFullBath = primaryResidentialAttrs.full_bath;
+      const residentialHalfBath = primaryResidentialAttrs.half_bath;
       const condoFullBath = condoAttrs.full_bath;
       const condoHalfBath = condoAttrs.half_bath;
-      const exemptionFullBath = table4Attrs.full_bathrooms;
-      const exemptionHalfBath = table4Attrs.half_bathrooms;
-      
-      const fullBath = prioritizeValue(residentialFullBath, condoFullBath, exemptionFullBath);
-      const halfBath = prioritizeValue(residentialHalfBath, condoHalfBath, exemptionHalfBath);
-      
+      const propertyWebAppFullBath = propertyWebAppData.full_bathrooms;
+      const propertyWebAppHalfBath = propertyWebAppData.half_bathrooms;
+
+      const fullBath = prioritizeValue(residentialFullBath, condoFullBath, propertyWebAppFullBath);
+      const halfBath = prioritizeValue(residentialHalfBath, condoHalfBath, propertyWebAppHalfBath);
+
       if (fullBath !== undefined && halfBath !== undefined) {
         return String(Number(fullBath) + Number(halfBath) * 0.5);
       }
       return undefined;
     })(),
-    halfBathrooms: prioritizeValue(residentialAttrs.half_bath, condoAttrs.half_bath, table4Attrs.half_bathrooms) || undefined,
-    bathStyle1: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.bath_style_1)), toProperCase(parseAfterDash(condoAttrs.bath_style_1)), toProperCase(parseAfterDash(table4Attrs.bath_style_1))) || undefined,
-    bathStyle2: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.bath_style_2)), toProperCase(parseAfterDash(condoAttrs.bath_style_2)), toProperCase(parseAfterDash(table4Attrs.bath_style_2))) || undefined,
-    bathStyle3: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.bath_style_3)), toProperCase(parseAfterDash(condoAttrs.bath_style_3)), toProperCase(parseAfterDash(table4Attrs.bath_style_3))) || undefined,
-    numberOfKitchens: prioritizeValue(residentialAttrs.kitchens, condoAttrs.kitchens, table4Attrs.kitchens) || undefined,
-    kitchenType: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.kitchen_type)), toProperCase(parseAfterDash(condoAttrs.kitchen_type)), toProperCase(parseAfterDash(table4Attrs.kitchen_type))) || undefined,
-    kitchenStyle1: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.kitchen_style_1)), toProperCase(parseAfterDash(condoAttrs.kitchen_style_1)), toProperCase(parseAfterDash(table4Attrs.kitchen_style_1))) || undefined,
-    kitchenStyle2: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.kitchen_style_2)), toProperCase(parseAfterDash(condoAttrs.kitchen_style_2)), toProperCase(parseAfterDash(table4Attrs.kitchen_style_2))) || undefined,
-    kitchenStyle3: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.kitchen_style_3)), toProperCase(parseAfterDash(condoAttrs.kitchen_style_3)), toProperCase(parseAfterDash(table4Attrs.kitchen_style_3))) || undefined,
-    yearBuilt: prioritizeValue(residentialAttrs.year_built, condoAttrs.year_built, table4Attrs.year_built) || undefined,
-    exteriorFinish: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.exterior_finish)), toProperCase(parseAfterDash(condoAttrs.exterior_finish)), toProperCase(parseAfterDash(table4Attrs.exterior_finish))) || undefined,
-    exteriorCondition: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.exterior_condition)), toProperCase(parseAfterDash(condoAttrs.exterior_condition)), toProperCase(parseAfterDash(table4Attrs.exterior_condition))) || undefined,
-    roofCover: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.roof_cover)), toProperCase(parseAfterDash(condoAttrs.roof_cover)), toProperCase(parseAfterDash(table4Attrs.roof_cover))) || undefined,
-    roofStructure: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.roof_structure)), toProperCase(parseAfterDash(condoAttrs.roof_structure)), toProperCase(parseAfterDash(table4Attrs.roof_structure))) || undefined,
-    foundation: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.foundation)), toProperCase(parseAfterDash(condoAttrs.foundation)), toProperCase(parseAfterDash(table4Attrs.foundation))) || "Not available",
-    parkingSpots: prioritizeValue(residentialAttrs.num_of_parking_spots, condoAttrs.num_of_parking_spots, table4Attrs.num_parking_spots) || undefined,
-    heatType: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.heat_type)), toProperCase(parseAfterDash(condoAttrs.heat_type)), toProperCase(parseAfterDash(table4Attrs.heat_type))) || undefined,
-    acType: prioritizeValue(toProperCase(parseAfterDash(residentialAttrs.ac_type)), toProperCase(parseAfterDash(condoAttrs.ac_type)), toProperCase(parseAfterDash(table4Attrs.ac_type))) || undefined,
-    fireplaces: prioritizeValue(residentialAttrs.fireplaces, condoAttrs.fireplaces, table4Attrs.fireplaces) || undefined,
-    salePrice: undefined, // Not in either layer
-    saleDate: table4Attrs.latest_sale_date || undefined, // Not in residential layer
-    registryBookAndPlace: undefined, // Not in either layer
+    halfBathrooms: prioritizeValue(primaryResidentialAttrs.half_bath, condoAttrs.half_bath, propertyWebAppData.half_bathrooms) || undefined,
+    bathStyle1: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.bath_style_1)), toProperCase(parseAfterDash(condoAttrs.bath_style_1)), toProperCase(parseAfterDash(propertyWebAppData.bath_style_1))) || undefined,
+    bathStyle2: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.bath_style_2)), toProperCase(parseAfterDash(condoAttrs.bath_style_2)), toProperCase(parseAfterDash(propertyWebAppData.bath_style_2))) || undefined,
+    bathStyle3: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.bath_style_3)), toProperCase(parseAfterDash(condoAttrs.bath_style_3)), toProperCase(parseAfterDash(propertyWebAppData.bath_style_3))) || undefined,
+    numberOfKitchens: prioritizeValue(primaryResidentialAttrs.kitchens, condoAttrs.kitchens, propertyWebAppData.kitchens) || undefined,
+    kitchenType: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.kitchen_type)), toProperCase(parseAfterDash(condoAttrs.kitchen_type)), toProperCase(parseAfterDash(propertyWebAppData.kitchen_type))) || undefined,
+    kitchenStyle1: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.kitchen_style_1)), toProperCase(parseAfterDash(condoAttrs.kitchen_style_1)), toProperCase(parseAfterDash(propertyWebAppData.kitchen_style_1))) || undefined,
+    kitchenStyle2: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.kitchen_style_2)), toProperCase(parseAfterDash(condoAttrs.kitchen_style_2)), toProperCase(parseAfterDash(propertyWebAppData.kitchen_style_2))) || undefined,
+    kitchenStyle3: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.kitchen_style_3)), toProperCase(parseAfterDash(condoAttrs.kitchen_style_3)), toProperCase(parseAfterDash(propertyWebAppData.kitchen_style_3))) || undefined,
+    yearBuilt: prioritizeValue(primaryResidentialAttrs.year_built, condoAttrs.year_built, propertyWebAppData.year_built) || undefined,
+    exteriorFinish: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.exterior_finish)), toProperCase(parseAfterDash(condoAttrs.exterior_finish)), toProperCase(parseAfterDash(propertyWebAppData.exterior_finish))) || undefined,
+    exteriorCondition: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.exterior_condition)), toProperCase(parseAfterDash(condoAttrs.exterior_condition)), toProperCase(parseAfterDash(propertyWebAppData.exterior_condition))) || undefined,
+    roofCover: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.roof_cover)), toProperCase(parseAfterDash(condoAttrs.roof_cover)), toProperCase(parseAfterDash(propertyWebAppData.roof_cover))) || undefined,
+    roofStructure: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.roof_structure)), toProperCase(parseAfterDash(condoAttrs.roof_structure)), toProperCase(parseAfterDash(propertyWebAppData.roof_structure))) || undefined,
+    foundation: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.foundation)), toProperCase(parseAfterDash(condoAttrs.foundation)), toProperCase(parseAfterDash(propertyWebAppData.foundation))) || "Not available",
+    parkingSpots: prioritizeValue(primaryResidentialAttrs.num_of_parking_spots, condoAttrs.num_of_parking_spots, propertyWebAppData.num_parking_spots) || undefined,
+    heatType: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.heat_type)), toProperCase(parseAfterDash(condoAttrs.heat_type)), toProperCase(parseAfterDash(propertyWebAppData.heat_type))) || undefined,
+    acType: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.ac_type)), toProperCase(parseAfterDash(condoAttrs.ac_type)), toProperCase(parseAfterDash(propertyWebAppData.ac_type))) || undefined,
+    fireplaces: prioritizeValue(primaryResidentialAttrs.fireplaces, condoAttrs.fireplaces, propertyWebAppData.fireplaces) || undefined,
+    salePrice: undefined,
+    saleDate: propertyWebAppData.latest_sale_date || undefined,
+    registryBookAndPlace: undefined,
     // Property Taxes fields
-    propertyGrossTax: table4Attrs.gross_tax || 0,
-    residentialExemptionAmount: table4Attrs.resexempt || 0, // TODO: cast to number
-    personalExemptionAmount: table4Attrs.persexempt_total|| 0,
-    communityPreservationAmount: table4Attrs.cpa_amt || 0,
-    personalExemptionAmount1: table4Attrs.persexempt_1 || 0,
-    personalExemptionAmount2: table4Attrs.persexempt_2 || 0,
-    estimatedTotalFirstHalf: table4Attrs.re_tax_amt || 0,
+    propertyGrossTax: propertyWebAppData.gross_tax || 0,
+    residentialExemptionAmount: propertyWebAppData.resexempt || 0, // TODO: cast to number
+    personalExemptionAmount: propertyWebAppData.persexempt_total|| 0,
+    communityPreservationAmount: propertyWebAppData.cpa_amt || 0,
+    personalExemptionAmount1: propertyWebAppData.persexempt_1 || 0,
+    personalExemptionAmount2: propertyWebAppData.persexempt_2 || 0,
+    estimatedTotalFirstHalf: propertyWebAppData.re_tax_amt || 0,
   });
 
   console.log(`[EGISClient] Property details completed for parcelId: ${parcelId}. Historical values count: ${Object.keys(historicalValues).length}`);
@@ -690,7 +891,7 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
   // Return both property details and geometry
   return {
     ...propertyDetails,
-    geometry: geometry,
+    geometry: geometricData,
   };
 };
 
@@ -879,7 +1080,7 @@ export const fetchPropertyStaticMapImageByParcelIdHelper = async (parcelId: stri
     try {
       console.log(`[EGISClient] Static map geometry query: ${geometryQuery}`);
       console.log(`[EGISClient] Full static map geometry URL: ${geomertricDataLayerUrl}/query${geometryQuery}`);
-      
+
       geometryFeatures = await fetchEGISData(geomertricDataLayerUrl, geometryQuery);
       console.log(`[EGISClient] Geometry data found: ${geometryFeatures.length} records`);
     } catch (error) {

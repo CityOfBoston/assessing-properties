@@ -6,6 +6,7 @@ import { IconButton } from "@components/IconButton";
 import { PropertySearchPopup } from "@components/PropertySearchPopup";
 import { FeedbackSenderContainer } from "@containers/FeedbackSenderContainer";
 import { BetaLabel } from "@components/BetaLabel";
+import { getComponentText } from "@utils/contentMapper";
 import styles from "./PropertyDetailsLayout.module.scss";
 
 // Add useMediaQuery hook
@@ -75,6 +76,7 @@ interface PropertyDetailsLayoutProps {
  * ```
  */
 export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDetailsLayoutProps) {
+  const layoutContent = getComponentText('PropertyDetailsLayout', 'layouts.PropertyDetailsLayout');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
@@ -198,14 +200,14 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
             <>
               <img
                 src="/cob-uswds/img/usa-icons/search.svg"
-                alt="Search"
+                alt={layoutContent.searchButton.mobileAlt}
                 className={styles.mobileSearchIcon}
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
               />
               {isDesktop && (
                 <IconButton
                   src="/cob-uswds/img/usa-icons/search.svg"
-                  text="Search another property"
+                  text={layoutContent.searchButton.text}
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
                   useLoraFont={true}
                 />
@@ -214,7 +216,15 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
           } 
         />
         {isSearchOpen && (
-          <PropertySearchPopup onClose={() => setIsSearchOpen(false)} />
+          <PropertySearchPopup 
+            onClose={() => setIsSearchOpen(false)} 
+            texts={{
+              closeButtonAriaLabel: layoutContent.searchPopup.closeButtonAriaLabel,
+              labelText: layoutContent.searchButton.text,
+              tooltipHint: layoutContent.searchPopup.tooltipHint,
+              placeholderText: layoutContent.searchPopup.placeholderText
+            }}
+          />
         )}
       </div>
       
@@ -236,7 +246,7 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
       {/* Main content with sections */}
       <main ref={mainRef} className={styles.main}>
         <div>
-          <h1 className={styles.detailsTitle}>Property Details <BetaLabel variant="blue" /></h1>
+          <h1 className={styles.detailsTitle}>{layoutContent.title} <BetaLabel variant="blue" /></h1>
           {sections.map((section, index) => (
             <div
               key={section.name}

@@ -1,6 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { WelcomeContent } from './WelcomeContent';
 
+const mockContent = {
+  title: "Assessing Online",
+  description: "Search for property assessment and tax information for any property in **Boston**. View property details, tax history, and more.",
+  logoAltText: "City of Boston Assessing Department Logo"
+};
+
 const meta = {
   title: 'Components/WelcomeContent',
   component: WelcomeContent,
@@ -22,6 +28,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    ...mockContent,
     additionalContent: (
       <div style={{ 
         padding: '1rem', 
@@ -36,11 +43,14 @@ export const Default: Story = {
 };
 
 export const WithoutAdditionalContent: Story = {
-  args: {},
+  args: {
+    ...mockContent
+  },
 };
 
 export const MobileWithHiddenContent: Story = {
   args: {
+    ...mockContent,
     hideTitleAndDescriptionOnMobile: true,
     additionalContent: (
       <div style={{ 
@@ -62,6 +72,7 @@ export const MobileWithHiddenContent: Story = {
 
 export const MobileWithVisibleContent: Story = {
   args: {
+    ...mockContent,
     hideTitleAndDescriptionOnMobile: false,
     additionalContent: (
       <div style={{ 
@@ -83,6 +94,7 @@ export const MobileWithVisibleContent: Story = {
 
 export const WithAdditionalContent: Story = {
   args: {
+    ...mockContent,
     additionalContent: (
       <div style={{ 
         backgroundColor: 'rgba(255, 255, 255, 0.1)', 
@@ -98,6 +110,7 @@ export const WithAdditionalContent: Story = {
 
 export const WithCustomComponent: Story = {
   args: {
+    ...mockContent,
     additionalContent: (
       <div style={{ 
         display: 'flex',

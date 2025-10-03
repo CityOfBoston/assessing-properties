@@ -26,15 +26,14 @@
 }
 
 .exemptionContent {
-  .text {
-    margin-bottom: 16px;
-  }
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5;
 }
 
 .list {
   list-style-type: disc;
   padding-left: 20px;
-  margin: 0;
 
   li {
     line-height: 28px;

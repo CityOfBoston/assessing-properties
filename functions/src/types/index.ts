@@ -26,49 +26,34 @@ export interface PropertyValueSectionData {
 }
 
 /**
+ * A type representing a property attribute field.
+ */
+export interface PropertyAttributeField {
+  label: string;
+  value: string | undefined;
+}
+
+/**
+ * A type representing a property attribute category.
+ */
+export interface PropertyAttributeCategory {
+  title: string;
+  content: PropertyAttributeField[];
+}
+
+/**
+ * A type representing a property attribute group.
+ */
+export interface PropertyAttributeGroup {
+  title: string;
+  content: PropertyAttributeField[] | PropertyAttributeCategory[];
+}
+
+/**
  * A type representing the attributes of a property.
  */
 export interface PropertyAttributesData {
-  // General
-  landUse?: string;
-  livingArea?: string;
-  style?: string;
-  storyHeight?: string;
-  floor?: string;
-  penthouseUnit?: string;
-  orientation?: string;
-
-  // Rooms
-  bedroomNumber?: string;
-  totalBathrooms?: string;
-  halfBathrooms?: string;
-  bathStyle1?: string;
-  bathStyle2?: string;
-  bathStyle3?: string;
-  numberOfKitchens?: string;
-  kitchenType?: string;
-  kitchenStyle1?: string;
-  kitchenStyle2?: string;
-  kitchenStyle3?: string;
-
-  //Constructions
-  yearBuilt?: string;
-  exteriorFinish?: string;
-  exteriorCondition?: string;
-  roofCover?: string;
-  roofStructure?: string;
-  foundation?: string;
-  parkingSpots?: string;
-
-  // Utilities
-  heatType?: string;
-  acType?: string;
-  fireplaces?: string;
-
-  // Last Transaction
-  salePrice?: string;
-  saleDate?: string;
-  registryBookAndPlace?: string;
+  attributeGroups: PropertyAttributeGroup[];
 }
 
 /**
@@ -90,12 +75,7 @@ export interface PropertyTaxesSectionData {
 }
 
 /**
- * Data object for all property details sections, uses a constructor
- * that takes in all fields flat and assembles them into data for each
- * section. This is used to avoid deeply nested objects and simplify
- * instance where the same field and value is used for two and more
- * sections and to make the data object easier to understand and
- * maintain.
+ * Data object for all property details sections.
  */
 export interface PropertyDetailsData {
   overview: OverviewSectionData;
@@ -105,14 +85,13 @@ export interface PropertyDetailsData {
 }
 
 /**
- * Class implementation of PropertyDetailsData that provides a constructor
- * to assemble the data object from flat fields.
+ * Class implementation of PropertyDetailsData.
  */
 export class PropertyDetails implements PropertyDetailsData {
-  overview: OverviewSectionData;
-  propertyValue: PropertyValueSectionData;
-  propertyAttributes: PropertyAttributesData;
-  propertyTaxes: PropertyTaxesSectionData;
+  overview!: OverviewSectionData;
+  propertyValue!: PropertyValueSectionData;
+  propertyAttributes!: PropertyAttributesData;
+  propertyTaxes!: PropertyTaxesSectionData;
 
   constructor(data: {
     // Overview fields
@@ -125,13 +104,53 @@ export class PropertyDetails implements PropertyDetailsData {
     propertyNetTax: number;
     personalExemptionFlag: boolean;
     residentialExemptionFlag: boolean;
+    buildingAttributes?: Array<{
+      buildingNumber: number;
+      landUse?: string;
+      grossArea?: string;
+      style?: string;
+      storyHeight?: string;
+      floor?: string;
+      penthouseUnit?: string;
+      orientation?: string;
+      bedroomNumber?: string;
+      totalBathrooms?: string;
+      halfBathrooms?: string;
+      bathStyle1?: string;
+      bathStyle2?: string;
+      bathStyle3?: string;
+      numberOfKitchens?: string;
+      kitchenType?: string;
+      kitchenStyle1?: string;
+      kitchenStyle2?: string;
+      kitchenStyle3?: string;
+      yearBuilt?: string;
+      exteriorFinish?: string;
+      exteriorCondition?: string;
+      roofCover?: string;
+      roofStructure?: string;
+      foundation?: string;
+      parkingSpots?: string;
+      heatType?: string;
+      acType?: string;
+      fireplaces?: string;
+    }>;
 
     // Property Value fields
     historicPropertyValues: { [year: number]: number };
 
     // Property Attributes fields
+    hasComplexCondoData?: boolean;
+    outbuildingAttributes?: Array<{
+      type: string;
+      size: string | number;
+      quality: string;
+      condition: string;
+    }>;
+    masterParcelId?: string;
+    grade?: string;
     landUse?: string;
-    livingArea?: string;
+    grossArea?: string;
     style?: string;
     storyHeight?: string;
     floor?: string;
@@ -181,11 +200,11 @@ export class PropertyDetails implements PropertyDetailsData {
       propertyType: data.propertyType,
       parcelId: data.parcelId,
       netTax: data.propertyNetTax,
+      totalBilledAmount: data.totalBilledAmount,
       personalExemptionFlag: data.personalExemptionFlag,
       residentialExemptionFlag: data.residentialExemptionFlag,
       personalExemptionAmount: data.personalExemptionAmount,
       residentialExemptionAmount: data.residentialExemptionAmount,
-      totalBilledAmount: data.totalBilledAmount,
     };
 
     // Construct property value section
@@ -194,38 +213,209 @@ export class PropertyDetails implements PropertyDetailsData {
     };
 
     // Construct property attributes section
+    console.log("[PropertyDetails] Constructing with data:", {
+      hasComplexCondoData: data.hasComplexCondoData,
+      buildingAttributes: data.buildingAttributes,
+      masterParcelId: data.masterParcelId,
+      grade: data.grade,
+      outbuildingAttributes: data.outbuildingAttributes?.length,
+    });
+
+    // Prepare common sections that appear in all cases
+    const commonSections = [
+      ...(data.outbuildingAttributes?.length ? [{
+        title: "Outbuildings",
+        content: data.outbuildingAttributes.map((building, index) => ({
+          title: `Outbuilding ${index + 1}`,
+          content: [
+            {label: "Type", value: building.type},
+            {label: "Size", value: building.size?.toString()},
+            {label: "Quality", value: building.quality},
+            {label: "Condition", value: building.condition},
+          ].filter((field) => field.value),
+        })),
+      }] : []),
+      {
+        title: "Last Transaction",
+        content: [
+          {label: "Sale Price", value: data.salePrice ? `$${data.salePrice}` : undefined},
+          {label: "Sale Date", value: data.saleDate},
+          {label: "Registry Book and Place", value: data.registryBookAndPlace},
+        ],
+      },
+    ];
+
     this.propertyAttributes = {
-      landUse: data.landUse,
-      livingArea: data.livingArea,
-      style: data.style,
-      storyHeight: data.storyHeight,
-      floor: data.floor,
-      penthouseUnit: data.penthouseUnit,
-      orientation: data.orientation,  
-      bedroomNumber: data.bedroomNumber,
-      totalBathrooms: data.totalBathrooms,
-      halfBathrooms: data.halfBathrooms,
-      bathStyle1: data.bathStyle1,
-      bathStyle2: data.bathStyle2,
-      bathStyle3: data.bathStyle3,
-      numberOfKitchens: data.numberOfKitchens,
-      kitchenType: data.kitchenType,
-      kitchenStyle1: data.kitchenStyle1,
-      kitchenStyle2: data.kitchenStyle2,
-      kitchenStyle3: data.kitchenStyle3,
-      yearBuilt: data.yearBuilt,
-      exteriorFinish: data.exteriorFinish,
-      exteriorCondition: data.exteriorCondition,
-      roofCover: data.roofCover,
-      roofStructure: data.roofStructure,
-      foundation: data.foundation,
-      parkingSpots: data.parkingSpots,
-      heatType: data.heatType,
-      acType: data.acType,
-      fireplaces: data.fireplaces,
-      salePrice: data.salePrice,
-      saleDate: data.saleDate,
-      registryBookAndPlace: data.registryBookAndPlace
+      attributeGroups: data.buildingAttributes ? [
+        // Map each building to its own group
+        ...data.buildingAttributes.map((building) => ({
+          title: `Building ${building.buildingNumber}`,
+          content: [
+            {
+              title: "General",
+              content: [
+                {label: "Land Use", value: building.landUse},
+                {label: "Gross Area", value: building.grossArea ? `${building.grossArea} sq ft` : undefined},
+                {label: "Style", value: building.style},
+                {label: "Story Height", value: building.storyHeight},
+                {label: "Floor", value: building.floor},
+                {label: "Penthouse Unit", value: building.penthouseUnit},
+                {label: "Orientation", value: building.orientation},
+              ].filter((field) => field.value),
+            },
+            {
+              title: "Rooms",
+              content: [
+                {label: "Number of Bedrooms", value: building.bedroomNumber},
+                {label: "Total Bathrooms", value: building.totalBathrooms},
+                {label: "Half Bathrooms", value: building.halfBathrooms},
+                {label: "Bath Style 1", value: building.bathStyle1},
+                {label: "Bath Style 2", value: building.bathStyle2},
+                {label: "Bath Style 3", value: building.bathStyle3},
+                {label: "Number of Kitchens", value: building.numberOfKitchens},
+                {label: "Kitchen Type", value: building.kitchenType},
+                {label: "Kitchen Style 1", value: building.kitchenStyle1},
+                {label: "Kitchen Style 2", value: building.kitchenStyle2},
+                {label: "Kitchen Style 3", value: building.kitchenStyle3},
+              ].filter((field) => field.value),
+            },
+            {
+              title: "Construction",
+              content: [
+                {label: "Year Built", value: building.yearBuilt},
+                {label: "Exterior Finish", value: building.exteriorFinish},
+                {label: "Exterior Condition", value: building.exteriorCondition},
+                {label: "Roof Cover", value: building.roofCover},
+                {label: "Roof Structure", value: building.roofStructure},
+                {label: "Foundation", value: building.foundation},
+                {label: "Parking Spots", value: building.parkingSpots},
+              ].filter((field) => field.value),
+            },
+            {
+              title: "Utilities",
+              content: [
+                {label: "Heat Type", value: building.heatType},
+                {label: "AC Type", value: building.acType},
+                {label: "Fireplaces", value: building.fireplaces},
+              ].filter((field) => field.value),
+            },
+          ],
+        })),
+        ...commonSections,
+      ] : data.hasComplexCondoData ? [ // Condo case
+        {
+          title: "Condo Main Attributes",
+          content: [
+            {label: "Master Parcel ID", value: data.masterParcelId},
+            {label: "Grade", value: data.grade},
+            {label: "Exterior Condition", value: data.exteriorCondition},
+            {label: "Exterior Finish", value: data.exteriorFinish},
+            {label: "Foundation", value: data.foundation},
+            {label: "Roof Cover", value: data.roofCover},
+            {label: "Roof Structure", value: data.roofStructure},
+          ].filter((attr) => attr.value),
+        },
+        {
+          title: "Unit Attributes",
+          content: [
+            {
+              title: "General",
+              content: [
+                {label: "Land Use", value: data.landUse},
+                {label: "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : undefined},
+                {label: "Style", value: data.style},
+                {label: "Story Height", value: data.storyHeight},
+                {label: "Floor", value: data.floor},
+                {label: "Penthouse Unit", value: data.penthouseUnit},
+                {label: "Orientation", value: data.orientation},
+              ],
+            },
+            {
+              title: "Rooms",
+              content: [
+                {label: "Number of Bedrooms", value: data.bedroomNumber},
+                {label: "Total Bathrooms", value: data.totalBathrooms},
+                {label: "Half Bathrooms", value: data.halfBathrooms},
+                {label: "Bath Style 1", value: data.bathStyle1},
+                {label: "Bath Style 2", value: data.bathStyle2},
+                {label: "Bath Style 3", value: data.bathStyle3},
+                {label: "Number of Kitchens", value: data.numberOfKitchens},
+                {label: "Kitchen Type", value: data.kitchenType},
+                {label: "Kitchen Style 1", value: data.kitchenStyle1},
+                {label: "Kitchen Style 2", value: data.kitchenStyle2},
+                {label: "Kitchen Style 3", value: data.kitchenStyle3},
+              ],
+            },
+            {
+              title: "Construction",
+              content: [
+                {label: "Year Built", value: data.yearBuilt},
+                {label: "Parking Spots", value: data.parkingSpots},
+              ],
+            },
+            {
+              title: "Utilities",
+              content: [
+                {label: "Heat Type", value: data.heatType},
+                {label: "AC Type", value: data.acType},
+                {label: "Fireplaces", value: data.fireplaces},
+              ],
+            },
+          ],
+        },
+        ...commonSections,
+      ] : [
+        // Standard case
+        {
+          title: "General",
+          content: [
+            {label: "Land Use", value: data.landUse},
+            {label: "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : undefined},
+            {label: "Style", value: data.style},
+            {label: "Story Height", value: data.storyHeight},
+            {label: "Floor", value: data.floor},
+            {label: "Penthouse Unit", value: data.penthouseUnit},
+            {label: "Orientation", value: data.orientation},
+          ],
+        },
+        {
+          title: "Rooms",
+          content: [
+            {label: "Number of Bedrooms", value: data.bedroomNumber},
+            {label: "Total Bathrooms", value: data.totalBathrooms},
+            {label: "Half Bathrooms", value: data.halfBathrooms},
+            {label: "Bath Style 1", value: data.bathStyle1},
+            {label: "Bath Style 2", value: data.bathStyle2},
+            {label: "Bath Style 3", value: data.bathStyle3},
+            {label: "Number of Kitchens", value: data.numberOfKitchens},
+            {label: "Kitchen Type", value: data.kitchenType},
+            {label: "Kitchen Style 1", value: data.kitchenStyle1},
+            {label: "Kitchen Style 2", value: data.kitchenStyle2},
+            {label: "Kitchen Style 3", value: data.kitchenStyle3},
+          ],
+        },
+        {
+          title: "Construction",
+          content: [
+            {label: "Year Built", value: data.yearBuilt},
+            {label: "Exterior Finish", value: data.exteriorFinish},
+            {label: "Exterior Condition", value: data.exteriorCondition},
+            {label: "Roof Cover", value: data.roofCover},
+            {label: "Roof Structure", value: data.roofStructure},
+            {label: "Foundation", value: data.foundation},
+            {label: "Parking Spots", value: data.parkingSpots},
+          ],
+        },
+        {
+          title: "Utilities",
+          content: [
+            {label: "Heat Type", value: data.heatType},
+            {label: "AC Type", value: data.acType},
+            {label: "Fireplaces", value: data.fireplaces},
+          ],
+        },
+        ...commonSections,
+      ],
     };
 
     // Construct property taxes section

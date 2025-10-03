@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import WelcomePageLayout from '@layouts/WelcomePageLayout/WelcomePageLayout';
 import { WelcomeContent } from '@components/WelcomeContent/WelcomeContent';
+import { getComponentText } from '@utils/contentMapper';
 import { SearchBarContainer } from '@containers/SearchBarContainer/SearchBarContainer';
 
 export default function WelcomePage() {
@@ -20,15 +21,17 @@ export default function WelcomePage() {
     }
   };
 
+  const welcomeContent = getComponentText('WelcomeContent');
+  const searchBarContent = getComponentText('AnnotatedSearchBar', 'pages.welcome.search');
+
   return (
     <WelcomePageLayout>
       <WelcomeContent
+        {...welcomeContent}
         additionalContent={
           <SearchBarContainer
             onSelect={handlePropertySelect}
-            labelText="Search by address or parcel ID"
-            tooltipHint="A unique, legal 10 digit number assigned by the City of Boston to each parcel of property."
-            placeholderText="Enter address or parcel ID"
+            {...searchBarContent}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setIsSearchFocused(false)}
           />

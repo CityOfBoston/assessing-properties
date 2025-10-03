@@ -12,6 +12,7 @@ interface FieldTableProps {
   setActiveRowIndex?: (idx: number | null) => void;
   openedRowIndex?: number | null;
   setOpenedRowIndex?: (idx: number | null) => void;
+  headerLabels?: { [key: string]: string };
 }
 
 /**
@@ -25,6 +26,7 @@ export const FieldTable: React.FC<FieldTableProps> = ({
   setActiveRowIndex,
   openedRowIndex = null,
   setOpenedRowIndex,
+  headerLabels = {},
 }) => {
   if (!data || data.length === 0) {
     return null;
@@ -40,7 +42,7 @@ export const FieldTable: React.FC<FieldTableProps> = ({
         <div className={styles.headerRow}>
           {keys.map((key) => (
             <div key={key} className={styles.headerCell}>
-              <h3 className={styles.headerText}>{key}</h3>
+              <h3 className={styles.headerText}>{headerLabels[key] || key}</h3>
             </div>
           ))}
         </div>

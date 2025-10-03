@@ -11,16 +11,31 @@ periods:
     new_fy_preliminary_tax_period_begins: "New FY Preliminary Tax Period Begins"
     abatement_grace_period_deadline: "Abatement 28 Day Grace Period Deadline"
 
-  # Abatement phase messages
+  # Dynamic messages for abatement phases - these change based on dates and fiscal years
   abatement_phases:
-    before_jan1: "Applications for Abatements for the current fiscal year FY{next_year} will become available for download on {jan1_date}. The current property values shown are for FY{current_year}."
-    open: "To file an Abatement Application for the current fiscal year FY{next_year}, please use the link below. The deadline for submission is {deadline_date}. The current property values shown are for FY{current_year}."
-    grace: "The deadline for filing an Abatement application for the current fiscal year FY{next_year} was {deadline_date}. However, additional documentation for applications already on file is still being accepted. The current property values shown are for FY{current_year}."
-    after_grace: "The deadline for filing an Abatement application for the current fiscal year FY{next_year} was {deadline_date}. Applications for the next fiscal year FY{next_fy} will become available for download beginning {next_jan1_date}. The current property values shown are for FY{current_year}."
-    preliminary: "This is the preliminary tax period for FY{current_fy}. Abatement applications for FY{current_fy} were submitted earlier this year and any approved reductions are reflected in the current tax amounts. Applications for the next fiscal year FY{next_fy} will become available in January ({next_jan1_date})."
-    unknown: ""
+    # Empty message for preliminary phase (July 1st to next January 1st) - section should not be shown
+    preliminary: ""
+    # Messages for active phases (January 1st to July 1st)
+    open: |
+      An abatement is a reduction in the assessed value of a property. An abatement is granted when the property is determined to be:
+      - over-valued
+      - improperly classified, or
+      - disproportionately assessed.
 
-  # Exemption phase messages
+      Learn more about [tax exemptions and abatements](https://www.boston.gov/departments/assessing/tax-exemptions-and-abatements).
+
+      The deadline for filing an abatement application is **{deadline_date}**.
+
+      [Download Property Tax Abatements Application (PDF)](//www.boston.gov/assessing-online/form/abatement/FY{next_year}/{parcel_id})
+    after_deadline: |
+      Abatement applications are not available after {deadline_date}. An abatement is a reduction in the assessed value of a property. An abatement is granted when the property is determined to be:
+      - over-valued
+      - improperly classified, or
+      - disproportionately assessed.
+
+      Learn more about [tax exemptions and abatements](https://www.boston.gov/departments/assessing/tax-exemptions-and-abatements).
+
+  # Dynamic messages for exemption phases - these change based on dates and fiscal years
   exemption_phases:
     before_jan1: "Applications for {exemption_type} Exemptions for FY{next_year} will become available for download on {jan1_date}. The current exemption amounts shown are for FY{current_year}."
     open: "To file a {exemption_type} Exemption Application for FY{next_year}, use the link(s) below. The deadline for submission is {deadline_date}. The current exemption amounts shown are for FY{current_year}."
@@ -31,60 +46,66 @@ periods:
   # Property taxes section messages
   property_taxes:
     # Exemption status messages
-    residential_exemption_granted: "A Residential Exemption has been granted for this parcel."
+    to_be_decided: "Amount to be decided"
+    residential_exemption_granted: "**Granted:** We granted a Residential Exemption for this parcel."
+    residential_exemption_not_granted: "**Not Granted:** This parcel did not receive a residential exemption on the third-quarter bill. You can [download the application]({residential_exemption_url}). See below for information on how to apply."
     personal_exemption_granted: "A Personal Exemption has been granted for this parcel."
     residential_open_phase: "You may qualify for a Residential Exemption. See below for application details."
     personal_open_phase: "You may qualify for a Personal Exemption. See below for application details."
-    residential_preliminary_submitted: "Your residential exemption application has been submitted for FY{current_fy}. Amount to be decided starting in Q3 (January 1, {current_fy})."
-    residential_preliminary_not_submitted: "You have not submitted a residential exemption application for FY{current_fy} before the deadline and will not be granted an exemption for FY{current_fy}."
-    personal_preliminary_submitted: "Your personal exemption application has been submitted for FY{current_fy}. Amount to be decided starting in Q3 (January 1, {current_fy})."
-    personal_preliminary_not_submitted: "You have not submitted a personal exemption application for FY{current_fy} before the deadline and will not be granted an exemption for FY{current_fy}."
+    residential_preliminary_submitted: "**Y flag:** We have factored into your Q1 and Q2 tax bills a preliminary residential exemption based on your fiscal year {current_fy} approval."
+    residential_preliminary_not_submitted: "**N flag:** We have not factored a residential exemption into your preliminary tax bill."
+    personal_preliminary_submitted: "**Y flag:** This property received a personal exemption in fiscal year {current_fy}. A new application is required every year. Renewal applications will be mailed in **August {current_fy}**."
+    personal_preliminary_not_submitted: "**N flag:** This property did not receive a personal exemption in fiscal year {current_fy}."
     
     # Deadline messages
-    residential_deadline_passed: "The deadline for filing a Residential Exemption application for FY{next_year} was {deadline_date}. Applications for FY{next_fy} will become available in January."
-    personal_deadline_passed: "The deadline for filing a Personal Exemption application for FY{next_year} was {deadline_date}. Applications for FY{next_fy} will become available in January."
+    residential_deadline_passed: "The deadline for filing a Residential Exemption application for **FY{next_year}** was **{deadline_date}**.\n\nWe will make applications for **FY{next_fy}** available for download starting **Thursday, January 1, {next_fy}**. The current exemption amounts shown are for **FY{next_year}**."
+    personal_deadline_passed: "The deadline for filing a Personal Exemption application for **FY{next_year}** was **{deadline_date}**.\n\nWe will make applications for **FY{next_fy}** available for download starting **Thursday, January 1, {next_fy}**. The current exemption amounts shown are for **FY{next_year}**."
+    
+    # Personal exemption open phase messages
+    personal_exemption_granted: "**Granted:** We have granted a Personal Exemption for this property"
+    personal_exemption_not_granted: "**Not granted:** To file a Personal Exemption Application for **FY{next_year}**, use the link below. The deadline for submission is **{deadline_date}**, at **12 a.m.** The current exemption amounts shown are for **FY{next_year}**.\n\n[Download Personal Exemptions Application (PDF)]({personal_exemption_url})"
     
     # Exemption descriptions
     residential_exemption_description: "If you own and live in your property as a primary residence, you may qualify for the residential exemption. This fiscal year, the residential exemption will save qualified Boston homeowners up to ${max_amount}. The exemption amount will be applied to your third-quarter tax bill issued in late December. If you didn't get the credit on your bill and believe you should have, you can apply for a residential exemption."
+    residential_exemption_open_description: "The Residential Exemption application deadline for fiscal year {next_year} is {deadline_date}. [Find out how to apply for the exemption.](https://www.boston.gov/departments/assessing/residential-exemption)\n\nIf you already submitted an application and have questions on its status, please call our [Taxpayer Referral and Assistance Center](https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center) (TRAC) at [617-635-4287](tel:617-635-4287 \"City of Boston Taxpayer Referral and Assistance Center\")."
+    residential_exemption_preliminary_description: "If you own and live in your property as a primary residence, you may qualify for the residential exemption. If you think you are eligible for a residential exemption and did not receive one, or if you have applied and you have questions on your application status, please contact our [Taxpayer Referral and Assistance Center](https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center) at [617-635-4287](tel:617-635-4287 \"City of Boston Taxpayer Referral and Assistance Center\") for an application. Applications that we receive by **October 15** should be processed in time for the third quarter bill we issue in December.\n\n[View more information on applying for the residential exemption.](https://www.boston.gov/departments/assessing/residential-exemption)"
+    residential_exemption_after_deadline_description: "If you own and live in your property as a primary residence, you may qualify for the residential exemption. [Learn more about the residential exemption, and how to apply.](https://www.boston.gov/departments/assessing/residential-exemption)"
     personal_exemption_description: "Through an exemption, the City releases you from paying part or all of your property taxes."
+    personal_exemption_preliminary_description: "The Assessing Department provides tax relief programs for eligible taxpayers based on statutory requirements and locally adopted provisions. These programs are summarized below.\n\nIf you already submitted an application and have questions on its status, or if you have questions about any of these programs, please call our [Taxpayer Referral and Assistance Center](https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center) (TRAC) at [617-635-4287](tel:617-635-4287 \"City of Boston Taxpayer Referral and Assistance Center\")."
     
     # Application deadline text
     deadline_for_submission: "Deadline for submission:"
     download_residential_exemption: "Download Residential Exemptions Application (PDF)"
     
-    # Community preservation description
-    community_preservation_description: "We calculate the CPA surcharge by first deducting $100,000 from the value of your property. Next, we recalculate the tax and apply your residential exemption and any personal exemptions, if you have them. To learn more visit the Community Preservation Act"
-    
-    # Net tax description
-    net_tax_description: "Through exemptions, the City releases you from paying part or all of your property taxes. There's also other legally required fees and benefits that will change the amount you pay for taxes. After all of these calculations, the 'Net taxes' include the' final amount you are required to pay."
+    # Net tax section
+    net_tax_header: "NET TAX"
+    net_tax_preliminary_header: "FY{current_fy} Preliminary Tax Information (July - December {prev_year})"
+    net_tax_description: |
+      Your Net Tax is the amount you owe on your property taxes after applying:
+      - exemptions
+      - the Community Preservation surcharge, and
+      - any other interest or fees that you may owe on your property
+    net_tax_preliminary_description: >
+      The preliminary tax shown on this bill is based on the net tax owed on your property for fiscal year **{current_fy}** (**July 1, {prev_year} - June 30, {current_year}**). As a general rule, the amount of your preliminary tax will not be more than 50% of your fiscal year **{current_fy}** tax (including betterments, special assessments, or charges added to the tax) as reduced by any abatements or exemptions. Under certain circumstances, the amount of your preliminary tax may exceed that amount.
     
     # Tax rate section
     tax_rate_header: "FY{current_fy} TAX RATE"
     tax_rate_description: "For more information on the breakdown of the tax calculation, visit"
     view_tax_rate_history: "View tax rate history (PDF)"
     
-    # MessageBox messages
-    prelim_period_message: "Property tax information for the first half (Q1 + Q2) of FY{current_fy} is shown below. These are estimated values using tax rates from FY{prev_fy} and without exemption data. Applications for FY{next_fy} will become available on January 1, {next_year}."
-    regular_period_message: "Property tax information for the entire FY{current_fy} is shown below. Applications for FY{next_fy} will become available on January 1, {next_year}."
-    fallback_message: "Property tax information for FY{current_fy} is shown below."
+  MessageBox_messages:
+    january_message: "For information on abatement applications, see below."
+    february_message: "The deadline for abatement applications was **{deadline_date}**."
+    regular_message: "You can see property tax information for all of **FY{current_fy}** below. We will make applications for **FY{next_fy}** available on **January 1, {next_fy}**."
     
-    # Net tax section
-    net_tax_header: "NET TAX"
-    net_tax_preliminary_header: "FY{current_fy} Preliminary Tax Information (July - December {prev_year})"
-    net_tax_preliminary_description: "During the early part of the fiscal year, your tax is based on an estimate. Since the new year's tax rates and exemption amounts have not yet been finalized, we temporarily use last year's rates. Exemption amounts will be updated starting in January {next_year}. In the second half of the fiscal year, your bill will be adjusted to reflect any differences."
-    
-    # Button text
+  buttons:
     pay_your_taxes: "Pay Your Taxes"
     print: "Print"
-    
-    # Exemption values
-    to_be_decided: "Amount to be decided"
     
     # Links
     pay_taxes_url: "https://www.boston.gov/real-estate-taxes?input1={parcel_id}"
     tax_rate_history_url: "https://www.boston.gov/sites/default/files/file/2024/01/FY24%20Tax%20Rate%20History_1.pdf"
     how_we_tax_url: "https://www.boston.gov/departments/assessing/how-we-tax-your-property"
-    community_preservation_url: "https://www.boston.gov/departments/assessing/community-preservation-act"
     residential_exemption_url: "https://www.boston.gov/assessing-online/form/resexempt/FY{current_fy}/{parcel_id}"
 
   # Personal exemption links
@@ -119,7 +140,7 @@ periods:
     preliminary_flag_false: "Not Applied"
     
     # Owner disclaimer
-    owner_disclaimer: "Owner information may not reflect any changes submitted to City of Boston Assessing after October 25, 2024. Authoritative ownership information is held by the Registry of Deeds."
+    owner_disclaimer: "Owner information may not reflect any changes submitted to the City of Boston’s Assessing Department after October 25, 2024."
     
     # Map link
     open_in_map: "Open in map"

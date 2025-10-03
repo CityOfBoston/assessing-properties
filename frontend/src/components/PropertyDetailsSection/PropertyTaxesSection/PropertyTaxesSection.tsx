@@ -6,13 +6,17 @@ import PropertyDetailsCardGroup from '../../PropertyDetailsCardGroup';
 import FormulaAccordion from '../../FormulaAccordion';
 import { IconButton } from '../../IconButton';
 import styles from './PropertyTaxesSection.module.scss';
+import sharedStyles from '../PropertyDetailsSection.module.scss';
 import { PropertyTaxesSectionData } from '@src/types';
 import { getExemptionPhase, getFiscalYear, formatDateForDisplay, EXEMPTION_APPLICATION_DEADLINE_DATE } from '@src/utils/periods';
-import { getPropertyTaxMessage, getPersonalExemptionLink, getPersonalExemptionLabel } from '@src/utils/periodsLanguage';
+import { getPersonalExemptionLink, getPersonalExemptionLabel, getLanguageString } from '@src/utils/periodsLanguage';
 import MessageBox from '../../MessageBox';
+import ReactMarkdown from 'react-markdown';
 import { useDateContext } from '@src/hooks/useDateContext';
 
-interface PropertyTaxesSectionProps extends PropertyTaxesSectionData {}
+interface PropertyTaxesSectionProps extends PropertyTaxesSectionData {
+  title: string;
+}
 
 export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
   const { date } = useDateContext();
@@ -37,22 +41,20 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
   const residentialGrantedCount = residentialGranted ? 1 : 0;
   const personalGrantedCount = personalGranted ? 1 : 0;
 
-  // For exemption phases, we need to use the calendar year when applications are due
-  // For July 2025 (FY2026), exemptions for FY2026 were due in April 2025 (calendar year 2025)
+  // For exemption phases, we need to use the calendar year for phase calculations
   const calendarYear = now.getFullYear();
-  const exemptionYear = nowMonth >= 6 ? calendarYear : calendarYear - 1;
   
   // Get exemption phase for residential
   const residentialExemptionPhase = getExemptionPhase(
     now,
-    exemptionYear,
+    calendarYear,
     { grantedCount: residentialGrantedCount, type: 'Residential' }
   );
 
   // Get exemption phase for personal
   const personalExemptionPhase = getExemptionPhase(
     now,
-    exemptionYear,
+    calendarYear,
     { grantedCount: personalGrantedCount, type: 'Personal' }
   );
 
@@ -93,65 +95,107 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
           return isPrelimPeriod ? 'Amount to be decided' : `- ${formatTaxValue(sectionData.residentialExemptionAmount)}`;
         }
         if (isPrelimPeriod && residentialExemptionApproved) {
-          return getPropertyTaxMessage('to_be_decided');
+          return getLanguageString('periods.property_taxes.to_be_decided');
         }
         return formatTaxValue(sectionData.residentialExemptionAmount) !== 'N/A' ? `- ${formatTaxValue(sectionData.residentialExemptionAmount)}` : 'N/A';
       })(),
       message:
         (() => {
-          if (residentialGranted) {
-            return getPropertyTaxMessage('residential_exemption_granted');
-          }
           const phase = residentialExemptionPhase.phase;
-          if (phase === 'open') {
-            return getPropertyTaxMessage('residential_open_phase');
-          } else if (phase === 'preliminary') {
-            return residentialExemptionApproved 
-              ? getPropertyTaxMessage('residential_preliminary_submitted', { current_fy: displayFY })
-              : getPropertyTaxMessage('residential_preliminary_not_submitted', { current_fy: displayFY });
+          console.log('Accordion message debug:', {
+            phase,
+            residentialGranted,
+            residentialExemptionApproved
+          });
+
+          if (phase === 'preliminary') {
+            return <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              )
+            }}>
+              {residentialExemptionApproved 
+                ? getLanguageString('periods.property_taxes.residential_preliminary_submitted', { current_fy: displayFY })
+                : getLanguageString('periods.property_taxes.residential_preliminary_not_submitted', { current_fy: displayFY })
+              }
+            </ReactMarkdown>;
+          } else if (phase === 'open') {
+            return <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              )
+            }}>
+              {residentialGranted 
+                ? getLanguageString('periods.property_taxes.residential_exemption_granted')
+                : getLanguageString('periods.property_taxes.residential_exemption_not_granted', {
+                    residential_exemption_url: getLanguageString('periods.property_taxes.residential_exemption_url', { 
+                      current_fy: fiscalYear, 
+                      parcel_id: sectionData.parcelId 
+                    })
+                  })
+              }
+            </ReactMarkdown>;
           } else if (phase === 'after_deadline' || phase === 'after_grace') {
-            return getPropertyTaxMessage('residential_deadline_passed', {
-              next_year: fiscalYear,
-              deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(exemptionYear)),
-              next_fy: fiscalYear + 1
-            });
+            return <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              )
+            }}>
+              {getLanguageString('periods.property_taxes.residential_deadline_passed', {
+                next_year: fiscalYear,
+                deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(calendarYear)),
+                next_fy: fiscalYear + 1
+              })}
+            </ReactMarkdown>;
           } else {
-            return getPropertyTaxMessage('residential_deadline_passed', {
-              next_year: fiscalYear,
-              deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(exemptionYear)),
-              next_fy: fiscalYear + 1
-            });
+            return <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              )
+            }}>
+              {getLanguageString('periods.property_taxes.residential_deadline_passed', {
+                next_year: fiscalYear,
+                deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(calendarYear)),
+                next_fy: fiscalYear + 1
+              })}
+            </ReactMarkdown>;
           }
         })(),
       description: (
         <div className={styles.exemptionContent}>
-          <div className={styles.text}>
-            {getPropertyTaxMessage('residential_exemption_description', { max_amount: residentialExemptionMaxAmount.toLocaleString() })}
+          <div className={sharedStyles.paragraph}>
+            <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              ),
+              a: ({ node, ...props }) => (
+                <a
+                  className="usa-link usa-link--external"
+                  rel="noreferrer"
+                  target="_blank"
+                  {...props}
+                />
+              )
+            }}>
+              {(() => {
+                const phase = residentialExemptionPhase.phase;
+                if (phase === 'preliminary') {
+                  return getLanguageString('periods.property_taxes.residential_exemption_preliminary_description');
+                } else if (phase === 'open') {
+                  return getLanguageString('periods.property_taxes.residential_exemption_open_description', {
+                    next_year: fiscalYear,
+                    deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(calendarYear))
+                  });
+                } else if (phase === 'after_deadline' || phase === 'after_grace') {
+                  return getLanguageString('periods.property_taxes.residential_exemption_after_deadline_description');
+                } else {
+                  return getLanguageString('periods.property_taxes.residential_exemption_description', { 
+                    max_amount: residentialExemptionMaxAmount.toLocaleString() 
+                  });
+                }
+              })()}
+            </ReactMarkdown>
           </div>
-          <div className={styles.text} style={{ fontWeight: 'bold'}}>
-            {residentialGranted
-              ? getPropertyTaxMessage('residential_exemption_granted')
-              : residentialExemptionPhase.message}
-          </div>
-          <ul className={styles.list}>
-            {residentialExemptionPhase.phase === 'open' && (
-              <>
-                <li>
-                  <strong>{getPropertyTaxMessage('deadline_for_submission')}</strong> Tuesday, April 1, {exemptionYear + 1}
-                </li>
-                <li>
-                  <a
-                    className="usa-link usa-link--external"
-                    rel="noreferrer"
-                    target="_blank"
-                    href={getPropertyTaxMessage('residential_exemption_url', { current_fy: fiscalYear, parcel_id: sectionData.parcelId })}
-                  >
-                    {getPropertyTaxMessage('download_residential_exemption')}
-                  </a>
-                </li>
-              </>
-            )}
-          </ul>
         </div>
       ),
     },
@@ -162,46 +206,95 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
           return isPrelimPeriod ? 'Amount to be decided' : `- ${formatTaxValue(sectionData.personalExemptionAmount)}`;
         }
         if (isPrelimPeriod && personalExemptionApproved) {
-          return getPropertyTaxMessage('to_be_decided');
+          return getLanguageString('periods.property_taxes.to_be_decided');
         }
         return formatTaxValue(sectionData.personalExemptionAmount) !== 'N/A' ? `- ${formatTaxValue(sectionData.personalExemptionAmount)}` : 'N/A';
       })(),
       message:
         (() => {
-          if (personalGranted) {
-            return getPropertyTaxMessage('personal_exemption_granted');
-          }
           const phase = personalExemptionPhase.phase;
-          if (phase === 'open') {
-            return getPropertyTaxMessage('personal_open_phase');
-          } else if (phase === 'preliminary') {
-            return personalExemptionApproved 
-              ? getPropertyTaxMessage('personal_preliminary_submitted', { current_fy: displayFY })
-              : getPropertyTaxMessage('personal_preliminary_not_submitted', { current_fy: displayFY });
+          if (phase === 'preliminary') {
+            return <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              )
+            }}>
+              {personalExemptionApproved 
+                ? getLanguageString('periods.property_taxes.personal_preliminary_submitted', { current_fy: displayFY })
+                : getLanguageString('periods.property_taxes.personal_preliminary_not_submitted', { current_fy: displayFY })
+              }
+            </ReactMarkdown>;
+          } else if (phase === 'open') {
+            return <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              ),
+              a: ({ node, ...props }) => (
+                <a
+                  className="usa-link usa-link--external"
+                  rel="noreferrer"
+                  target="_blank"
+                  {...props}
+                />
+              )
+            }}>
+              {personalGranted 
+                ? getLanguageString('periods.property_taxes.personal_exemption_granted')
+                : getLanguageString('periods.property_taxes.personal_exemption_not_granted', {
+                    next_year: fiscalYear,
+                    deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(calendarYear)),
+                    personal_exemption_url: "https://www.boston.gov/assessing-online/form/persexempt/FY" + fiscalYear + "/" + sectionData.parcelId
+                  })
+              }
+            </ReactMarkdown>;
           } else if (phase === 'after_deadline' || phase === 'after_grace') {
-            return getPropertyTaxMessage('personal_deadline_passed', {
-              next_year: fiscalYear,
-              deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(exemptionYear)),
-              next_fy: fiscalYear + 1
-            });
+            return <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              )
+            }}>
+              {getLanguageString('periods.property_taxes.personal_deadline_passed', {
+                next_year: fiscalYear,
+                deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(calendarYear)),
+                next_fy: fiscalYear + 1
+              })}
+            </ReactMarkdown>;
           } else {
-            return getPropertyTaxMessage('personal_deadline_passed', {
-              next_year: fiscalYear,
-              deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(exemptionYear)),
-              next_fy: fiscalYear + 1
-            });
+            return <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              )
+            }}>
+              {getLanguageString('periods.property_taxes.personal_deadline_passed', {
+                next_year: fiscalYear,
+                deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(calendarYear)),
+                next_fy: fiscalYear + 1
+              })}
+            </ReactMarkdown>;
           }
         })(),
       description: (
         <div className={styles.exemptionContent}>
-          <div className={styles.text}>
-            {getPropertyTaxMessage('personal_exemption_description')}
-                  </div>
-          <div className={styles.text} style={{ fontWeight: 'bold' }}>
-            {personalGranted
-              ? getPropertyTaxMessage('personal_exemption_granted')
-              : personalExemptionPhase.message}
-              </div>
+          <div className={sharedStyles.paragraph}>
+            <ReactMarkdown components={{
+              strong: ({ node, ...props }) => (
+                <span style={{ fontWeight: 'bold' }} {...props} />
+              ),
+              a: ({ node, ...props }) => (
+                <a
+                  className="usa-link usa-link--external"
+                  rel="noreferrer"
+                  target="_blank"
+                  {...props}
+                />
+              )
+            }}>
+              {personalExemptionPhase.phase === 'preliminary'
+                ? getLanguageString('periods.property_taxes.personal_exemption_preliminary_description')
+                : getLanguageString('periods.property_taxes.personal_exemption_description')
+              }
+            </ReactMarkdown>
+          </div>
           <ul className={styles.list}>
             <li>
               <a
@@ -271,16 +364,17 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
       title: 'Community Preservation',
       value: formatTaxValue(sectionData.communityPreservationAmount) !== 'N/A' ? `+ ${formatTaxValue(sectionData.communityPreservationAmount)}` : '-',
       description: (
-        <div className={styles.text}>
-          {getPropertyTaxMessage('community_preservation_description')}{' '}
+        <div className={sharedStyles.paragraph}>
+          The Community Preservation surcharge supports a variety of programs. To learn more, visit the{' '}
           <a
             className="usa-link usa-link--external"
             rel="noreferrer"
             target="_blank"
-            href={getPropertyTaxMessage('community_preservation_url')}
+            href="https://www.boston.gov/departments/assessing/community-preservation-act"
           >
             Community Preservation Act
-          </a>
+          </a>{' '}
+          page.
         </div>
       ),
     },
@@ -290,91 +384,147 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
     },
   ];
 
+
   return (
-    <PropertyDetailsSection title="Property Taxes">
-      <div className={styles.taxRateContainer}>
-        <h3 className={styles.header}>{getPropertyTaxMessage('tax_rate_header', { current_fy: displayFY })}</h3>
-        <div className={styles.text}>
-          {getPropertyTaxMessage('tax_rate_description')}{' '}
-          <a
-            className="usa-link usa-link--external"
-            rel="noreferrer"
-            target="_blank"
-            href={getPropertyTaxMessage('how_we_tax_url')}
-          >
-            How we tax your property
-          </a>
-          .
+    <PropertyDetailsSection title={props.title}>
+      {!isPrelimPeriod && (
+        <>
+          <div className={styles.taxRateContainer}>
+            <h3 className={styles.header}>{getLanguageString('periods.property_taxes.tax_rate_header', { current_fy: displayFY })}</h3>
+            <div className={sharedStyles.paragraph}>
+              {getLanguageString('periods.property_taxes.tax_rate_description')}{' '}
+              <a
+                className="usa-link usa-link--external"
+                rel="noreferrer"
+                target="_blank"
+                href={getLanguageString('periods.property_taxes.how_we_tax_url')}
+              >
+                How we tax your property
+              </a>
+              .
+            </div>
+
+            <div className={styles.cardGroup}>
+              <PropertyDetailsCardGroup cards={taxRateCards}/>
+            </div>
+            <div className={styles.link}>
+              <a
+                className="usa-link usa-link--external"
+                rel="noreferrer"
+                target="_blank"
+                href={getLanguageString('periods.property_taxes.tax_rate_history_url')}
+              >
+                {getLanguageString('periods.property_taxes.view_tax_rate_history')}
+              </a>
+            </div>
           </div>
 
-        <div className={styles.cardGroup}>
-          <PropertyDetailsCardGroup cards={taxRateCards}/>
-        </div>
-      <div className={styles.link}>
-        <a
-          className="usa-link usa-link--external"
-          rel="noreferrer"
-          target="_blank"
-          href={getPropertyTaxMessage('tax_rate_history_url')}
-        >
-          {getPropertyTaxMessage('view_tax_rate_history')}
-        </a>
-      </div>
-
-      </div>
-
-      {/* Formal MessageBox about reference values */}
-      <MessageBox>
-        {(() => {
-          const nowMonth = now.getMonth();
-          if (nowMonth >= 6 && nowMonth < 12) { // July (6) to December (11)
-            return (
-              <>
-                {getPropertyTaxMessage('prelim_period_message', { 
-                  current_fy: fiscalYear, 
-                  prev_fy: fiscalYear - 1, 
-                  next_fy: fiscalYear + 1, 
-                  next_year: calendarYear + 1 
-                })}<br />
-                Applications for FY{fiscalYear + 1} will become available on January 1, {calendarYear + 1}.
-              </>
-            );
-          } else if (nowMonth < 6) { // January (0) to June (5)
-            return (
-              <>
-                {getPropertyTaxMessage('regular_period_message', { 
-                  current_fy: fiscalYear, 
-                  next_fy: fiscalYear + 1, 
-                  next_year: calendarYear + 1 
-                })}
-              </>
-            );
-          } else { // fallback
-            return (
-              <>
-                {getPropertyTaxMessage('fallback_message', { current_fy: fiscalYear })}
-              </>
-            );
-          }
-        })()}
-      </MessageBox>
+          {/* Formal MessageBox about reference values */}
+          <MessageBox>
+            {(() => {
+              const phase = residentialExemptionPhase.phase;
+              console.log('MessageBox phase debug:', {
+                date: now.toISOString(),
+                phase,
+                calendarYear,
+                fiscalYear,
+                residentialGranted
+              });
+              
+              // Three distinct periods:
+              // 1. Open period (Jan 1 to April deadline) - Show granted/not granted message
+              // 2. After deadline until preliminary (April deadline to July 1) - Show deadline passed message
+              // 3. Preliminary period (July 1 to Dec 31) - Show regular message
+              
+              if (phase === 'open') {
+                return (
+                  <ReactMarkdown components={{
+                    strong: ({ node, ...props }) => (
+                      <span style={{ fontWeight: 'bold' }} {...props} />
+                    )
+                  }}>
+                    {residentialGranted 
+                      ? getLanguageString('periods.property_taxes.residential_exemption_granted')
+                      : getLanguageString('periods.property_taxes.residential_exemption_not_granted', {
+                          residential_exemption_url: getLanguageString('periods.property_taxes.residential_exemption_url', { 
+                            current_fy: fiscalYear, 
+                            parcel_id: sectionData.parcelId 
+                          })
+                        })
+                    }
+                  </ReactMarkdown>
+                );
+              }
+              
+              if (phase === 'after_deadline' || phase === 'after_grace') {
+                return (
+                  <ReactMarkdown components={{
+                    strong: ({ node, ...props }) => (
+                      <span style={{ fontWeight: 'bold' }} {...props} />
+                    )
+                  }}>
+                    {getLanguageString('periods.property_taxes.residential_deadline_passed', {
+                      next_year: fiscalYear,
+                      deadline_date: formatDateForDisplay(EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(calendarYear)),
+                      next_fy: fiscalYear + 1
+                    })}
+                  </ReactMarkdown>
+                );
+              }
+              
+              if (phase === 'preliminary') {
+                return (
+                  <ReactMarkdown components={{
+                    strong: ({ node, ...props }) => (
+                      <span style={{ fontWeight: 'bold' }} {...props} />
+                    )
+                  }}>
+                    {getLanguageString('periods.MessageBox_messages.regular_message', {
+                      current_fy: fiscalYear,
+                      next_fy: fiscalYear + 1
+                    })}
+                  </ReactMarkdown>
+                );
+              }
+              
+              // Default to regular message
+              return (
+                <ReactMarkdown components={{
+                  strong: ({ node, ...props }) => (
+                    <span style={{ fontWeight: 'bold' }} {...props} />
+                  )
+                }}>
+                  {getLanguageString('periods.MessageBox_messages.regular_message', {
+                    current_fy: fiscalYear,
+                    next_fy: fiscalYear + 1
+                  })}
+                </ReactMarkdown>
+              );
+            })()}
+          </MessageBox>
+        </>
+      )}
 
       <h3 className={styles.header}>
         {isPrelimPeriod 
-          ? getPropertyTaxMessage('net_tax_preliminary_header', { 
+          ? getLanguageString('periods.property_taxes.net_tax_preliminary_header', { 
               current_fy: displayFY, 
               prev_year: displayFY - 1 
             })
-          : getPropertyTaxMessage('net_tax_header')
+          : getLanguageString('periods.property_taxes.net_tax_header')
         }
       </h3>
-      <div className={styles.text}>
-        {isPrelimPeriod 
-          ? getPropertyTaxMessage('net_tax_preliminary_description', { 
-              next_year: displayFY + 1 
-            })
-          : getPropertyTaxMessage('net_tax_description')
-        }
+      <div className={sharedStyles.paragraph}>
+         <ReactMarkdown>
+           {isPrelimPeriod 
+             ? getLanguageString('periods.property_taxes.net_tax_preliminary_description', { 
+                 current_fy: displayFY,
+                 prev_year: displayFY - 1,
+                 current_year: displayFY
+               })
+             : getLanguageString('periods.property_taxes.net_tax_description')
+           }
+         </ReactMarkdown>
       </div>
 
       <div className={styles.accordion}>
@@ -383,18 +533,18 @@ export default function PropertyTaxesSection(props: PropertyTaxesSectionProps) {
 
       <div className={styles.buttonContainer}>
         <a
-          href={getPropertyTaxMessage('pay_taxes_url', { parcel_id: sectionData.parcelId })}
+          href={getLanguageString('periods.buttons.pay_taxes_url', { parcel_id: sectionData.parcelId })}
           target="_blank"
           rel="noreferrer"
           className={styles.payTaxesLink}
         >
           <IconButton 
-            text={getPropertyTaxMessage('pay_your_taxes')}
+            text={getLanguageString('periods.buttons.pay_your_taxes')}
             variant="primary"
           />
         </a>
         <span className={styles.printPayTaxesLink}>
-          Pay your taxes via {getPropertyTaxMessage('pay_taxes_url', { parcel_id: sectionData.parcelId })}
+          Pay your taxes via {getLanguageString('periods.buttons.pay_taxes_url', { parcel_id: sectionData.parcelId })}
         </span>
       </div>
     </PropertyDetailsSection>

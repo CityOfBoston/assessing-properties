@@ -1,10 +1,42 @@
 import styles from './OverviewSection.module.scss';
+import sharedStyles from '../PropertyDetailsSection.module.scss';
 import PropertyDetailsCardGroup from '@components/PropertyDetailsCardGroup';
 import IconButton from '@components/IconButton';
 import PropertyDetailsSection from '../PropertyDetailsSection';
 import { OverviewSectionData } from '@src/types';
 import { useDateContext } from '@src/hooks/useDateContext';
 import { getOverviewMessage } from '@src/utils/periodsLanguage';
+import { getComponentText } from '@utils/contentMapper';
+
+/**
+ * Helper function to determine property type based on property code
+ * @param propertyCode - The numeric property code
+ * @returns The property type label
+ */
+const getPropertyTypeLabel = (propertyCode: string): string => {
+  const code = parseInt(propertyCode);
+  
+  // Handle invalid codes
+  if (isNaN(code)) {
+    return propertyCode;
+  }
+
+  // Residential property codes
+  if ((code >= 101 && code <= 110) || (code >= 130 && code <= 132)) {
+    return `Residential (${propertyCode})`;
+  }
+  
+  // Commercial property codes
+  if ((code >= 10 && code <= 31) || 
+      (code >= 111 && code <= 129) || 
+      code === 140 || 
+      (code >= 200 && code <= 999)) {
+    return `Commercial (${propertyCode})`;
+  }
+
+  // Default case - just return the code
+  return propertyCode;
+};
 
 /**
  * Custom target icon component for property location
@@ -43,9 +75,10 @@ const TargetIcon = () => (
  */
 interface OverviewSectionProps {
   data: OverviewSectionData;
+  title: string;
 }
 
-export default function OverviewSection({ data }: OverviewSectionProps) {
+export default function OverviewSection({ data, title }: OverviewSectionProps) {
   const { date } = useDateContext();
   
   // Determine if we're in the preliminary period (July-December)
@@ -96,8 +129,11 @@ export default function OverviewSection({ data }: OverviewSectionProps) {
     }
   ];
 
+  const content = getComponentText('OverviewSection');
+  const pageContent = getComponentText('propertyDetails', 'pages.propertyDetails');
+
   return (
-    <PropertyDetailsSection title="Overview">
+    <PropertyDetailsSection title={title}>
       <section className={styles.section}>
         <div className={styles.leftContent}>
           <div className={styles.locationContainer}>
@@ -112,12 +148,19 @@ export default function OverviewSection({ data }: OverviewSectionProps) {
             <h3 className={styles.sectionTitle}>Current Owner(s)</h3>
           </div>
           <div className={styles.sectionContent}>
-            {data.owners.map((owner, index) => (
-              <p key={index}>{owner}</p>
-            ))}
-            <p className={styles.ownerDisclaimer}>
-              {getOverviewMessage('owner_disclaimer')}
-            </p>
+            <div className={styles.ownerNames}>
+              {data.owners.map((owner, index) => (
+                <div key={index} className={`${sharedStyles.paragraph} ${styles.ownerName}`}>{owner}</div>
+              ))}
+            </div>
+            <div className={styles.ownerDisclaimers}>
+              <div className={`${sharedStyles.paragraph} ${styles.ownerDisclaimer}`}>
+                Owner names appear as Last Name followed by First Name
+              </div>
+              <div className={`${sharedStyles.paragraph} ${styles.ownerDisclaimer}`}>
+                {getOverviewMessage('owner_disclaimer')}
+              </div>
+            </div>
           </div>
 
           <div className={styles.divider} />
@@ -127,7 +170,7 @@ export default function OverviewSection({ data }: OverviewSectionProps) {
             <h3 className={styles.sectionTitle}>Assessed Value</h3>
           </div>
           <div className={styles.sectionContent}>
-            <p>{data.assessedValue != null ? `$${data.assessedValue.toLocaleString()}` : 'N/A'}</p>
+            <div className={sharedStyles.paragraph}>{data.assessedValue != null ? `$${data.assessedValue.toLocaleString()}` : 'N/A'}</div>
           </div>
 
           <div className={styles.divider} />
@@ -137,7 +180,7 @@ export default function OverviewSection({ data }: OverviewSectionProps) {
             <h3 className={styles.sectionTitle}>Property Type</h3>
           </div>
           <div className={styles.sectionContent}>
-            <p>{data.propertyType}</p>
+            <div className={sharedStyles.paragraph}>{getPropertyTypeLabel(data.propertyType)}</div>
           </div>
         </div>
 

@@ -11,6 +11,11 @@ interface ResponsiveTableProps {
   data: TableData[];
   showDetails?: boolean;
   showMapLink?: boolean;
+  texts?: {
+    viewDetails?: string;
+    openInMap?: string;
+    columnHeaders?: { [key: string]: string };
+  };
 }
 
 /**
@@ -21,6 +26,11 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   data,
   showDetails = false,
   showMapLink = false,
+  texts = {
+    viewDetails: "View Details",
+    openInMap: "Open in Map",
+    columnHeaders: {}
+  }
 }) => {
   const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
   const [openedRowIndex, setOpenedRowIndex] = useState<number | null>(null);
@@ -32,14 +42,15 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   const processedData = data.map(row => {
     const newRow = { ...row };
     if (showDetails) {
-      const parcelId = row['Parcel ID'] as string;
+      // Get parcelId from either the 'Parcel ID' or 'parcelId' field
+      const parcelId = (row['Parcel ID'] || row.parcelId) as string;
       const detailsLink = (
         <a
           className="usa-link"
           rel="noreferrer"
           href={`#/details?parcelId=${parcelId}`}
         >
-          View Details
+          {texts.viewDetails}
         </a>
       );
 
@@ -53,7 +64,7 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
             target="_blank"
             href={`https://app01.cityofboston.gov/AssessingMap/?find=${parcelId}`}
           >
-            Open in Map
+            {texts.openInMap}
           </a>
         );
       } else {
@@ -67,7 +78,8 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   const mobileData = processedData.map(row => {
     const newRow = { ...row };
     if (showDetails && showMapLink) {
-      const parcelId = row['Parcel ID'] as string;
+      // Get parcelId from either the 'Parcel ID' or 'parcelId' field
+      const parcelId = (row['Parcel ID'] || row.parcelId) as string;
       newRow['Details'] = (
         <div className={styles.detailsLinks}>
           <a
@@ -75,7 +87,7 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
             rel="noreferrer"
             href={`#/details?parcelId=${parcelId}`}
           >
-            View Details
+            {texts.viewDetails}
           </a>
           <a
             className="usa-link usa-link--external"
@@ -83,7 +95,7 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
             target="_blank"
             href={`https://app01.cityofboston.gov/AssessingMap/?find=${parcelId}`}
           >
-            Open in Map
+            {texts.openInMap}
           </a>
         </div>
       );

@@ -17,6 +17,23 @@ export interface FeedbackSenderProps {
    * Optional parcelId for context
    */
   parcelId?: string;
+
+  /**
+   * Text content
+   */
+  texts?: {
+    question?: string;
+    yesLabel?: string;
+    noLabel?: string;
+    promptTitle?: string;
+    promptOptional?: string;
+    disclaimer?: string;
+    submitButton?: string;
+    characterCount?: string;
+    characterRemaining?: string;
+    contactInfo?: string;
+    departmentLinkText?: string;
+  };
 }
 
 /**
@@ -26,6 +43,7 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
   onSubmit,
   assessingDeptUrl = '#',
   parcelId,
+  texts
 }) => {
   const [feedbackOption, setFeedbackOption] = useState<string | null>(null);
   const [feedbackText, setFeedbackText] = useState('');
@@ -62,7 +80,7 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
   return (
     <form className={styles.feedbackForm} onSubmit={handleSubmit}>
       <div className={styles.feedbackContainer}>
-        <p className={styles.feedbackQuestion} id="feedback-question">Was this page helpful?</p>
+        <p className={styles.feedbackQuestion} id="feedback-question">{texts.question}</p>
         
         <div className={styles.radioGroup} role="radiogroup" aria-labelledby="feedback-question">
           <div className="usa-radio">
@@ -76,7 +94,7 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
               onChange={handleOptionChange}
             />
             <label className="usa-radio__label" htmlFor="feedback-yes">
-              Yes
+              {texts.yesLabel}
             </label>
           </div>
           
@@ -91,7 +109,7 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
               onChange={handleOptionChange}
             />
             <label className="usa-radio__label" htmlFor="feedback-no">
-              No
+              {texts.noLabel}
             </label>
           </div>
         </div>
@@ -100,11 +118,11 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
       {feedbackOption && (
         <div className={styles.feedbackContainer}>
           <legend className={`usa-legend usa-legend ${styles.feedbackPrompt}`}>
-            <strong>You can tell us more below</strong> (Optional)
+            <strong>{texts.promptTitle}</strong> {texts.promptOptional}
           </legend>
           
           <div className={`usa-hint ${styles.disclaimerText}`} id="feedback-hint">
-            <em>Do not include any personal or contact information</em>
+            <em>{texts.disclaimer}</em>
           </div>
           
           <textarea
@@ -121,21 +139,21 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
           
           <div className="usa-hint" id="character-count" data-validator="maxlength">
             {feedbackText.length > 0 
-              ? `${remainingChars} characters remaining`
-              : `${MAX_CHARACTERS} characters allowed`
+              ? texts.characterRemaining.replace('{count}', remainingChars.toString())
+              : texts.characterCount.replace('{count}', MAX_CHARACTERS.toString())
             }
           </div>
           
           <IconButton 
-            text="Send feedback"
+            text={texts.submitButton}
             variant="primary"
             type="submit"
           />
           
           <p className={styles.contactInfo}>
-            We use this feedback to improve our website. If you need assistance, please contact the{' '}
+            {texts.contactInfo}{' '}
             <a className="usa-link" href={assessingDeptUrl}>
-              Assessing department
+              {texts.departmentLinkText}
             </a>.
           </p>
         </div>

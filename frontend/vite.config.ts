@@ -73,13 +73,13 @@ export default defineConfig({
       transform(code, id) {
         if (id.endsWith('.yaml') || id.endsWith('.yml')) {
           try {
-            const data = yaml.load(code);
+            const data = yaml.load(code, { json: true });
             return {
-              code: `export default ${JSON.stringify(data)};`,
+              code: `export default ${JSON.stringify(data, null, 2)};`,
               map: null
             };
           } catch (error) {
-            console.error('Error parsing YAML:', error);
+            this.error('Error parsing YAML: ' + error.message);
             return null;
           }
         }
@@ -107,6 +107,7 @@ export default defineConfig({
       '@hooks': path.resolve(__dirname, 'src/hooks'),
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@types': path.resolve(__dirname, 'src/types'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
     },
   },
   

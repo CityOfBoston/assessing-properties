@@ -12,10 +12,23 @@ interface Property {
 
 interface PropertySearchResultsProps {
   results: Property[];
+  texts?: {
+    heading?: string;
+    resultsCount?: string;
+    columnHeaders?: {
+      parcelId?: string;
+      address?: string;
+      owner?: string;
+      value?: string;
+      details?: string;
+    };
+    viewDetails?: string;
+  };
 }
 
 export const PropertySearchResults: React.FC<PropertySearchResultsProps> = ({
   results,
+  texts
 }) => {
   const resultCount = results.length;
   // Keep the word in lowercase
@@ -23,23 +36,23 @@ export const PropertySearchResults: React.FC<PropertySearchResultsProps> = ({
   
   // Transform data for FieldTable
   const tableData = results.map(property => ({
-    'PARCEL ID': property.parcelId,
-    'ADDRESS': property.address,
-    'OWNER': property.owner,
-    'VALUE': property.value,
-    'DETAILS': (
+    [texts.columnHeaders.parcelId]: property.parcelId,
+    [texts.columnHeaders.address]: property.address,
+    [texts.columnHeaders.owner]: property.owner,
+    [texts.columnHeaders.value]: property.value,
+    [texts.columnHeaders.details]: (
       <a href={`/details?parcelId=${property.parcelId}`} className="usa-link">
-        View Details
+        {texts.viewDetails}
       </a>
     )
   }));
   
   return (
     <div className={styles.container}>
-      <h2 className={styles.heading}>PARCEL RESULTS</h2>
+      <h2 className={styles.heading}>{texts.heading}</h2>
       
       <div className="usa-hint">
-        We found {resultWord} ({resultCount}) results.
+        {texts.resultsCount.replace('{count}', resultWord).replace('{number}', resultCount.toString())}
       </div>
       
       <div className={styles.tableContainer}>

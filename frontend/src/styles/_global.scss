@@ -40,9 +40,15 @@ h1, h2 {
   letter-spacing: 0.05em;
 }
 
-// Global link color for non-external links
+// Global link styles
 .usa-link:not(.usa-link--external) {
   color: #005ea2 !important;
+  word-break: break-word;
+}
+
+// Global link styles for all anchor tags
+a {
+  word-break: break-word;
 }
 
 // Global button overrides

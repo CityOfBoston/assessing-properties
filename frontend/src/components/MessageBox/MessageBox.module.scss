@@ -2,9 +2,12 @@
   border-radius: 4px;
   border: 1px solid #1871BD;
   background: #D4E8FA;
-  padding: 10px;
+  padding: 1rem;
   margin-bottom: 12px;
   width: 100%;
   box-sizing: border-box;
-  line-height: 28px;
+  p {
+    margin: 0;
+    line-height: 1.5;
+  }
 } 

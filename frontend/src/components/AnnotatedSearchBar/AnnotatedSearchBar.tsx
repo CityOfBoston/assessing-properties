@@ -8,11 +8,32 @@ interface Suggestion {
 }
 
 interface AnnotatedSearchBarProps {
+  // Main content
   labelText: string;
   tooltipHint: string;
   placeholderText?: string;
   errorMessage?: string;
   value: string;
+  
+  // Button text
+  searchButtonText?: string;
+  clearButtonText?: string;
+  cancelButtonText?: string;
+  
+  // Loading states
+  loadingText?: string;
+  noResultsText?: string;
+  parcelIdPrefix?: string;
+  
+  // Aria labels
+  searchInputAriaLabel?: string;
+  clearButtonAriaLabel?: string;
+  searchButtonAriaLabel?: string;
+  suggestionsAriaLabel?: string;
+  modalAriaLabel?: string;
+  closeModalAriaLabel?: string;
+  
+  // Functional props
   onChange: (value: string) => void;
   suggestions: Suggestion[];
   loading?: boolean;
@@ -26,11 +47,32 @@ interface AnnotatedSearchBarProps {
 }
 
 export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
+  // Main content
   labelText,
   tooltipHint,
   placeholderText,
   errorMessage,
   value,
+  
+  // Button text
+  searchButtonText,
+  clearButtonText,
+  cancelButtonText,
+  
+  // Loading states
+  loadingText,
+  noResultsText,
+  parcelIdPrefix,
+  
+  // Aria labels
+  searchInputAriaLabel,
+  clearButtonAriaLabel,
+  searchButtonAriaLabel,
+  suggestionsAriaLabel,
+  modalAriaLabel,
+  closeModalAriaLabel,
+  
+  // Functional props
   onChange,
   suggestions = [],
   loading = false,
@@ -238,7 +280,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder={placeholderText}
-              aria-label="Search input"
+              aria-label={searchInputAriaLabel}
               aria-expanded={showSuggestions && suggestions.length > 0}
               aria-controls="search-suggestions"
               aria-activedescendant={selectedIndex >= 0 ? `suggestion-${selectedIndex}` : undefined}
@@ -257,17 +299,17 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
                   ignoreNextFocus.current = true;
                   e.preventDefault();
                 }}
-                aria-label="Clear search"
+                aria-label={clearButtonAriaLabel}
                 tabIndex={0}
               >
-                ×
+                {clearButtonText}
               </button>
             )}
           </div>
           <button 
             className={styles.searchButton} 
             type="submit"
-            aria-label="Submit search"
+            aria-label={searchButtonAriaLabel}
           >
               <img
                 src="/cob-uswds/img/usa-icons/search.svg"
@@ -275,7 +317,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
                 className={styles.searchButtonIcon}
                 aria-hidden="true"
               />
-              <span className={styles.searchButtonText}>Search</span>
+              <span className={styles.searchButtonText}>{searchButtonText}</span>
           </button>
         </form>
       </section>
@@ -292,7 +334,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
             {showSuggestions && (loading ? (
           <div className={styles.loadingContainer} role="status">
             <div className={styles.loadingSpinner} aria-hidden="true" />
-            <p className={styles.loadingText}>Searching properties...</p>
+            <p className={styles.loadingText}>{loadingText}</p>
           </div>
         ) : suggestions.length > 0 ? (
           suggestions.map((suggestion, index) => (
@@ -316,14 +358,14 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
                 <img src="/cob-uswds/img/usa-icons/location_on.svg" alt="" className={styles.locationIcon} aria-hidden="true" />
                 <div className={styles.addressContainer}>
                   <p className={styles.fullAddress}>{suggestion.fullAddress}</p>
-                  <p className={styles.parcelId}>Parcel ID: {suggestion.parcelId}</p>
+                  <p className={styles.parcelId}>{parcelIdPrefix}{suggestion.parcelId}</p>
                 </div>
               </div>
             </div>
           ))
             ) : value.trim().length >= 1 ? (
               <div className={styles.loadingContainer} role="status">
-                <p className={styles.loadingText}>No properties found</p>
+                <p className={styles.loadingText}>{noResultsText}</p>
               </div>
             ) : null)}
       </div>
@@ -341,7 +383,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
         <div 
           className={styles.mobileModal}
           role="dialog"
-          aria-label="Search properties"
+          aria-label={modalAriaLabel}
         >
           <div className={styles.modalBackdrop} onClick={handleModalClose} />
           <div className={styles.modalContent}>
@@ -350,9 +392,9 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
                 type="button" 
                 className={styles.modalCloseButton}
                 onClick={handleModalClose}
-                aria-label="Close search"
+                aria-label={closeModalAriaLabel}
               >
-                Cancel
+                {cancelButtonText}
               </button>
             </div>
             
@@ -366,7 +408,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholderText}
                     autoFocus
-                    aria-label="Search properties"
+                    aria-label={modalAriaLabel}
                     aria-expanded={showSuggestions && suggestions.length > 0}
                     aria-controls="modal-search-suggestions"
                     aria-activedescendant={selectedIndex >= 0 ? `modal-suggestion-${selectedIndex}` : undefined}
@@ -380,10 +422,10 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
                       className={`${styles.clearButton} clearButton`}
                       onClick={handleClear}
                       onMouseDown={e => e.preventDefault()}
-                      aria-label="Clear search"
+                      aria-label={clearButtonAriaLabel}
                       tabIndex={0}
                     >
-                      ×
+                      {clearButtonText}
                     </button>
                   )}
                 </div>
@@ -394,12 +436,12 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
               id="modal-search-suggestions"
               className={styles.modalSuggestions}
               role="listbox"
-              aria-label="Search suggestions"
+              aria-label={suggestionsAriaLabel}
             >
               {loading ? (
                 <div className={styles.loadingContainer} role="status">
                   <div className={styles.loadingSpinner} aria-hidden="true" />
-                  <p className={styles.loadingText}>Searching properties...</p>
+                  <p className={styles.loadingText}>{loadingText}</p>
                 </div>
               ) : suggestions.length > 0 ? (
                 suggestions.map((suggestion, index) => (
@@ -423,14 +465,14 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
                       <img src="/cob-uswds/img/usa-icons/location_on.svg" alt="" className={styles.locationIcon} aria-hidden="true" />
                       <div className={styles.addressContainer}>
                         <p className={styles.fullAddress}>{suggestion.fullAddress}</p>
-                        <p className={styles.parcelId}>Parcel ID: {suggestion.parcelId}</p>
+                        <p className={styles.parcelId}>{parcelIdPrefix}{suggestion.parcelId}</p>
                       </div>
                     </div>
                   </div>
                 ))
               ) : value.trim().length >= 1 ? (
                 <div className={styles.loadingContainer} role="status">
-                  <p className={styles.loadingText}>No properties found</p>
+                  <p className={styles.loadingText}>{noResultsText}</p>
                 </div>
               ) : null}
             </div>

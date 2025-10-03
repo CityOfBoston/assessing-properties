@@ -13,6 +13,7 @@ interface RecordTableProps {
   setActiveRowIndex?: (idx: number | null) => void;
   openedRowIndex?: number | null;
   setOpenedRowIndex?: (idx: number | null) => void;
+  labelMappings?: { [key: string]: string };
 }
 
 /**
@@ -27,6 +28,7 @@ export const RecordTable: React.FC<RecordTableProps> = ({
   setActiveRowIndex,
   openedRowIndex = null,
   setOpenedRowIndex,
+  labelMappings = {},
 }) => {
   if (!data) {
     return null;
@@ -67,7 +69,7 @@ export const RecordTable: React.FC<RecordTableProps> = ({
             return (
               <div key={index} className={styles.row}>
                 <div className={styles.labelCell}>
-                  <span className={styles.labelText}>{key}</span>
+                  <span className={styles.labelText}>{labelMappings[key] || key}</span>
                 </div>
                 <div className={styles.valueCell}>
                   {React.cloneElement(

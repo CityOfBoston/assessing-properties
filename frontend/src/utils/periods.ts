@@ -108,63 +108,37 @@ export function getFiscalYear(date: Date): number {
   return month >= 6 ? year + 1 : year;
 }
 
-export function getAbatementPhase(date: Date, year: number) {
+export function getAbatementPhase(date: Date, year: number, parcelId?: string) {
+  // Get current year from date for proper phase calculation
+  const currentYear = date.getFullYear();
+  
   // Get all relevant timepoints
-  const jan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(year);
-  const abatementDeadline = ABATEMENT_APPLICATION_DEADLINE.getDate(year);
-  const graceDeadline = ABATEMENT_GRACE_PERIOD_DEADLINE.getDate(year);
-  const july1 = NEW_FY_PRELIMINARY_TAX_PERIOD_BEGINS.getDate(year);
-  const nextJan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(year + 1);
-  const fiscalYear = getFiscalYear(date);
-  
-  // 1. Before Jan 1: between end of previous app period and Jan 1
-  if (date < jan1) {
-    return {
-      phase: 'before_jan1',
-      message: getAbatementPhaseMessage('before_jan1', {
-        next_year: year + 1,
-        jan1_date: formatDateForDisplay(jan1),
-        current_year: year
-      })
-    };
-  }
-  
-  // 2. Jan 1 (inclusive) to abatement deadline (inclusive) - Application period for NEXT fiscal year
+  const jan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(currentYear);
+  const abatementDeadline = ABATEMENT_APPLICATION_DEADLINE.getDate(currentYear);
+  const july1 = NEW_FY_PRELIMINARY_TAX_PERIOD_BEGINS.getDate(currentYear);
+  const nextJan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(currentYear + 1);
+  // 1. Jan 1 (inclusive) to abatement deadline (inclusive) - Application period for NEXT fiscal year
   if (date >= jan1 && date <= abatementDeadline) {
     return {
       phase: 'open',
       message: getAbatementPhaseMessage('open', {
         next_year: year + 1,
         deadline_date: formatDateForDisplay(abatementDeadline, { withTime: true }),
-        current_year: year
-      }),
+        current_year: year,
+        parcel_id: parcelId
+      }, parcelId),
       deadline: abatementDeadline
     };
   }
   
-  // 3. After abatement deadline (exclusive) to grace period (inclusive)
-  if (date > abatementDeadline && date <= graceDeadline) {
+  // After deadline until July 1st
+  if (date > abatementDeadline && date < july1) {
     return {
-      phase: 'grace',
-      message: getAbatementPhaseMessage('grace', {
+      phase: 'after_deadline',
+      message: getAbatementPhaseMessage('after_deadline', {
         next_year: year + 1,
-        deadline_date: formatDateForDisplay(abatementDeadline),
-        current_year: year
-      }),
-      deadline: abatementDeadline
-    };
-  }
-  
-  // 4. After grace period (i.e., starting 29 days after deadline) and before July 1st
-  if (date > graceDeadline && date < july1) {
-    return {
-      phase: 'after_grace',
-      message: getAbatementPhaseMessage('after_grace', {
-        next_year: year + 1,
-        deadline_date: formatDateForDisplay(abatementDeadline),
-        next_fy: year + 2,
-        next_jan1_date: formatDateForDisplay(nextJan1),
-        current_year: year
+        current_year: year,
+        deadline_date: formatDateForDisplay(abatementDeadline)
       }),
       deadline: abatementDeadline
     };
@@ -175,19 +149,19 @@ export function getAbatementPhase(date: Date, year: number) {
     return {
       phase: 'preliminary',
       message: getAbatementPhaseMessage('preliminary', {
-        current_fy: year + 1,
-        current_year: year + 1,
-        next_fy: year + 2,
+        current_fy: currentYear + 1,
+        current_year: currentYear + 1,
+        next_fy: currentYear + 2,
         next_jan1_date: formatDateForDisplay(nextJan1)
       }),
       deadline: abatementDeadline
     };
   }
   
-  // Fallback (should not happen)
+  // Any other time (after nextJan1 or before jan1): we're in preliminary phase
   return {
-    phase: 'unknown',
-    message: getAbatementPhaseMessage('unknown', {})
+    phase: 'preliminary',
+    message: getAbatementPhaseMessage('preliminary', {})
   };
 }
 
@@ -201,8 +175,16 @@ export function getExemptionPhase(date: Date, year: number, opts: { grantedCount
   const deadline = EXEMPTION_APPLICATION_DEADLINE_DATE.getDate(year);
   const july1 = NEW_FY_PRELIMINARY_TAX_PERIOD_BEGINS.getDate(year);
   const nextJan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(year + 1);
-  const fiscalYear = getFiscalYear(date);
-  const { grantedCount, type } = opts;
+  const { type } = opts;
+
+  console.log('getExemptionPhase debug:', {
+    date: date.toISOString(),
+    year,
+    jan1: jan1.toISOString(),
+    deadline: deadline.toISOString(),
+    july1: july1.toISOString(),
+    nextJan1: nextJan1.toISOString()
+  });
   
   // Before Jan 1
   if (date < jan1) {
@@ -232,7 +214,7 @@ export function getExemptionPhase(date: Date, year: number, opts: { grantedCount
   }
   
   // After deadline until July 1st
-  if (date > deadline && date < july1) {
+  if (date >= deadline && date < july1) {
     return {
       phase: 'after_deadline',
       message: getExemptionPhaseMessage('after_deadline', {
@@ -261,9 +243,9 @@ export function getExemptionPhase(date: Date, year: number, opts: { grantedCount
     };
   }
   
-  // Fallback
+  // Return empty message if no phase matches
   return { 
-    phase: 'unknown', 
-    message: getExemptionPhaseMessage('unknown', {})
+    phase: 'before_jan1', 
+    message: ''
   };
 } 

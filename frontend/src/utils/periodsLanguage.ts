@@ -33,23 +33,35 @@ export function getLanguageString(
   path: string, 
   variables: Record<string, any> = {}
 ): string {
+  console.log('getLanguageString called with path:', path);
+  console.log('languageData:', languageData);
+  
   const keys = path.split('.');
   let value: any = languageData;
   
+  console.log('Initial keys:', keys);
+  
   for (const key of keys) {
+    console.log(`Checking key: ${key}, Current value:`, value);
     if (value && typeof value === 'object' && key in value) {
       value = value[key];
+      console.log(`Found key ${key}, new value:`, value);
     } else {
-      console.warn(`Language key not found: ${path}`);
+      console.warn(`Language key not found: ${path}, stopped at key: ${key}`);
+      console.log('Available keys at this level:', Object.keys(value || {}));
       return path; // Return the path as fallback
     }
   }
   
+  console.log('Final value:', value);
+  
   if (typeof value === 'string') {
-    return replaceTemplateVariables(value, variables);
+    const result = replaceTemplateVariables(value, variables);
+    console.log('Returning processed string:', result);
+    return result;
   }
   
-  console.warn(`Language value is not a string: ${path}`);
+  console.warn(`Language value is not a string: ${path}, type:`, typeof value);
   return path;
 }
 
@@ -74,8 +86,13 @@ export function getLanguageStringRaw(path: string): string {
 
 // Export commonly used language strings as functions
 export const getTimepointLabel = (key: string) => getLanguageStringRaw(`periods.timepoints.${key}`);
-export const getAbatementPhaseMessage = (phase: string, variables: Record<string, any>) => 
-  getLanguageString(`periods.abatement_phases.${phase}`, variables);
+export const getAbatementPhaseMessage = (phase: string, variables: Record<string, any>, parcelId?: string) => {
+  const vars = { ...variables };
+  if (parcelId) {
+    vars.parcel_id = parcelId;
+  }
+  return getLanguageString(`periods.abatement_phases.${phase}`, vars);
+};
 export const getExemptionPhaseMessage = (phase: string, variables: Record<string, any>) => 
   getLanguageString(`periods.exemption_phases.${phase}`, variables);
 export const getPropertyTaxMessage = (key: string, variables: Record<string, any> = {}) => 

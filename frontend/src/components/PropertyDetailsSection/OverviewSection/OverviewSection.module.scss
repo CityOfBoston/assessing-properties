@@ -115,16 +115,32 @@
   margin-left: 30px;
 }
 
-.ownerDisclaimer {
-  margin-top: 8px;
-  color: #58585B;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 28px;
-  margin-right: 80px;
+.ownerNames {
+  margin-bottom: 8px;
+  
+  .ownerName {
+    margin-bottom: 0px;
+  }
+}
 
-  @include main.at-media-max('mobile-lg') {
-    margin-right: 0;
+.ownerDisclaimers {
+  .ownerDisclaimer {
+    margin-top: 0;
+    margin-bottom: 0px !important;
+    color: #58585B;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 24px;
+    margin-right: 80px;
+    font-style: italic;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    @include main.at-media-max('mobile-lg') {
+      margin-right: 0;
+    }
   }
 }
 

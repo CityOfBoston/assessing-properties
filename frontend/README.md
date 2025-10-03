@@ -1,4 +1,4 @@
-# Property Tax Lookup Frontend
+# Boston Property Lookup Frontend
 
 ## Development Setup
 

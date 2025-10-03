@@ -22,6 +22,25 @@
   gap: 14px;
 }
 
+.paragraph {
+  line-height: 1.5;
+  margin: 0;
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  p {
+    display: inline;
+    margin: 0;
+  }
+
+  a {
+    word-break: break-word;
+  }
+}
+
 @media print {
   .container {
     padding: 0 !important;

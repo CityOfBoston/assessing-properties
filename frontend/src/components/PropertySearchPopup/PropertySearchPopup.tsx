@@ -7,11 +7,18 @@ import { useNavigate } from 'react-router-dom';
 export interface PropertySearchPopupProps {
   onClose: () => void;
   onSelect?: (pid: string, fullAddress: string) => void;
+  texts?: {
+    closeButtonAriaLabel?: string;
+    labelText?: string;
+    tooltipHint?: string;
+    placeholderText?: string;
+  };
 }
 
 export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
   onClose,
   onSelect,
+  texts
 }) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const navigate = useNavigate();
@@ -34,16 +41,16 @@ export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
       <button 
         className={styles.closeButton}
         onClick={onClose}
-        aria-label="Close search"
+        aria-label={texts.closeButtonAriaLabel}
       >
         ×
       </button>
       <SearchBackground>
         <div className={styles.content}>
           <SearchBarContainer onSelect={handlePropertySelect} 
-          labelText="Search by address or parcel ID"
-          tooltipHint="A unique, legal 10 digit number assigned by the City of Boston to each parcel of property."
-          placeholderText="Enter address or parcel ID"
+          labelText={texts.labelText}
+          tooltipHint={texts.tooltipHint}
+          placeholderText={texts.placeholderText}
           onFocus={() => setIsSearchFocused(true)}
           onBlur={() => setIsSearchFocused(false)}
           />

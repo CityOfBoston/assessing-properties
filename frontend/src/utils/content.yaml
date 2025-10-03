@@ -1,0 +1,460 @@
+# Content configuration for the Boston Property Lookup web application
+
+# Application configuration
+config:
+  maintenance:
+    enabled: false 
+    message: "The Boston Property Lookup tool is currently undergoing active development for the newest Beta features. Apologies for any inconvenience. Please check back later."
+  test:
+    enabled: false  # Set to false to hide time changer in production
+
+# Shared text that can be referenced across components
+shared:
+  # Common labels and text used across multiple components
+  labels:
+    beta: "BETA"
+    parcelId: "PARCEL ID"
+    address: "ADDRESS"
+    owner: "OWNER"
+    value: "VALUE"
+    details: "DETAILS"
+    overview: "Overview"
+    propertyValue: "Value"
+    attributes: "Attributes"
+    taxesAndExemptions: "Taxes & Exemptions"
+    abatements: "Abatements"
+    permits: "Permits"
+    contactUs: "Contact Us"
+
+  # Common button text
+  buttons:
+    search: "Search"
+    clear: "Clear"
+    back: "Back"
+    viewDetails: "View Details"
+    openInMap: "Open in Map"
+    payTaxes: "Pay Your Taxes"
+    print: "Print"
+
+  # Common loading states
+  loading:
+    default: "Loading..."
+    searchResults: "Loading search results..."
+    properties: "Loading properties..."
+    propertyDetails: "Loading property details..."
+
+  # Common error messages
+  errors:
+    general: "An error occurred. Please try again."
+    notFound: "Not found"
+    propertyNotFound: "Property Not Found"
+    noPropertyId: "No property ID was provided. Please try searching for a property."
+
+# Component-specific text configurations
+components:
+  # Base PropertyDetailsSection component
+  PropertyDetailsSection:
+    title: "@shared.labels.overview"
+
+  # Overview Section
+  OverviewSection:
+    title: "@shared.labels.overview"
+    cards:
+      parcelId:
+        header: "Parcel ID"
+        icon: "/cob-uswds/img/usa-icons/account_circle.svg"
+      netTax:
+        header:
+          preliminary: "FY{year} First Half Estimated Net Tax"
+          regular: "FY{year} Net Tax"
+        icon: "/cob-uswds/img/usa-icons/attach_money.svg"
+      personalExemption:
+        header: "Personal Exemption"
+        icon: "/cob-uswds/img/usa-icons/person.svg"
+      residentialExemption:
+        header: "Residential Exemption"
+        icon: "/cob-uswds/img/usa-icons/home.svg"
+    sections:
+      location:
+        icon: "/cob-uswds/img/usa-icons/location_on.svg"
+        alt: "Location"
+      owners:
+        title: "Current Owner(s)"
+        icon: "/cob-uswds/img/usa-icons/people.svg"
+        alt: "Owners"
+        disclaimer: "@periods.overview.owner_disclaimer"
+      assessedValue:
+        title: "Assessed Value"
+        icon: "/cob-uswds/img/usa-icons/trending_up.svg"
+        alt: "Value"
+      propertyType:
+        title: "Property Type"
+        icon: "/cob-uswds/img/usa-icons/location_city.svg"
+        alt: "Property Type"
+    map:
+      ariaLabel: "Open property location in map"
+      linkText: "@periods.overview.open_in_map"
+      url: "@periods.overview.map_url"
+    buttons:
+      payTaxes:
+        text: "@shared.buttons.payTaxes"
+        url: "@periods.property_taxes.pay_taxes_url"
+      print:
+        text: "@shared.buttons.print"
+        icon: "/cob-uswds/img/usa-icons/print.svg"
+
+  # Property Value Section
+  PropertyValueSection:
+    title: "@shared.labels.propertyValue"
+    description: "Learn more about"
+    howWeEstimateLink:
+      text: "how we estimate your property's value"
+      url: "https://www.boston.gov/departments/assessing/how-we-estimate-your-propertys-value"
+    chart:
+      title: "Property Value History"
+    valueHistory:
+      title: "VALUE HISTORY"
+      note: "Note: The assessed value is the actual billed assessment."
+      table:
+        headers:
+          year: "Year"
+          value: "Assessed Value"
+      buttons:
+        seeMore: "See More"
+        seeLess: "See Less"
+
+  # Attributes Section
+  AttributesSection:
+    title: "@shared.labels.attributes"
+    groups:
+      general:
+        title: "General"
+        labels:
+          landUse: "Land Use"
+          livingArea: "Living Area"
+          style: "Style"
+          storyHeight: "Story Height"
+          floor: "Floor"
+          penthouseUnit: "Penthouse Unit"
+          orientation: "Orientation"
+      rooms:
+        title: "Rooms"
+        labels:
+          bedroomNumber: "Number of Bedrooms"
+          totalBathrooms: "Total Bathrooms"
+          halfBathrooms: "Half Bathrooms"
+          bathStyle1: "Bath Style 1"
+          bathStyle2: "Bath Style 2"
+          bathStyle3: "Bath Style 3"
+          numberOfKitchens: "Number of Kitchens"
+          kitchenType: "Kitchen Type"
+          kitchenStyle1: "Kitchen Style 1"
+          kitchenStyle2: "Kitchen Style 2"
+          kitchenStyle3: "Kitchen Style 3"
+      construction:
+        title: "Construction"
+        labels:
+          yearBuilt: "Year Built"
+          exteriorFinish: "Exterior Finish"
+          exteriorCondition: "Exterior Condition"
+          roofCover: "Roof Cover"
+          roofStructure: "Roof Structure"
+          foundation: "Foundation"
+          parkingSpots: "Parking Spots"
+      utilities:
+        title: "Utilities"
+        labels:
+          heatType: "Heat Type"
+          acType: "AC Type"
+          fireplaces: "Fireplaces"
+      lastTransaction:
+        title: "Last Transaction"
+        labels:
+          salePrice: "Sale Price"
+          saleDate: "Sale Date"
+          registryBookAndPlace: "Registry Book and Place"
+    buttons:
+      seeMore: "See More"
+      seeLess: "See Less"
+
+  # Property Taxes Section
+  PropertyTaxesSection:
+    title: "@shared.labels.taxesAndExemptions"
+    taxRates:
+      title: "@periods.property_taxes.tax_rate_header"
+      description: "@periods.property_taxes.tax_rate_description"
+      cards:
+        residential:
+          header: "Residential Tax Rate"
+          value: "$11.58 per $1,000"
+        commercial:
+          header: "Commercial Tax Rate"
+          value: "$25.96 per $1,000"
+      links:
+        howWeTax:
+          text: "How we tax your property"
+          url: "@periods.property_taxes.how_we_tax_url"
+        taxRateHistory:
+          text: "@periods.property_taxes.view_tax_rate_history"
+          url: "@periods.property_taxes.tax_rate_history_url"
+    netTax:
+      title: "@periods.property_taxes.net_tax_header"
+      preliminaryTitle: "@periods.property_taxes.net_tax_preliminary_header"
+      description: "@periods.property_taxes.net_tax_description"
+      preliminaryDescription: "@periods.property_taxes.net_tax_preliminary_description"
+    formula:
+      grossTax:
+        title: "FY{year} Gross Tax"
+        preliminaryTitle: "FY{year} Estimated Tax (Q1 + Q2)"
+      residentialExemptions:
+        title: "Residential Exemptions"
+        toBeDecided: "Amount to be decided"
+        granted: "@periods.property_taxes.residential_exemption_granted"
+        openPhase: "@periods.property_taxes.residential_open_phase"
+        preliminarySubmitted: "@periods.property_taxes.residential_preliminary_submitted"
+        preliminaryNotSubmitted: "@periods.property_taxes.residential_preliminary_not_submitted"
+        deadlinePassed: "@periods.property_taxes.residential_deadline_passed"
+        description: "@periods.property_taxes.residential_exemption_description"
+        downloadLink: "@periods.property_taxes.download_residential_exemption"
+        deadlineLabel: "@periods.property_taxes.deadline_for_submission"
+      personalExemptions:
+        title: "Personal Exemptions"
+        toBeDecided: "Amount to be decided"
+        granted: "@periods.property_taxes.personal_exemption_granted"
+        openPhase: "@periods.property_taxes.personal_open_phase"
+        preliminarySubmitted: "@periods.property_taxes.personal_preliminary_submitted"
+        preliminaryNotSubmitted: "@periods.property_taxes.personal_preliminary_not_submitted"
+        deadlinePassed: "@periods.property_taxes.personal_deadline_passed"
+        description: "@periods.property_taxes.personal_exemption_description"
+        links:
+          blind: "@periods.personal_exemption_links.blind_exemption"
+          elderly: "@periods.personal_exemption_links.elderly_exemption"
+          veterans: "@periods.personal_exemption_links.veterans_exemption"
+          survivingSpouse: "@periods.personal_exemption_links.surviving_spouse_exemption"
+          nationalGuard: "@periods.personal_exemption_links.national_guard_exemption"
+          coopHousing: "@periods.personal_exemption_links.coop_housing_exemption"
+        labels:
+          blind: "@periods.personal_exemption_links.blind_exemption_label"
+          elderly: "@periods.personal_exemption_links.elderly_exemption_label"
+          veterans: "@periods.personal_exemption_links.veterans_exemption_label"
+          survivingSpouse: "@periods.personal_exemption_links.surviving_spouse_exemption_label"
+          nationalGuard: "@periods.personal_exemption_links.national_guard_exemption_label"
+          coopHousing: "@periods.personal_exemption_links.coop_housing_exemption_label"
+      communityPreservation:
+        title: "Community Preservation"
+        description: "The Community Preservation surcharge supports a variety of programs. To learn more, visit the"
+        link:
+          text: "Community Preservation Act"
+          url: "https://www.boston.gov/departments/assessing/community-preservation-act"
+        suffix: "page."
+    buttons:
+      payTaxes:
+        text: "@periods.property_taxes.pay_your_taxes"
+        url: "@periods.property_taxes.pay_taxes_url"
+        printText: "Pay your taxes via {url}"
+
+  # Abatements Section
+  AbatementsSection:
+    title: "@shared.labels.abatements"
+    description: {
+      text: "An abatement is a reduction in the assessed value of a property. An abatement is granted when the property is determined to be:\n- over-valued\n- improperly classified, or\n- disproportionately assessed.\n\nLearn more about [tax exemptions and abatements](https://www.boston.gov/departments/assessing/tax-exemptions-and-abatements).\n\nThe deadline for filing an abatement application is **{deadline_date}**.\n\n[Download Property Tax Abatements Application (PDF)](//www.boston.gov/assessing-online/form/abatement/{fiscal_year}/{parcel_id})",
+      url: "//www.boston.gov/assessing-online/form/abatement/{fiscal_year}/{parcel_id}"
+    }
+
+  # Approved Permits Section
+  ApprovedPermitsSection:
+    title: "@shared.labels.permits"
+    description: {
+      text: "See the permits that have been approved for this address since 2009.",
+      url: "https://data.boston.gov/dataset/approved-building-permits/resource/6ddcd912-32a0-43df-9908-63574f8c7e77?filters=parcel_id%3A{parcelId}"
+    }
+
+  # Contact Us Section
+  ContactUsSection:
+    title: "@shared.labels.contactUs"
+    paragraphs:
+      exemptions:
+        text: "If you have questions about the **Residential Exemption or Personal Exemptions for the blind, disabled veterans, or seniors**, please contact the"
+        link:
+          text: "Taxpayer Referral and Assistance Center"
+          url: "https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center"
+        suffix: "by calling"
+        phone:
+          text: "617-635-4287"
+          url: "tel:617-635-4287"
+          label: "City of Boston Taxpayer Referral and Assistance Center"
+        email:
+          text: "TRACFAXSG@boston.gov"
+          url: "mailto:TRACFAXSG@boston.gov"
+      billing:
+        text: "If you have questions about **paying your bill**, please call the Collecting Division at"
+        phone:
+          text: "617-635-4131"
+          url: "tel:617-635-4131"
+          label: "City of Boston Collecting Division"
+      values:
+        text: "If you have questions about **property values**, please call the Assessing Department at"
+        phone:
+          text: "617-635-4321"
+          url: "tel:617-635-4321"
+          label: "City of Boston Assessing Department"
+      ownership:
+        text: "If you have **updates to ownership names or mailing addresses**, please call the Assessing Department's Tax Data Administration team at"
+        phone:
+          text: "617-635-3783"
+          url: "tel:617-635-3783"
+          label: "City of Boston Assessing Department Tax Data Administration"
+
+  # Other components
+  WelcomeContent:
+    title: "Boston Property Lookup"
+    description: "Use this tool to find detailed information about properties in Boston, including: assessed value, location, ownership, and tax information for any parcel in the City of Boston. **Please note:** This website is in beta while we improve its functionality. __Tell us what you think.__"
+    logoAltText: "Assessing Department Logo"
+
+  BetaLabel:
+    text: "@shared.labels.beta"
+
+  AnnotatedSearchBar:
+    labelText: "Search by address or parcel ID"
+    tooltipHint: "A unique, legal 10 digit number assigned by the City of Boston to each parcel of property."
+    placeholderText: "Enter address or parcel ID"
+    searchButtonText: "@shared.buttons.search"
+    clearButtonText: "×"
+    cancelButtonText: "Cancel"
+    loadingText: "@shared.loading.searchResults"
+    noResultsText: "@shared.errors.notFound"
+    parcelIdPrefix: "Parcel ID: "
+    searchInputAriaLabel: "Search input"
+    clearButtonAriaLabel: "Clear search"
+    searchButtonAriaLabel: "Submit search"
+    suggestionsAriaLabel: "Search suggestions"
+    modalAriaLabel: "Search properties"
+    closeModalAriaLabel: "Close search"
+
+  FeedbackSender:
+    question: "Was this page helpful?"
+    yesLabel: "Yes"
+    noLabel: "No"
+    promptTitle: "You can tell us more below"
+    promptOptional: "(Optional)"
+    disclaimer: "Do not include any personal or contact information"
+    submitButton: "Send feedback"
+    characterCount: "{count} characters allowed"
+    characterRemaining: "{count} characters remaining"
+    contactInfo: "We use this feedback to improve our website. If you need assistance, please contact the"
+    departmentLinkText: "Assessing department"
+
+  LoadingIndicator:
+    message: "@shared.loading.default"
+
+  PropertySearchHelp:
+    noResultsTitle: "No Results Found"
+    noResultsMessage: 'We did not find results for "{query}"'
+    tipsTitle: "Search Tips"
+    tips:
+      - title: "Check the street name spelling."
+        description: "Make sure the street name is spelled correctly."
+      - title: "Verify the street number."
+        description: "Ensure the street number is accurate. Do not include apartment numbers or extensions like letters or dashes (e.g., 123A or 123-1)"
+      - title: "Use directionals correctly."
+        description: "For directional street names, use abbreviations. For example, instead of 'West Second Street,' enter 'W Second'."
+      - title: "Use common abbreviations."
+        description: "Street names may include abbreviations. For instance, 'Saint Rose' might appear as 'St Rose'. Also, note that punctuation is not used in street names."
+
+  PropertySearchResults:
+    heading: "PARCEL RESULTS"
+    resultsCount: "We found {count} ({number}) results."
+    columnHeaders:
+      parcelId: "@shared.labels.parcelId"
+      address: "@shared.labels.address"
+      owner: "@shared.labels.owner"
+      value: "@shared.labels.value"
+      details: "@shared.labels.details"
+    viewDetails: "@shared.buttons.viewDetails"
+    openInMap: "@shared.buttons.openInMap"
+
+  FieldTable:
+    headerLabels:
+      parcelId: "@shared.labels.parcelId"
+      address: "@shared.labels.address"
+      owner: "@shared.labels.owner"
+      value: "@shared.labels.value"
+      details: "@shared.labels.details"
+
+  RecordTable:
+    labelMappings:
+      parcelId: "@shared.labels.parcelId"
+      address: "@shared.labels.address"
+      owner: "@shared.labels.owner"
+      value: "@shared.labels.value"
+      details: "@shared.labels.details"
+
+  ResponsiveTable:
+    viewDetails: "@shared.buttons.viewDetails"
+    openInMap: "@shared.buttons.openInMap"
+    columnHeaders:
+      parcelId: "@shared.labels.parcelId"
+      address: "@shared.labels.address"
+      owner: "@shared.labels.owner"
+      value: "@shared.labels.value"
+      details: "@shared.labels.details"
+
+# Layout-specific content
+layouts:
+  PropertyDetailsLayout:
+    searchButton:
+      text: "Search another property"
+      mobileAlt: "Search"
+    title: "Property Details"
+    searchPopup:
+      closeButtonAriaLabel: "Close search"
+      tooltipHint: "A unique, legal 10 digit number assigned by the City of Boston to each parcel of property."
+      placeholderText: "Enter address or parcel ID"
+
+# Page-specific content that maps component text to specific instances
+pages:
+  welcome:
+    hero:
+      component: "WelcomeContent"
+      props: "@components.WelcomeContent"
+    search:
+      component: "AnnotatedSearchBar"
+      props: "@components.AnnotatedSearchBar"
+
+  searchResults:
+    hero:
+      component: "WelcomeContent"
+      props: "@components.WelcomeContent"
+    search:
+      component: "AnnotatedSearchBar"
+      props: "@components.AnnotatedSearchBar"
+    results:
+      component: "PropertySearchResults"
+      props: "@components.PropertySearchResults"
+    searchHelp:
+      component: "PropertySearchHelp"
+      props: "@components.PropertySearchHelp"
+
+  propertyDetails:
+    error:
+      title: "@shared.errors.propertyNotFound"
+      description: "@shared.errors.noPropertyId"
+    loading:
+      message: "@shared.loading.propertyDetails"
+    sections:
+      loading:
+        name: "Loading"
+      overview:
+        name: "Overview"
+      value:
+        name: "Property Value"
+      attributes:
+        name: "Attributes"
+      taxes:
+        name: "Taxes & Exemptions"
+      abatements:
+        name: "Abatements"
+      permits:
+        name: "Permits"
+      contact:
+        name: "Contact Us"

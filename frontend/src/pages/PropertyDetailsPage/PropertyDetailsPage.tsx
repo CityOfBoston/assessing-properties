@@ -14,6 +14,8 @@ import { LoadingIndicator } from '@src/components/LoadingIndicator';
 import { usePropertyDetails } from '../../hooks/usePropertyDetails';
 import { useDateContext } from '@src/hooks/useDateContext';
 import TimeChanger from '@src/components/TimeChanger/TimeChanger';
+import { getComponentText } from '@utils/contentMapper';
+import { getAbatementPhase } from '@utils/periods';
 import styles from './PropertyDetailsPage.module.scss';
 
 /**
@@ -33,6 +35,8 @@ function getFiscalYear(date: Date): number {
  * property details using the usePropertyDetails hook.
  */
 export default function PropertyDetailsPage() {
+  const pageContent = getComponentText('propertyDetails', 'pages.propertyDetails');
+  const config = getComponentText('config');
   const [searchParams] = useSearchParams();
   const parcelId = searchParams.get('parcelId') || '';
   const { date } = useDateContext();
@@ -63,59 +67,93 @@ export default function PropertyDetailsPage() {
   if (!parcelId) {
     return (
       <div className={styles.error}>
-        <h1>Property Not Found</h1>
-        <p>No property ID was provided. Please try searching for a property.</p>
+        <h1>{pageContent.error.title}</h1>
+        <p>{pageContent.error.description}</p>
       </div>
     );
   }
 
-  // Create sections array with all available sections
-  const sections = isLoading || error || !propertyDetails ? [
+  // Get section names from content configuration
+  if (!pageContent?.sections) {
+    console.error('Missing section names in content configuration');
+    return null;
+  }
+  const sectionNames = pageContent.sections;
+
+  // Verify that all required section names are present
+  const requiredSections = ['overview', 'value', 'attributes', 'taxes', 'permits', 'contact'];
+  const missingSections = requiredSections.filter(section => !sectionNames[section]?.name);
+  if (missingSections.length > 0) {
+    console.error('Missing required section names:', missingSections);
+    return null;
+  }
+  
+  // Handle loading state
+  if (isLoading || error || !propertyDetails) {
+    const loadingName = sectionNames?.loading?.name || "Loading";
+    return (
+      <div className={styles.propertyDetailsPage}>
+        {config.test?.enabled && <TimeChanger />}
+        <PropertyDetailsLayout 
+          sections={[{
+            name: loadingName,
+            component: (
+              <div className={styles.fullWidthLoadingContainer}>
+                <LoadingIndicator 
+                  message={error ? `Error: ${error.message}` : (pageContent?.loading?.message || "Loading property details...")} 
+                  size="large" 
+                />
+              </div>
+            ),
+          }]}
+          parcelId={parcelId}
+        />
+      </div>
+    );
+  }
+
+  // Check if abatements section should be shown
+  const now = date;
+  const calendarYear = now.getFullYear();
+  const nowMonth = now.getMonth();
+  const abatementYear = nowMonth >= 6 ? calendarYear : calendarYear - 1;
+  const abatementPhase = getAbatementPhase(now, abatementYear);
+
+  // Build sections array
+  const sections = [
     {
-      name: 'Loading',
-      component: (
-        <div className={styles.fullWidthLoadingContainer}>
-          <LoadingIndicator 
-            message={error ? `Error: ${error.message}` : "Loading property details..."} 
-            size="large" 
-          />
-        </div>
-      ),
+      name: sectionNames.overview.name,
+      component: <OverviewSection data={propertyDetails.overview} title={sectionNames.overview.name} />,
     },
-  ] : [
     {
-      name: 'Overview',
-      component: <OverviewSection data={propertyDetails.overview} />,
+      name: sectionNames.value.name,
+      component: <PropertyValueSection {...propertyDetails.propertyValue} title={sectionNames.value.name} />,
     },
     {
-      name: 'Value',
-      component: <PropertyValueSection {...propertyDetails.propertyValue} />,
+      name: sectionNames.attributes.name,
+      component: <AttributesSection data={propertyDetails.propertyAttributes} title={sectionNames.attributes.name} />,
     },
     {
-      name: 'Attributes',
-      component: <AttributesSection data={propertyDetails.propertyAttributes} />,
+      name: sectionNames.taxes.name,
+      component: <PropertyTaxesSection {...propertyDetails.propertyTaxes} title={sectionNames.taxes.name} />,
+    },
+    ...(abatementPhase.message ? [{
+      name: sectionNames.abatements.name,
+      component: <AbatementsSection parcelId={parcelId} title={sectionNames.abatements.name} />,
+    }] : []),
+    {
+      name: sectionNames.permits.name,
+      component: <ApprovedPermitsSection parcelId={parcelId} title={sectionNames.permits.name} />,
     },
     {
-      name: 'Taxes & Exemptions',
-      component: <PropertyTaxesSection {...propertyDetails.propertyTaxes} />,
-    },
-    {
-      name: 'Abatements',
-      component: <AbatementsSection />,
-    },
-    {
-      name: 'Permits',
-      component: <ApprovedPermitsSection parcelId={parcelId} />,
-    },
-    {
-      name: 'Contact Us',
-      component: <ContactUsSection />,
+      name: sectionNames.contact.name,
+      component: <ContactUsSection title={sectionNames.contact.name} />,
     },
   ];
 
   return (
     <div className={styles.propertyDetailsPage}>
-      <TimeChanger />
+      {config.test?.enabled && <TimeChanger />}
       <PropertyDetailsLayout 
         sections={sections}
         parcelId={parcelId}

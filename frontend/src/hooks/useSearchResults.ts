@@ -76,6 +76,9 @@ export const useSearchResults = (): UseSearchResultsReturn => {
         return;
       }
 
+      // Keep track of original order using a Map
+      const orderMap = new Map(fuzzyResults.map((result, index) => [result.parcelId, index]));
+      
       // Extract parcel IDs from fuzzy search results and limit to 50
       const parcelIds = fuzzyResults.map(result => result.parcelId).slice(0, 50);
       
@@ -95,7 +98,16 @@ export const useSearchResults = (): UseSearchResultsReturn => {
         return;
       }
       
-      console.log('[useSearchResults] Successfully fetched property summaries:', summaries);
+      // Sort results to maintain original fuzzy search order
+      if (summaries.results) {
+        summaries.results.sort((a, b) => {
+          const orderA = orderMap.get(a.parcelId) ?? Number.MAX_VALUE;
+          const orderB = orderMap.get(b.parcelId) ?? Number.MAX_VALUE;
+          return orderA - orderB;
+        });
+      }
+      
+      console.log('[useSearchResults] Successfully fetched and sorted property summaries:', summaries);
       console.log('[useSearchResults] Number of results:', summaries.results?.length || 0);
       
       setSearchResults(summaries);

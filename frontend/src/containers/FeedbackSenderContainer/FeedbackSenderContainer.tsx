@@ -2,6 +2,7 @@ import { usePropertyFeedback } from '@hooks/usePropertyFeedback';
 import { FeedbackSender, FeedbackSenderProps } from '../../components/FeedbackSender/FeedbackSender';
 import { useCallback, useEffect } from 'react';
 import { FeedbackData } from '../../types';
+import { getComponentText } from '@utils/contentMapper';
 import styles from './FeedbackSenderContainer.module.scss';
 
 interface FeedbackSenderContainerProps extends Omit<FeedbackSenderProps, 'onSubmit'> {
@@ -75,9 +76,12 @@ export const FeedbackSenderContainer = ({
     );
   }
 
+  const feedbackContent = getComponentText('FeedbackSender');
+
   return (
     <FeedbackSender
       {...feedbackSenderProps}
+      texts={feedbackContent}
       onSubmit={handleSubmit}
     />
   );

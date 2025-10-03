@@ -27,6 +27,7 @@
       "@hooks/*": ["src/hooks/*"],
       "@pages/*": ["src/pages/*"],
       "@types/*": ["src/types/*"],
+      "@utils/*": ["src/utils/*"],
       "@cob-uswds-components/*": ["node_modules/cob-uswds/packages/*"],
       "@cob-uswds/*": ["node_modules/cob-uswds/dist/*"]
     },
