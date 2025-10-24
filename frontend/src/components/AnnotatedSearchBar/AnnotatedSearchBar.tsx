@@ -159,6 +159,10 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
 
   const handleModalClose = () => {
     setIsModalOpen(false);
+    // Call onBlur when closing modal to reset focus state
+    if (inputRef.current) {
+      onBlur?.({ target: inputRef.current } as React.FocusEvent<HTMLInputElement>);
+    }
     inputRef.current?.blur();
   };
 
@@ -223,9 +227,6 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
   };
 
   const handleSuggestionClick = (suggestion: Suggestion, event?: React.MouseEvent | React.KeyboardEvent) => {
-    console.log('[AnnotatedSearchBar] handleSuggestionClick called with:', suggestion);
-    console.log('[AnnotatedSearchBar] Event type:', event?.type);
-    console.log('[AnnotatedSearchBar] onSuggestionClick function:', onSuggestionClick);
     
     if (onSuggestionClick) {
       onSuggestionClick(suggestion);
@@ -292,6 +293,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
             />
             {value && (
               <button
+                id="search_clear_button"
                 type="button"
                 className={`${styles.clearButton} clearButton`}
                 onClick={handleClear}
@@ -307,6 +309,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
             )}
           </div>
           <button 
+            id="search_submit_button"
             className={styles.searchButton} 
             type="submit"
             aria-label={searchButtonAriaLabel}
@@ -389,6 +392,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
               <button 
+                id="search_modal_close_button"
                 type="button" 
                 className={styles.modalCloseButton}
                 onClick={handleModalClose}
@@ -418,6 +422,7 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
                   />
                   {value && (
                     <button
+                      id="search_modal_clear_button"
                       type="button"
                       className={`${styles.clearButton} clearButton`}
                       onClick={handleClear}

@@ -14,6 +14,7 @@ interface PropertySearchHelpProps {
     noResultsMessage?: string;
     tipsTitle?: string;
   };
+  feedbackLink?: React.ReactNode;
 }
 
 export const PropertySearchHelp: React.FC<PropertySearchHelpProps> = ({
@@ -23,14 +24,18 @@ export const PropertySearchHelp: React.FC<PropertySearchHelpProps> = ({
     noResultsTitle: "No Results Found",
     noResultsMessage: 'We did not find results for "{query}"',
     tipsTitle: "Search Tips"
-  }
+  },
+  feedbackLink
 }) => {
   return (
     <div className={styles.container}>
-      <h2 className={styles.heading}>{texts.noResultsTitle}</h2>
-      <p className={styles.queryMessage}>
-        {texts.noResultsMessage.replace('{query}', searchQuery)}
-      </p>
+      <h1 className={styles.heading}>{texts.noResultsTitle}</h1>
+      <div className={styles.queryMessageRow}>
+        <p className={styles.queryMessage}>
+          {texts.noResultsMessage.replace('{query}', searchQuery)}
+        </p>
+        {feedbackLink && feedbackLink}
+      </div>
       
       <h2 className={styles.heading}>{texts.tipsTitle}</h2>
       

@@ -24,11 +24,9 @@ export const usePropertyDetails = (): UsePropertyDetailsReturn => {
       setIsLoading(true);
       setError(null);
       
-      console.log('[usePropertyDetails] Fetching property details for parcelId:', parcelId, 'date:', date);
       
       const details = await fetchPropertyDetailsByParcelId(parcelId, date);
       
-      console.log('[usePropertyDetails] Successfully fetched property details:', details);
       
       setPropertyDetails(details);
     } catch (err) {

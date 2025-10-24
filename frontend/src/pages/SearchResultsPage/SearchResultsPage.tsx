@@ -4,11 +4,13 @@ import SearchResultsLayout from '@layouts/SearchResultsLayout';
 import WelcomeContent from '@components/WelcomeContent';
 import { getComponentText } from '@utils/contentMapper';
 import { SearchBarContainer } from '@containers/SearchBarContainer';
+import { ComplexFeedbackSenderContainer } from '@containers/ComplexFeedbackSenderContainer';
 import PropertySearchHelp from '@components/PropertySearchHelp';
 import ResponsiveTable from '@components/ResponsiveTable';
-import { LoadingIndicator } from '@src/components/LoadingIndicator';
-import { PropertySearchResult } from '@src/types';
-import { useSearchResults } from '../../hooks/useSearchResults';
+import { LoadingIndicator } from '@components/LoadingIndicator';
+import type { PropertySearchResult } from '../../types';
+import { useSearchResults } from '@hooks/useSearchResults';
+import { usePerformanceTracking } from '@services/analytics';
 import styles from './SearchResultsPage.module.scss';
 import { toWords } from 'number-to-words';
 
@@ -25,12 +27,13 @@ export default function SearchResultsPage() {
   const navigate = useNavigate();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const shouldBlurRef = useRef(false);
+  const performance = usePerformanceTracking('SearchResults');
+  const renderStartTimeRef = useRef(0);
   
   const { searchResults, isLoading, error, performSearch } = useSearchResults();
 
   const handlePropertySelect = (pid: string, fullAddress?: string) => {
     console.log('[SearchResultsPage] handlePropertySelect called with pid:', pid, 'address:', fullAddress);
-    // Navigate to property details page
     navigate(`/details?parcelId=${pid}`);
   };
 
@@ -90,8 +93,7 @@ export default function SearchResultsPage() {
   const errorMessage = getErrorMessage();
 
   const tableData = results.map((result: PropertySearchResult) => ({
-    'Parcel ID': result.parcelId.toString(), // Use consistent key for ResponsiveTable
-    parcelId: result.parcelId.toString(), // Also provide as parcelId for backup
+    'Parcel ID': result.parcelId.toString(),
     [searchResultsContent.columnHeaders.address]: result.address,
     [searchResultsContent.columnHeaders.owner]: result.owners.join(', '),
     [searchResultsContent.columnHeaders.value]: `$${result.value.toLocaleString()}`,
@@ -128,21 +130,37 @@ export default function SearchResultsPage() {
         ) : results && results.length > 0 ? (
           <div className={styles.resultsContainer}>
             <h1 className={styles.resultsHeader}>{searchResultsContent.heading}</h1>
-            <p className={styles.resultsDescription}>
-              {searchResultsContent.resultsCount
-                .replace('{count}', toWords(results.length))
-                .replace('{number}', results.length.toString())}
-            </p>
+            <div className={styles.resultsDescriptionRow}>
+              <p className={styles.resultsDescription}>
+                {searchResultsContent.resultsCount
+                  .replace('{count}', toWords(results.length))
+                  .replace('{number}', results.length.toString())}
+              </p>
+              <ComplexFeedbackSenderContainer searchQuery={query} variant="default" />
+            </div>
             <div className={styles.resultsTable}>
-              <ResponsiveTable
-                data={tableData}
-                showDetails={true}
-                showMapLink={true}
-              />
+              {(() => {
+                renderStartTimeRef.current = window.performance.now();
+                return (
+                  <ResponsiveTable
+                    data={tableData}
+                    showDetails={true}
+                    showMapLink={true}
+                    onLoad={() => {
+                      const renderTime = window.performance.now() - renderStartTimeRef.current;
+                      performance.trackRender(renderTime);
+                    }}
+                  />
+                );
+              })()}
             </div>
           </div>
         ) : (
-          <PropertySearchHelp searchQuery={query} searchTips={searchHelpContent.tips} />
+          <PropertySearchHelp 
+            searchQuery={query} 
+            searchTips={searchHelpContent.tips}
+            feedbackLink={<ComplexFeedbackSenderContainer searchQuery={query} variant="default" />}
+          />
         )}
       </div>
     </SearchResultsLayout>

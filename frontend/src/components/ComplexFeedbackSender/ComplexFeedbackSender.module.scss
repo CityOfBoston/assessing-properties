@@ -1,0 +1,199 @@
+@use '../../styles/main.scss' as main;
+
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.modalContent {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  
+  @include main.at-media('mobile-lg') {
+    margin: 16px;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid var(--border-color, #dcdee0);
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  border-radius: 8px 8px 0 0;
+  z-index: 10;
+}
+
+.headerTitle {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #1B1B1B;
+  text-transform: uppercase;
+  
+  @include main.at-media('mobile-lg') {
+    font-size: 1.25rem;
+  }
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #58585B;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #f0f0f0;
+    color: #1B1B1B;
+  }
+  
+  &:focus {
+    outline: 2px solid #1871BD;
+    outline-offset: 2px;
+  }
+}
+
+.feedbackForm {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  
+  > * {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+.feedbackContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+// Issue type fieldset styling
+:global(.usa-fieldset) {
+  margin-bottom: 32px;
+  border: none;
+  padding: 0;
+  
+  :global(.usa-legend) {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #1B1B1B;
+  }
+  
+  :global(.usa-radio) {
+    margin-bottom: 8px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.required {
+  color: #D83933;
+  margin-left: 2px;
+}
+
+// Add spacing for text area and character count and set font to Lora
+:global(.usa-textarea) {
+  margin-bottom: 8px;
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+}
+
+// Style the validation checklist
+:global(.usa-checklist) {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  
+  @include main.at-media('tablet') {
+    flex-direction: row;
+    gap: 16px;
+  }
+  
+  :global(.usa-button) {
+    flex: 1;
+    text-transform: uppercase;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin: 0 !important;
+    
+    // Remove individual padding when vertically stacked
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    
+    @include main.at-media('tablet') {
+      // Restore normal padding on tablet and up
+      padding-top: 12px !important;
+      padding-bottom: 12px !important;
+    }
+  }
+}
+
+// Responsive adjustments
+@include main.at-media('mobile-lg') {
+  .modalContent {
+    margin: 8px;
+    max-height: 95vh;
+  }
+  
+  .modalHeader {
+    padding: 16px 16px 12px 16px;
+  }
+  
+  .feedbackContainer {
+    padding: 16px;
+  }
+  
+  .headerTitle {
+    font-size: 1.25rem;
+  }
+  
+  .closeButton {
+    font-size: 1.75rem;
+  }
+}

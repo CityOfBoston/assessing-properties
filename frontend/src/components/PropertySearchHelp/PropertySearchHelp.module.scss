@@ -9,9 +9,18 @@
   font-weight: bold;
 }
 
-.queryMessage {
+.queryMessageRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-top: 24px;
   margin-bottom: 32px;
+}
+
+.queryMessage {
+  margin: 0;
+  font-size: 18px;
 }
 
 .tipsList {

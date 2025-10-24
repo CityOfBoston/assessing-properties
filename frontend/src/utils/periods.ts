@@ -177,14 +177,6 @@ export function getExemptionPhase(date: Date, year: number, opts: { grantedCount
   const nextJan1 = NEW_APPLICATION_PERIOD_BEGINS.getDate(year + 1);
   const { type } = opts;
 
-  console.log('getExemptionPhase debug:', {
-    date: date.toISOString(),
-    year,
-    jan1: jan1.toISOString(),
-    deadline: deadline.toISOString(),
-    july1: july1.toISOString(),
-    nextJan1: nextJan1.toISOString()
-  });
   
   // Before Jan 1
   if (date < jan1) {

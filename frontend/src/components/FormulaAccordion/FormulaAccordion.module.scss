@@ -29,6 +29,7 @@
 
 .title {
   flex: 1;
+  margin-right: 24px; // Add gap between title and value
 }
 
 .rightContent {
@@ -58,10 +59,11 @@
   border-top: 1px solid #D2D2D2;
   width: 100%;
   box-sizing: border-box;
+  line-height: 1.5;
 }
 
 .description {
-  padding: 12px 0;
   width: 100%;
   box-sizing: border-box;
+  line-height: 1.5;
 } 

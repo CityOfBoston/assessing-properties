@@ -3,6 +3,8 @@
 .resultsContainer {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
 }
 
 .resultsArea {
@@ -56,9 +58,16 @@
   font-weight: 700;
 }
 
-.resultsDescription {
+.resultsDescriptionRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-top: 24px;
-  margin-bottom: 0;
+}
+
+.resultsDescription {
+  margin: 0;
   font-size: 1.125rem;
   color: #555;
 }
@@ -70,4 +79,12 @@
 
 .resultsTable {
   margin-top: 24px;
+  width: 100%;
+  max-width: 100%;
+
+  @include main.at-media-max('mobile-lg') {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    width: calc(100% + 2rem);
+  }
 }

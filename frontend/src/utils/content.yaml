@@ -5,8 +5,6 @@ config:
   maintenance:
     enabled: false 
     message: "The Boston Property Lookup tool is currently undergoing active development for the newest Beta features. Apologies for any inconvenience. Please check back later."
-  test:
-    enabled: false  # Set to false to hide time changer in production
 
 # Shared text that can be referenced across components
 shared:
@@ -25,6 +23,15 @@ shared:
     abatements: "Abatements"
     permits: "Permits"
     contactUs: "Contact Us"
+    fiscalYear: "Fiscal Year"
+    assessedValue: "Assessed Value"
+    residential: "Residential"
+    commercial: "Commercial"
+    unknown: "Unknown"
+    note: "Note"
+    notAvailable: "N/A"
+    property: "Property"
+    masterParcelId: "Master Parcel ID"
 
   # Common button text
   buttons:
@@ -35,6 +42,8 @@ shared:
     openInMap: "Open in Map"
     payTaxes: "Pay Your Taxes"
     print: "Print"
+    seeMore: "See More"
+    seeLess: "See Less"
 
   # Common loading states
   loading:
@@ -82,6 +91,7 @@ components:
         title: "Current Owner(s)"
         icon: "/cob-uswds/img/usa-icons/people.svg"
         alt: "Owners"
+        nameFormat: "Owner names appear as Last Name followed by First Name"
         disclaimer: "@periods.overview.owner_disclaimer"
       assessedValue:
         title: "Assessed Value"
@@ -114,7 +124,7 @@ components:
       title: "Property Value History"
     valueHistory:
       title: "VALUE HISTORY"
-      note: "Note: The assessed value is the actual billed assessment."
+      note: "The assessed value is the actual billed assessment."
       table:
         headers:
           year: "Year"
@@ -283,6 +293,7 @@ components:
           text: "617-635-4287"
           url: "tel:617-635-4287"
           label: "City of Boston Taxpayer Referral and Assistance Center"
+        emailPrefix: "or emailing"
         email:
           text: "TRACFAXSG@boston.gov"
           url: "mailto:TRACFAXSG@boston.gov"
@@ -308,7 +319,7 @@ components:
   # Other components
   WelcomeContent:
     title: "Boston Property Lookup"
-    description: "Use this tool to find detailed information about properties in Boston, including: assessed value, location, ownership, and tax information for any parcel in the City of Boston. **Please note:** This website is in beta while we improve its functionality. __Tell us what you think.__"
+    description: "Use this tool to find detailed information about properties in Boston, including: assessed value, location, ownership, and tax information for any parcel in the City of Boston. **Please note:** This website is in beta while we improve its functionality."
     logoAltText: "Assessing Department Logo"
 
   BetaLabel:
@@ -343,6 +354,23 @@ components:
     characterRemaining: "{count} characters remaining"
     contactInfo: "We use this feedback to improve our website. If you need assistance, please contact the"
     departmentLinkText: "Assessing department"
+
+  ComplexFeedbackSender:
+    headerTitle: "Help us improve the site"
+    issueQuestion: "What was the main issue you faced with the search?"
+    issueOption1: "Couldn't find what I was looking for"
+    issueOption2: "Something went wrong (bug or error)"
+    issueOption3: "I have a suggestion to improve it"
+    promptTitle: "Share your feedback"
+    promptOptional: "(Optional)"
+    disclaimer: "Do not include sensitive information such as account numbers or personal details."
+    submitButton: "Submit feedback"
+    cancelButton: "Cancel"
+    characterCount: "{count} characters allowed"
+    characterRemaining: "{count} characters remaining"
+    contactInfo: "We use this feedback to improve our website. If you need assistance, please contact the"
+    departmentLinkText: "Assessing department"
+    closeButtonAriaLabel: "Close feedback modal"
 
   LoadingIndicator:
     message: "@shared.loading.default"

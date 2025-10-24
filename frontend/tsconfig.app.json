@@ -28,6 +28,8 @@
       "@pages/*": ["src/pages/*"],
       "@types/*": ["src/types/*"],
       "@utils/*": ["src/utils/*"],
+      "@services/*": ["src/services/*"],
+      "@presenters/*": ["src/presenters/*"],
       "@cob-uswds-components/*": ["node_modules/cob-uswds/packages/*"],
       "@cob-uswds/*": ["node_modules/cob-uswds/dist/*"]
     },

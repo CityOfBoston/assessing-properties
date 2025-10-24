@@ -12,7 +12,11 @@ export const feedbackDataRef = db.collection("feedback");
  * @param feedbackData The feedback data to add to the feedback collection.
  */
 export const addFeedbackData = async (feedbackData: FeedbackData): Promise<void> => {
-  console.log(`[FirestoreClient] Adding feedback data for parcelId: ${feedbackData.parcelId}`);
+  const identifier = feedbackData.type === 'property' 
+    ? `parcelId: ${feedbackData.parcelId}` 
+    : `issueType: ${feedbackData.issueType}`;
+  
+  console.log(`[FirestoreClient] Adding feedback data for ${identifier}`);
 
   try {
     const feedbackDoc = {
@@ -22,9 +26,9 @@ export const addFeedbackData = async (feedbackData: FeedbackData): Promise<void>
 
     await feedbackDataRef.add(feedbackDoc);
 
-    console.log(`[FirestoreClient] Successfully added feedback data for parcelId: ${feedbackData.parcelId}`);
+    console.log(`[FirestoreClient] Successfully added feedback data for ${identifier}`);
   } catch (error) {
-    console.error(`[FirestoreClient] Error adding feedback data for parcelId: ${feedbackData.parcelId}`, error);
+    console.error(`[FirestoreClient] Error adding feedback data for ${identifier}`, error);
     throw error;
   }
 };

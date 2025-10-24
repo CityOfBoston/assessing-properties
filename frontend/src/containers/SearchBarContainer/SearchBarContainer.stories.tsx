@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { ParcelPairingsProvider } from '@hooks/useParcelPairingsContext';
 
 const meta = {
-  title: 'Container/SearchBarContainer',
+  title: 'Containers/SearchBarContainer',
   component: SearchBarContainer,
   parameters: {
     layout: 'padded',

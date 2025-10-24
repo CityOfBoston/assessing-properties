@@ -1,4 +1,4 @@
-import content from './content.yaml';
+import content from '@utils/content.yaml';
 
 type ContentReference = string | Record<string, any>;
 

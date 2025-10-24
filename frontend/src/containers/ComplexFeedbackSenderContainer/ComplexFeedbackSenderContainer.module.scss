@@ -1,0 +1,50 @@
+@use '../../styles/main.scss' as main;
+
+.feedbackTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  font-family: 'Lora', serif;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: text-decoration 0.2s ease;
+  
+  &:hover {
+    text-decoration: none;
+  }
+  
+  &:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+.light {
+  color: #A2E0FB;
+  font-size: 15px;
+  
+  .commentIcon {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) saturate(100%) invert(85%) sepia(15%) saturate(1500%) hue-rotate(170deg) brightness(105%) contrast(95%);
+  }
+}
+
+.default {
+  color: #1871BD;
+  font-size: 17px;
+  
+  .commentIcon {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) saturate(100%) invert(28%) sepia(85%) saturate(1654%) hue-rotate(201deg) brightness(95%) contrast(90%);
+  }
+}
+
+.commentIcon {
+  flex-shrink: 0;
+}

@@ -1,0 +1,72 @@
+name: Deploy to Production Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy-prod" to confirm production deployment'
+        required: true
+        default: ''
+
+jobs:
+  validate-input:
+    name: Validate Deployment Confirmation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        if: github.event.inputs.confirm != 'deploy-prod'
+        run: |
+          echo "::error::Deployment confirmation failed. Please type 'deploy' to confirm."
+          exit 1
+
+  deploy-production:
+    name: Deploy to Production
+    needs: validate-input
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Frontend Build and Deploy
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Create frontend environment file
+        working-directory: ./frontend
+        run: |
+          echo "${{ secrets.PROD_FRONTEND_ENV }}" > .env
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      # Functions Build
+      - name: Install functions dependencies
+        working-directory: ./functions
+        run: npm ci
+
+      - name: Create functions environment file
+        working-directory: ./functions
+        run: |
+          echo "${{ secrets.PROD_FUNCTIONS_ENV }}" > .env
+
+      - name: Build functions
+        working-directory: ./functions
+        run: npm run build
+
+      # Deploy both frontend and functions
+      - name: Deploy to Firebase (Production)
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --project ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROD }}
+

@@ -1,14 +1,20 @@
 import React from 'react';
 import TimeChanger from './TimeChanger';
-import { MemoryRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
+import { DateProvider } from '@hooks/useDateContext';
 
 export default {
   title: 'Components/TimeChanger',
   component: TimeChanger,
+  decorators: [
+    (Story: React.ComponentType) => (
+      <BrowserRouter>
+        <DateProvider>
+          <Story />
+        </DateProvider>
+      </BrowserRouter>
+    ),
+  ],
 };
 
-export const Default = () => (
-  <MemoryRouter>
-    <TimeChanger />
-  </MemoryRouter>
-); 
+export const Default = () => <TimeChanger />; 

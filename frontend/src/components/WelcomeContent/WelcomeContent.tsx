@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from './WelcomeContent.module.scss';
-import assessingLogo from '../../assets/assessing_logo_white.svg';
 import { BetaLabel } from '../BetaLabel';
 import { WelcomeContentProps as WelcomeContentTextProps } from '@src/types/content';
 
@@ -31,19 +30,13 @@ export const WelcomeContent: React.FC<WelcomeContentProps & { additionalContent?
   additionalContent,
   hideTitleAndDescriptionOnMobile = false,
   title,
-  description,
-  logoAltText
+  description
 }) => {
   const titleClassName = `${styles.title} ${hideTitleAndDescriptionOnMobile ? styles.hideOnMobile : ''}`;
   const descriptionClassName = `${styles.description} ${hideTitleAndDescriptionOnMobile ? styles.hideOnMobile : ''}`;
 
   return (
     <div className={styles.container}>
-      <img 
-        src={assessingLogo} 
-        alt={logoAltText}
-        className={`${styles.logo} ${hideTitleAndDescriptionOnMobile ? styles.hideOnMobile : ''}`}
-      />
       <div className={styles.contentWrapper}>
         <h1 className={titleClassName}>
           {title} <BetaLabel variant="white" />

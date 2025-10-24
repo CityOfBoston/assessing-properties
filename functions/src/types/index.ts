@@ -6,7 +6,8 @@ export interface OverviewSectionData {
   owners: string[];
   imageSrc: string;
   assessedValue: number;
-  propertyType: string;
+  propertyTypeCode: string;
+  propertyTypeDescription?: string;
   parcelId: string;
   netTax: number;
   totalBilledAmount: number;
@@ -99,7 +100,8 @@ export class PropertyDetails implements PropertyDetailsData {
     owners: string[];
     imageSrc: string;
     assessedValue: number;
-    propertyType: string;
+    propertyTypeCode: string;
+    propertyTypeDescription?: string;
     parcelId: string;
     propertyNetTax: number;
     personalExemptionFlag: boolean;
@@ -108,6 +110,7 @@ export class PropertyDetails implements PropertyDetailsData {
       buildingNumber: number;
       landUse?: string;
       grossArea?: string;
+      livingArea?: string;
       style?: string;
       storyHeight?: string;
       floor?: string;
@@ -151,6 +154,7 @@ export class PropertyDetails implements PropertyDetailsData {
     grade?: string;
     landUse?: string;
     grossArea?: string;
+    livingArea?: string;
     style?: string;
     storyHeight?: string;
     floor?: string;
@@ -197,7 +201,8 @@ export class PropertyDetails implements PropertyDetailsData {
       owners: data.owners,
       imageSrc: data.imageSrc,
       assessedValue: data.assessedValue,
-      propertyType: data.propertyType,
+    propertyTypeCode: data.propertyTypeCode,
+    propertyTypeDescription: data.propertyTypeDescription,
       parcelId: data.parcelId,
       netTax: data.propertyNetTax,
       totalBilledAmount: data.totalBilledAmount,
@@ -255,7 +260,7 @@ export class PropertyDetails implements PropertyDetailsData {
               title: "General",
               content: [
                 {label: "Land Use", value: building.landUse},
-                {label: "Gross Area", value: building.grossArea ? `${building.grossArea} sq ft` : undefined},
+                {label: building.grossArea ? "Gross Area" : building.livingArea ? "Living Area" : "Gross Area", value: building.grossArea ? `${building.grossArea} sq ft` : building.livingArea ? `${building.livingArea} sq ft` : "Not Available"},
                 {label: "Style", value: building.style},
                 {label: "Story Height", value: building.storyHeight},
                 {label: "Floor", value: building.floor},
@@ -322,7 +327,7 @@ export class PropertyDetails implements PropertyDetailsData {
               title: "General",
               content: [
                 {label: "Land Use", value: data.landUse},
-                {label: "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : undefined},
+                {label: data.grossArea ? "Gross Area" : data.livingArea ? "Living Area" : "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : data.livingArea ? `${data.livingArea} sq ft` : "Not Available"},
                 {label: "Style", value: data.style},
                 {label: "Story Height", value: data.storyHeight},
                 {label: "Floor", value: data.floor},
@@ -370,7 +375,7 @@ export class PropertyDetails implements PropertyDetailsData {
           title: "General",
           content: [
             {label: "Land Use", value: data.landUse},
-            {label: "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : undefined},
+            {label: data.grossArea ? "Gross Area" : data.livingArea ? "Living Area" : "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : data.livingArea ? `${data.livingArea} sq ft` : "Not Available"},
             {label: "Style", value: data.style},
             {label: "Story Height", value: data.storyHeight},
             {label: "Floor", value: data.floor},
@@ -462,11 +467,28 @@ export interface PropertySearchSuggestions {
   suggestions: PropertySearchSuggestion[];
 }
 
-export interface FeedbackData {
+// Base feedback interface
+export interface BaseFeedbackData {
+  feedbackMessage?: string;
+  createdAt?: any; // Firestore Timestamp
+}
+
+// Property-specific feedback (existing FeedbackSender)
+export interface PropertyFeedbackData extends BaseFeedbackData {
+  type: 'property';
   parcelId: string;
   hasPositiveSentiment: boolean;
-  feedbackMessage?: string;
 }
+
+// General site feedback (new ComplexFeedbackSender)
+export interface GeneralFeedbackData extends BaseFeedbackData {
+  type: 'general';
+  issueType: 'not-found' | 'bug' | 'suggestion';
+  searchQuery?: string;
+}
+
+// Union type for all feedback
+export type FeedbackData = PropertyFeedbackData | GeneralFeedbackData;
 
 // Standard response interface
 export interface StandardResponse<T = any> {

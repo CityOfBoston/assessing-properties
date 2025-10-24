@@ -2,9 +2,8 @@
  * ApprovedPermitsSection component displays building permits and approvals
  */
 import PropertyDetailsSection from '../PropertyDetailsSection';
-import { useDateContext } from '@src/hooks/useDateContext';
-import { getComponentText } from '@utils/contentMapper';
 import styles from '../PropertyDetailsSection.module.scss';
+import { useApprovedPermitsContent } from '@src/hooks/usePropertyDetailsContent';
 
 interface ApprovedPermitsSectionProps {
   parcelId: string;
@@ -12,9 +11,7 @@ interface ApprovedPermitsSectionProps {
 }
 
 export default function ApprovedPermitsSection({ parcelId, title }: ApprovedPermitsSectionProps) {
-  const { date } = useDateContext();
-  const content = getComponentText('ApprovedPermitsSection');
-  const pageContent = getComponentText('propertyDetails', 'pages.propertyDetails');
+  const { content, getPermitsUrl } = useApprovedPermitsContent(parcelId);
 
   return (
     <PropertyDetailsSection title={title}>
@@ -23,9 +20,9 @@ export default function ApprovedPermitsSection({ parcelId, title }: ApprovedPerm
           className="usa-link usa-link--external"
           rel="noreferrer"
           target="_blank"
-          href={content.description.url.replace('{parcelId}', parcelId)}
+          href={getPermitsUrl(parcelId)}
         >
-          {content.description.text}
+          {content.description?.text || 'View approved building permits'}
         </a>
       </div>
     </PropertyDetailsSection>

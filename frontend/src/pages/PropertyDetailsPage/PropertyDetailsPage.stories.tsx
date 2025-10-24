@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { DateProvider } from '@hooks/useDateContext';
 import PropertyDetailsPage from './PropertyDetailsPage';
 
 const meta = {
@@ -17,9 +18,11 @@ const meta = {
       
       return (
         <MemoryRouter initialEntries={[`/details${searchParams ? `?${searchParams}` : ''}`]}>
-          <Routes>
-            <Route path="/details" element={<Story />} />
-          </Routes>
+          <DateProvider>
+            <Routes>
+              <Route path="/details" element={<Story />} />
+            </Routes>
+          </DateProvider>
         </MemoryRouter>
       );
     },
@@ -34,7 +37,7 @@ export const WithParcelId: Story = {
   parameters: {
     reactRouter: {
       searchParams: {
-        parcelId: '1234567890',
+        parcelId: '0300475733',
       },
     },
   },

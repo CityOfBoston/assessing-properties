@@ -60,7 +60,6 @@ export const useSearchResults = (): UseSearchResultsReturn => {
       // Create new abort controller for this search
       abortControllerRef.current = new AbortController();
       
-      console.log('[useSearchResults] Performing search for query:', query);
       
       // Use fuzzy search to find matching parcel IDs
       const fuzzyResults = search(query);
@@ -71,7 +70,6 @@ export const useSearchResults = (): UseSearchResultsReturn => {
       }
       
       if (fuzzyResults.length === 0) {
-        console.log('[useSearchResults] No fuzzy search results found');
         setSearchResults({ results: [] });
         return;
       }
@@ -87,10 +85,8 @@ export const useSearchResults = (): UseSearchResultsReturn => {
         return;
       }
       
-      console.log('[useSearchResults] Found parcel IDs from fuzzy search (limited to 50):', parcelIds);
       
       // Fetch property summaries for the found parcel IDs
-      console.log('[useSearchResults] Calling fetchPropertySummariesByParcelIds with parcelIds:', parcelIds);
       const summaries = await fetchPropertySummariesByParcelIds(parcelIds);
       
       // Check if search was cancelled
@@ -107,8 +103,6 @@ export const useSearchResults = (): UseSearchResultsReturn => {
         });
       }
       
-      console.log('[useSearchResults] Successfully fetched and sorted property summaries:', summaries);
-      console.log('[useSearchResults] Number of results:', summaries.results?.length || 0);
       
       setSearchResults(summaries);
     } catch (err) {

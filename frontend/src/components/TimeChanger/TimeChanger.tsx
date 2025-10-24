@@ -158,10 +158,10 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
             className={styles.dateInput + (flash ? ' ' + styles.flash : '')}
             aria-label="Custom date"
           />
-          <button className={styles.resetButton} onClick={handleReset}>
+          <button id="time_reset_button" className={styles.resetButton} onClick={handleReset}>
             Reset
           </button>
-          <button className={styles.expandButton} onClick={() => setExpanded(true)} aria-label="Expand timeline">
+          <button id="time_expand_button" className={styles.expandButton} onClick={() => setExpanded(true)} aria-label="Expand timeline">
             <img src="/cob-uswds/img/usa-icons/zoom_out_map.svg" alt="Expand" width={28} height={28} style={{ verticalAlign: 'middle' }} />
           </button>
         </div>
@@ -175,7 +175,7 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
       <div className={`${styles.timeChanger} ${isExiting ? styles.timeChangerExiting : ''}`}>
       <div className={styles.label}>
         Test Date: <span style={{fontWeight:400}}>{formatDate(effectiveDate)}</span>
-        <button className={styles.collapseButton} onClick={handleCollapse} aria-label="Collapse timeline">
+        <button id="time_collapse_button" className={styles.collapseButton} onClick={handleCollapse} aria-label="Collapse timeline">
           <img src='/cob-uswds/img/usa-icons/expand_more.svg' alt="Collapse" width={28} height={28} style={{ verticalAlign: 'middle' }} />
         </button>
       </div>
@@ -208,7 +208,7 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
       </div>
       <div className={styles.confirmButtonContainer}>
         {showConfirm && (
-          <button className={styles.confirmButton} onClick={handleConfirm}>
+          <button id="time_confirm_button" className={styles.confirmButton} onClick={handleConfirm}>
             Confirm Date
           </button>
         )}
@@ -223,7 +223,7 @@ const TimeChanger: React.FC<TimeChangerProps> = () => {
           className={styles.dateInput + (flash ? ' ' + styles.flash : '')}
           aria-label="Custom date"
         />
-        <button className={styles.resetButton} onClick={handleReset}>
+        <button id="time_reset_button" className={styles.resetButton} onClick={handleReset}>
           Reset to Today
         </button>
         </div>

@@ -16,8 +16,13 @@ export const usePropertyFeedback = (): UsePropertyFeedbackReturn => {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const sendFeedback = useCallback(async (feedback: FeedbackData) => {
-    if (!feedback.parcelId?.trim()) {
-      throw new Error('Parcel ID is required');
+    // Validate based on feedback type
+    if (feedback.type === 'property' && !feedback.parcelId?.trim()) {
+      throw new Error('Parcel ID is required for property feedback');
+    }
+    
+    if (feedback.type === 'general' && !feedback.issueType?.trim()) {
+      throw new Error('Issue type is required for general feedback');
     }
 
     try {
@@ -25,11 +30,7 @@ export const usePropertyFeedback = (): UsePropertyFeedbackReturn => {
       setError(null);
       setIsSuccess(false);
       
-      console.log('[usePropertyFeedback] Sending feedback for parcelId:', feedback.parcelId);
-      
       await storePropertyFeedback(feedback);
-      
-      console.log('[usePropertyFeedback] Successfully sent feedback');
       
       setIsSuccess(true);
     } catch (err) {

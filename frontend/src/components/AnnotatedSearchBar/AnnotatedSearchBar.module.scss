@@ -15,8 +15,9 @@
 .label {
   display: flex;
   align-items: center;
-  font-size: 1rem;
   color: white;
+  font-family: Montserrat, sans-serif;
+  font-weight: bold;
 
   @include at-media-max('mobile-lg') {
     font-size: 18px;
@@ -27,7 +28,11 @@
   margin-left: 0.5rem;
   display: inline-flex;
   align-items: center;
-  line-height: 1;
+  line-height: 1.2;
+  font-size: 16px;
+  font-family: Lora, serif;
+  font-weight: normal;
+  text-transform: none;
 }
 
 .searchForm {
@@ -201,7 +206,7 @@
   border: 1px solid #D2D2D2;
   border-radius: 4px;
   z-index: 1000;
-  max-height: calc(8 * (48px + 1px)); // 8 items * (item height + border)
+  max-height: calc(0.8 * min(calc(8 * (48px + 1px)), calc(100vh - var(--search-bar-bottom) - 16px))); 
   overflow-y: auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: none; // Hide by default

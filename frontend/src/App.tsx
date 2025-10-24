@@ -1,10 +1,11 @@
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import WelcomePage from '@pages/WelcomePage';
 import SearchResultsPage from '@pages/SearchResultsPage';
-import PropertyDetailsPage from '@src/pages/PropertyDetailsPage';
+import PropertyDetailsPage from '@pages/PropertyDetailsPage';
 import MaintenancePage from '@pages/MaintenancePage';
-import { ParcelPairingsProvider } from '@src/hooks/useParcelPairingsContext';
-import { DateProvider } from '@src/hooks/useDateContext';
+import { ParcelPairingsProvider } from '@hooks/useParcelPairingsContext';
+import { DateProvider } from '@hooks/useDateContext';
+import { GoogleAnalyticsProvider } from '@hooks/useGoogleAnalytics';
 import { getComponentText } from '@utils/contentMapper';
 import '@styles/main.scss';
 
@@ -13,7 +14,8 @@ export const App = () => {
   return (
     <ParcelPairingsProvider>
       <Router>
-        <DateProvider>
+        <GoogleAnalyticsProvider>
+          <DateProvider>
           <Routes>
             {config.maintenance.enabled ? (
               <>
@@ -29,6 +31,7 @@ export const App = () => {
             )}
           </Routes>
         </DateProvider>
+        </GoogleAnalyticsProvider>
       </Router>
     </ParcelPairingsProvider>
   );

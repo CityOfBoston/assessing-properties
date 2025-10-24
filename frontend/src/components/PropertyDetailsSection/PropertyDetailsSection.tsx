@@ -6,11 +6,19 @@ interface PropertyDetailsSectionProps {
   children: React.ReactNode;
 }
 
-export default function PropertyDetailsSection({ title, children }: PropertyDetailsSectionProps) {
+function PropertyDetailsSection({ title, children }: PropertyDetailsSectionProps, ref: React.ForwardedRef<HTMLDivElement>) {
   return (
-    <div className={styles.container}>
+    <div ref={ref} className={styles.container}>
       <h2 className={styles.title}>{title}</h2>
       {children}
     </div>
   );
-} 
+}
+
+const ForwardedPropertyDetailsSection = React.memo(
+  React.forwardRef<HTMLDivElement, PropertyDetailsSectionProps>(PropertyDetailsSection)
+);
+
+ForwardedPropertyDetailsSection.displayName = 'PropertyDetailsSection';
+
+export default ForwardedPropertyDetailsSection;

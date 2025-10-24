@@ -1,7 +1,12 @@
 import React from 'react';
 import styles from './IconButton.module.scss';
 
-interface IconButtonProps {
+export interface IconButtonProps {
+  /**
+   * Optional button ID for analytics tracking
+   */
+  id?: string;
+
   /**
    * Optional SVG icon to display
    */
@@ -47,6 +52,7 @@ interface IconButtonProps {
  * IconButton component that displays optional icon alongside text
  */
 export const IconButton: React.FC<IconButtonProps> = ({
+  id,
   src,
   text,
   onClick,
@@ -63,7 +69,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
         return baseClass;
       case 'outline':
         // Only apply outline class if there's an icon
-        return src ? `${baseClass} usa-button--outline` : baseClass;
+        return `${baseClass} usa-button--outline`;
       default:
         return baseClass;
     }
@@ -71,6 +77,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
 
   return (
     <button 
+      id={id}
       className={`${getButtonClass()} ${styles.iconButton} ${src ? styles.hasIcon : ''} ${className}`}
       type={type}
       onClick={onClick}

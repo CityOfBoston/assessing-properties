@@ -170,9 +170,21 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
   // Calculate dimensions and scales
   const minValue = Math.min(...data.map(item => item.value));
   const range = maxValue - minValue;
-  const padding = range * 0.15; // Increased padding from 0.1 to 0.15
-  const yDomain = [minValue - (range * 0.33), maxValue + padding * 2]; // Double the top padding
-  const step = getStepSize(range, data.length);
+  
+  // Handle case where all values are the same
+  const effectiveRange = range === 0 ? maxValue * 0.2 : range; // Use 20% of the value as range if all values are same
+  const padding = effectiveRange * 0.15;
+  
+  // Ensure we have a reasonable domain even when all values are the same
+  const yDomain = range === 0 
+    ? [maxValue * 0.8, maxValue * 1.2] // Create a domain ±20% around the single value
+    : [minValue - (range * 0.33), maxValue + padding * 2];
+    
+  // Calculate step size based on the effective range
+  const step = range === 0
+    ? (yDomain[1] - yDomain[0]) / 4 // Show 5 ticks when all values are same
+    : getStepSize(effectiveRange, data.length);
+
 
   // Scales
   const xScale = (index: number) => {
@@ -181,7 +193,15 @@ const PropertyValuesBarChart: React.FC<PropertyValuesBarChartProps> = ({
     return margin.left + startPadding + totalBarWidth + totalGapWidth;
   };
   const yScale = (value: number) => {
+    // Handle edge cases
+    if (typeof value !== 'number' || isNaN(value)) {
+      return margin.top + chartHeight; // Return bottom of chart
+    }
     if (value === 0) return chartHeight + margin.top;
+    if (yDomain[1] === yDomain[0]) {
+      return margin.top + chartHeight / 2; // Return middle of chart
+    }
+    
     const scale = (value - yDomain[0]) / (yDomain[1] - yDomain[0]);
     return margin.top + chartHeight * (1 - scale);
   };

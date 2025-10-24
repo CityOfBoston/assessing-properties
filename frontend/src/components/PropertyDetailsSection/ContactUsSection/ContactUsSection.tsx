@@ -1,17 +1,17 @@
 /**
  * ContactUsSection component displays contact information and support resources
  */
-import PropertyDetailsSection from '../PropertyDetailsSection';
-import styles from './ContactUsSection.module.scss';
 import ReactMarkdown from 'react-markdown';
-import { getComponentText } from '@utils/contentMapper';
+import PropertyDetailsSection from '@components/PropertyDetailsSection/PropertyDetailsSection';
+import styles from './ContactUsSection.module.scss';
+import { useContactUsContent } from '@src/hooks/usePropertyDetailsContent';
 
 interface ContactUsSectionProps {
   title: string;
 }
 
 export default function ContactUsSection({ title }: ContactUsSectionProps) {
-  const content = getComponentText('ContactUsSection');
+  const { content } = useContactUsContent();
   const { paragraphs } = content;
 
 
@@ -42,13 +42,13 @@ export default function ContactUsSection({ title }: ContactUsSectionProps) {
             {paragraphs.exemptions.phone.text}
           </a>
           {' '}
-          or emailing
+          {paragraphs.exemptions?.emailPrefix || 'or emailing'}
           {' '}
           <a
-            href={paragraphs.exemptions.email.url}
+            href={paragraphs.exemptions?.email?.url || 'mailto:TRACFAXSG@boston.gov'}
             className="usa-link"
           >
-            {paragraphs.exemptions.email.text}
+            {paragraphs.exemptions?.email?.text || 'TRACFAXSG@boston.gov'}
           </a>
           .
         </div>

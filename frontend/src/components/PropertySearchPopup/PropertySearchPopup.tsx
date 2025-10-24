@@ -39,6 +39,7 @@ export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
   return (
     <div className={styles.container}>
       <button 
+        id="search_popup_close_button"
         className={styles.closeButton}
         onClick={onClose}
         aria-label={texts.closeButtonAriaLabel}

@@ -1,7 +1,7 @@
 import { usePropertyFeedback } from '@hooks/usePropertyFeedback';
-import { FeedbackSender, FeedbackSenderProps } from '../../components/FeedbackSender/FeedbackSender';
+import { FeedbackSender, FeedbackSenderProps } from '@components/FeedbackSender/FeedbackSender';
 import { useCallback, useEffect } from 'react';
-import { FeedbackData } from '../../types';
+import type { FeedbackData } from '../../types';
 import { getComponentText } from '@utils/contentMapper';
 import styles from './FeedbackSenderContainer.module.scss';
 
@@ -22,7 +22,7 @@ export const FeedbackSenderContainer = ({
   onError,
   ...feedbackSenderProps
 }: FeedbackSenderContainerProps) => {
-  const { isLoading, error, isSuccess, sendFeedback, reset } = usePropertyFeedback();
+  const { isLoading, error, isSuccess, sendFeedback } = usePropertyFeedback();
 
   // Handle success callback
   useEffect(() => {
@@ -49,6 +49,7 @@ export const FeedbackSenderContainer = ({
     }
 
     const feedbackData: FeedbackData = {
+      type: 'property',
       parcelId: data.parcelId,
       hasPositiveSentiment: data.helpful,
       feedbackMessage: data.feedback,
@@ -76,7 +77,7 @@ export const FeedbackSenderContainer = ({
     );
   }
 
-  const feedbackContent = getComponentText('FeedbackSender');
+  const feedbackContent = getComponentText('FeedbackSender') as Required<FeedbackSenderProps['texts']>;
 
   return (
     <FeedbackSender

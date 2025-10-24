@@ -52,10 +52,10 @@ periods:
     personal_exemption_granted: "A Personal Exemption has been granted for this parcel."
     residential_open_phase: "You may qualify for a Residential Exemption. See below for application details."
     personal_open_phase: "You may qualify for a Personal Exemption. See below for application details."
-    residential_preliminary_submitted: "**Y flag:** We have factored into your Q1 and Q2 tax bills a preliminary residential exemption based on your fiscal year {current_fy} approval."
-    residential_preliminary_not_submitted: "**N flag:** We have not factored a residential exemption into your preliminary tax bill."
-    personal_preliminary_submitted: "**Y flag:** This property received a personal exemption in fiscal year {current_fy}. A new application is required every year. Renewal applications will be mailed in **August {current_fy}**."
-    personal_preliminary_not_submitted: "**N flag:** This property did not receive a personal exemption in fiscal year {current_fy}."
+    residential_preliminary_submitted: "**Granted:** We have factored into your Q1 and Q2 tax bills a preliminary residential exemption based on your fiscal year {current_fy} approval."
+    residential_preliminary_not_submitted: "**Not Granted:** We have not factored a residential exemption into your preliminary tax bill."
+    personal_preliminary_submitted: "**Granted:** This property received a personal exemption in fiscal year {current_fy}. A new application is required every year. Renewal applications will be mailed in **August {current_fy}**."
+    personal_preliminary_not_submitted: "**Not Granted:** This property did not receive a personal exemption in fiscal year {current_fy}."
     
     # Deadline messages
     residential_deadline_passed: "The deadline for filing a Residential Exemption application for **FY{next_year}** was **{deadline_date}**.\n\nWe will make applications for **FY{next_fy}** available for download starting **Thursday, January 1, {next_fy}**. The current exemption amounts shown are for **FY{next_year}**."
@@ -67,11 +67,55 @@ periods:
     
     # Exemption descriptions
     residential_exemption_description: "If you own and live in your property as a primary residence, you may qualify for the residential exemption. This fiscal year, the residential exemption will save qualified Boston homeowners up to ${max_amount}. The exemption amount will be applied to your third-quarter tax bill issued in late December. If you didn't get the credit on your bill and believe you should have, you can apply for a residential exemption."
-    residential_exemption_open_description: "The Residential Exemption application deadline for fiscal year {next_year} is {deadline_date}. [Find out how to apply for the exemption.](https://www.boston.gov/departments/assessing/residential-exemption)\n\nIf you already submitted an application and have questions on its status, please call our [Taxpayer Referral and Assistance Center](https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center) (TRAC) at [617-635-4287](tel:617-635-4287 \"City of Boston Taxpayer Referral and Assistance Center\")."
-    residential_exemption_preliminary_description: "If you own and live in your property as a primary residence, you may qualify for the residential exemption. If you think you are eligible for a residential exemption and did not receive one, or if you have applied and you have questions on your application status, please contact our [Taxpayer Referral and Assistance Center](https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center) at [617-635-4287](tel:617-635-4287 \"City of Boston Taxpayer Referral and Assistance Center\") for an application. Applications that we receive by **October 15** should be processed in time for the third quarter bill we issue in December.\n\n[View more information on applying for the residential exemption.](https://www.boston.gov/departments/assessing/residential-exemption)"
+    residential_exemption_open_description:
+      text: "The Residential Exemption application deadline for fiscal year {next_year} is {deadline_date}."
+      links:
+        how_to_apply:
+          text: "Find out how to apply for the exemption."
+          url: "https://www.boston.gov/departments/assessing/residential-exemption"
+        trac:
+          text: "Taxpayer Referral and Assistance Center"
+          url: "https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center"
+      phone:
+        text: "617-635-4287"
+        url: "tel:617-635-4287"
+        label: "City of Boston Taxpayer Referral and Assistance Center"
+      status_text: "If you already submitted an application and have questions on its status, please call our"
+    residential_exemption_preliminary_description:
+      text: "If you own and live in your property as a primary residence, you may qualify for the residential exemption. If you think you are eligible for a residential exemption and did not receive one, or if you have applied and you have questions on your application status, please contact our"
+      links:
+        trac:
+          text: "Taxpayer Referral and Assistance Center"
+          url: "https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center"
+        more_info:
+          text: "View more information on applying for the residential exemption."
+          url: "https://www.boston.gov/departments/assessing/residential-exemption"
+      phone:
+        text: "617-635-4287"
+        url: "tel:617-635-4287"
+        label: "City of Boston Taxpayer Referral and Assistance Center"
+      application_text:
+        prefix: "for an application. Applications that we receive by"
+        date: "October 15"
+        suffix: "should be processed in time for the third quarter bill we issue in December."
     residential_exemption_after_deadline_description: "If you own and live in your property as a primary residence, you may qualify for the residential exemption. [Learn more about the residential exemption, and how to apply.](https://www.boston.gov/departments/assessing/residential-exemption)"
     personal_exemption_description: "Through an exemption, the City releases you from paying part or all of your property taxes."
-    personal_exemption_preliminary_description: "The Assessing Department provides tax relief programs for eligible taxpayers based on statutory requirements and locally adopted provisions. These programs are summarized below.\n\nIf you already submitted an application and have questions on its status, or if you have questions about any of these programs, please call our [Taxpayer Referral and Assistance Center](https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center) (TRAC) at [617-635-4287](tel:617-635-4287 \"City of Boston Taxpayer Referral and Assistance Center\")."
+    
+    # URLs and links
+    how_we_tax_url: "https://www.boston.gov/departments/assessing/how-we-tax-your-property"
+    tax_rate_history_url: "https://www.boston.gov/departments/assessing/property-tax-rates"
+    residential_exemption_url: "https://www.boston.gov/assessing-online/form/resexempt/FY{current_fy}/{parcel_id}"
+    personal_exemption_preliminary_description:
+      text: "The Assessing Department provides tax relief programs for eligible taxpayers based on statutory requirements and locally adopted provisions. These programs are summarized below.\n\nIf you already submitted an application and have questions on its status, or if you have questions about any of these programs, please call our"
+      links:
+        trac:
+          text: "Taxpayer Referral and Assistance Center"
+          url: "https://www.boston.gov/departments/assessing/taxpayer-referral-and-assistance-center"
+      phone:
+        text: "617-635-4287"
+        url: "tel:617-635-4287"
+        label: "City of Boston Taxpayer Referral and Assistance Center"
+      suffix: "(TRAC)"
     
     # Application deadline text
     deadline_for_submission: "Deadline for submission:"
@@ -119,7 +163,7 @@ periods:
     
     # Link labels
     blind_exemption_label: "Blind exemption 37A"
-    elderly_exemption_label: "Elderly exemption 41D"
+    elderly_exemption_label: "Elderly exemption 41C"
     veterans_exemption_label: "Veterans Exemption 22"
     surviving_spouse_exemption_label: "Surviving Spouse, Minor Child of Deceased Parent, Elderly Exemption 17D"
     national_guard_exemption_label: "National Guard Exemption"

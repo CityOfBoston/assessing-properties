@@ -48,9 +48,23 @@
   z-index: 100;
   pointer-events: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  white-space: normal;
 
   [data-variant="white"] & {
     background-color: white;
     color: black;
+  }
+  
+  // On mobile, center horizontally on screen but keep above icon
+  @include at-media-max('mobile-lg') {
+    position: fixed;
+    left: 1rem;
+    right: 1rem;
+    bottom: auto;
+    top: calc(var(--icon-top, 0px) - 0.5rem);
+    transform: translateY(-100%);
+    width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+    white-space: normal;
   }
 } 

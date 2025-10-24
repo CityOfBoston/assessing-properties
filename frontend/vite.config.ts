@@ -93,22 +93,25 @@ export default defineConfig({
    * Aliases make imports cleaner throughout the application
    */
   resolve: {
-    alias: {
+    alias: [
       // USWDS components alias
-      '@cob-uswds-components': path.resolve(__dirname, USWDS_PACKAGES_PATH),
+      { find: '@cob-uswds-components', replacement: path.resolve(__dirname, USWDS_PACKAGES_PATH) },
       
       // Add application-specific aliases
-      '@src': path.resolve(__dirname, 'src'),
-      '@layouts': path.resolve(__dirname, 'src/layouts'),
-      '@components': path.resolve(__dirname, 'src/components'),
-      '@styles': path.resolve(__dirname, 'src/styles'),
-      '@containers': path.resolve(__dirname, 'src/containers'),
-      '@assets': path.resolve(__dirname, 'src/assets'),
-      '@hooks': path.resolve(__dirname, 'src/hooks'),
-      '@pages': path.resolve(__dirname, 'src/pages'),
-      '@types': path.resolve(__dirname, 'src/types'),
-      '@utils': path.resolve(__dirname, 'src/utils'),
-    },
+      { find: '@src', replacement: path.resolve(__dirname, 'src') },
+      { find: '@layouts', replacement: path.resolve(__dirname, 'src/layouts') },
+      { find: '@components', replacement: path.resolve(__dirname, 'src/components') },
+      { find: '@styles', replacement: path.resolve(__dirname, 'src/styles') },
+      { find: '@containers', replacement: path.resolve(__dirname, 'src/containers') },
+      { find: '@assets', replacement: path.resolve(__dirname, 'src/assets') },
+      { find: '@hooks', replacement: path.resolve(__dirname, 'src/hooks') },
+      { find: '@pages', replacement: path.resolve(__dirname, 'src/pages') },
+      { find: '@types', replacement: path.resolve(__dirname, 'src/types') },
+      { find: '@utils', replacement: path.resolve(__dirname, 'src/utils') },
+      { find: '@services', replacement: path.resolve(__dirname, 'src/services') },
+      { find: '@presenters', replacement: path.resolve(__dirname, 'src/presenters') },
+    ],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.yaml', '.yml'],
   },
   
   /**

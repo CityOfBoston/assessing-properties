@@ -9,13 +9,15 @@ import {
   AbatementsSection,
   ApprovedPermitsSection,
   ContactUsSection,
-} from '@src/components/PropertyDetailsSection';
-import { LoadingIndicator } from '@src/components/LoadingIndicator';
-import { usePropertyDetails } from '../../hooks/usePropertyDetails';
-import { useDateContext } from '@src/hooks/useDateContext';
-import TimeChanger from '@src/components/TimeChanger/TimeChanger';
+} from '@components/PropertyDetailsSection';
+import { LoadingIndicator } from '@components/LoadingIndicator';
+import { usePropertyDetails } from '@hooks/usePropertyDetails';
+import { useDateContext } from '@hooks/useDateContext';
+import TimeChanger from '@components/TimeChanger/TimeChanger';
 import { getComponentText } from '@utils/contentMapper';
 import { getAbatementPhase } from '@utils/periods';
+import { useGoogleAnalytics } from '@hooks/useGoogleAnalytics';
+import { usePerformanceTracking } from '@services/analytics';
 import styles from './PropertyDetailsPage.module.scss';
 
 /**
@@ -37,11 +39,16 @@ function getFiscalYear(date: Date): number {
 export default function PropertyDetailsPage() {
   const pageContent = getComponentText('propertyDetails', 'pages.propertyDetails');
   const config = getComponentText('config');
+  const analytics = useGoogleAnalytics();
+  const performance = usePerformanceTracking('PropertyDetailsPage');
   const [searchParams] = useSearchParams();
   const parcelId = searchParams.get('parcelId') || '';
   const { date } = useDateContext();
   const lastFiscalYearRef = useRef<number | null>(null);
   const lastParcelIdRef = useRef<string | null>(null);
+  
+  // Check if TimeChanger should be shown (for testing/development only)
+  const showTimeChanger = import.meta.env.VITE_ENABLE_TIME_CHANGER === 'true';
 
   const { propertyDetails, isLoading, error, fetchPropertyDetails } = usePropertyDetails();
 
@@ -58,10 +65,25 @@ export default function PropertyDetailsPage() {
       if (isFirstLoad || (isParcelIdChanged && isSameFiscalYear)) {
         lastFiscalYearRef.current = currentFiscalYear;
         lastParcelIdRef.current = parcelId;
-        fetchPropertyDetails(parcelId, date.toISOString().slice(0, 10));
+        
+
+        // Track API call performance
+        const startTime = window.performance.now();
+        fetchPropertyDetails(parcelId, date.toISOString().slice(0, 10))
+          .then(() => {
+            performance.trackOperation('fetch_property_details', 'success', window.performance.now() - startTime);
+          })
+          .catch((error) => {
+            performance.trackOperation('fetch_property_details', 'error', window.performance.now() - startTime, error.message);
+            analytics.trackError({
+              error_type: 'api',
+              error_message: error.message,
+              component: 'PropertyDetailsPage'
+            });
+          });
       }
     }
-  }, [parcelId, date, fetchPropertyDetails]);
+  }, [parcelId, date, fetchPropertyDetails, analytics, performance, propertyDetails]);
 
   // If no parcelId is provided, show error
   if (!parcelId) {
@@ -93,7 +115,7 @@ export default function PropertyDetailsPage() {
     const loadingName = sectionNames?.loading?.name || "Loading";
     return (
       <div className={styles.propertyDetailsPage}>
-        {config.test?.enabled && <TimeChanger />}
+        {showTimeChanger && <TimeChanger />}
         <PropertyDetailsLayout 
           sections={[{
             name: loadingName,
@@ -119,41 +141,77 @@ export default function PropertyDetailsPage() {
   const abatementYear = nowMonth >= 6 ? calendarYear : calendarYear - 1;
   const abatementPhase = getAbatementPhase(now, abatementYear);
 
+  // Track section view as button click
+  const trackSectionView = (sectionName: string) => {
+    analytics.trackButtonClick({
+      button_id: `${sectionName.toLowerCase().replace(/\s+/g, '_')}_section_button`,
+      context: `property_details_${parcelId}`
+    });
+  };
+
   // Build sections array
   const sections = [
     {
       name: sectionNames.overview.name,
-      component: <OverviewSection data={propertyDetails.overview} title={sectionNames.overview.name} />,
+      component: (
+        <div onFocus={() => trackSectionView('overview')}>
+          <OverviewSection data={propertyDetails.overview} title={sectionNames.overview.name} />
+        </div>
+      ),
     },
     {
       name: sectionNames.value.name,
-      component: <PropertyValueSection {...propertyDetails.propertyValue} title={sectionNames.value.name} />,
+      component: (
+        <div onFocus={() => trackSectionView('value')}>
+          <PropertyValueSection {...propertyDetails.propertyValue} title={sectionNames.value.name} />
+        </div>
+      ),
     },
     {
       name: sectionNames.attributes.name,
-      component: <AttributesSection data={propertyDetails.propertyAttributes} title={sectionNames.attributes.name} />,
+      component: (
+        <div onFocus={() => trackSectionView('attributes')}>
+          <AttributesSection data={propertyDetails.propertyAttributes} title={sectionNames.attributes.name} />
+        </div>
+      ),
     },
     {
       name: sectionNames.taxes.name,
-      component: <PropertyTaxesSection {...propertyDetails.propertyTaxes} title={sectionNames.taxes.name} />,
+      component: (
+        <div onFocus={() => trackSectionView('taxes')}>
+          <PropertyTaxesSection {...propertyDetails.propertyTaxes} title={sectionNames.taxes.name} />
+        </div>
+      ),
     },
     ...(abatementPhase.message ? [{
       name: sectionNames.abatements.name,
-      component: <AbatementsSection parcelId={parcelId} title={sectionNames.abatements.name} />,
+      component: (
+        <div onFocus={() => trackSectionView('abatements')}>
+          <AbatementsSection parcelId={parcelId} title={sectionNames.abatements.name} />
+        </div>
+      ),
     }] : []),
     {
       name: sectionNames.permits.name,
-      component: <ApprovedPermitsSection parcelId={parcelId} title={sectionNames.permits.name} />,
+      component: (
+        <div onFocus={() => trackSectionView('permits')}>
+          <ApprovedPermitsSection parcelId={parcelId} title={sectionNames.permits.name} />
+        </div>
+      ),
     },
     {
       name: sectionNames.contact.name,
-      component: <ContactUsSection title={sectionNames.contact.name} />,
+      component: (
+        <div onFocus={() => trackSectionView('contact')}>
+          <ContactUsSection title={sectionNames.contact.name} />
+        </div>
+      ),
     },
   ];
 
   return (
     <div className={styles.propertyDetailsPage}>
-      {config.test?.enabled && <TimeChanger />}
+      {showTimeChanger && <TimeChanger />}
       <PropertyDetailsLayout 
         sections={sections}
         parcelId={parcelId}

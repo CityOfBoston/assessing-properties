@@ -11,6 +11,7 @@ interface ResponsiveTableProps {
   data: TableData[];
   showDetails?: boolean;
   showMapLink?: boolean;
+  onLoad?: () => void;
   texts?: {
     viewDetails?: string;
     openInMap?: string;
@@ -26,6 +27,7 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   data,
   showDetails = false,
   showMapLink = false,
+  onLoad,
   texts = {
     viewDetails: "View Details",
     openInMap: "Open in Map",
@@ -42,8 +44,8 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   const processedData = data.map(row => {
     const newRow = { ...row };
     if (showDetails) {
-      // Get parcelId from either the 'Parcel ID' or 'parcelId' field
-      const parcelId = (row['Parcel ID'] || row.parcelId) as string;
+      // Get parcelId from the 'Parcel ID' field
+      const parcelId = row['Parcel ID'] as string;
       const detailsLink = (
         <a
           className="usa-link"
@@ -78,8 +80,8 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   const mobileData = processedData.map(row => {
     const newRow = { ...row };
     if (showDetails && showMapLink) {
-      // Get parcelId from either the 'Parcel ID' or 'parcelId' field
-      const parcelId = (row['Parcel ID'] || row.parcelId) as string;
+      // Get parcelId from the 'Parcel ID' field
+      const parcelId = row['Parcel ID'] as string;
       newRow['Details'] = (
         <div className={styles.detailsLinks}>
           <a
@@ -103,6 +105,11 @@ export const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
     }
     return newRow;
   });
+
+  // Call onLoad after initial render
+  React.useEffect(() => {
+    onLoad?.();
+  }, [onLoad]);
 
   return (
     <div className={styles.responsiveTable}>

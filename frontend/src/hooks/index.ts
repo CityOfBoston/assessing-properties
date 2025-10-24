@@ -4,4 +4,15 @@ export { useParcelPairingsContext, ParcelPairingsProvider } from './useParcelPai
 export { useSearchSuggestions } from './useSearchSuggestions';
 export { useSearchResults } from './useSearchResults';
 export { usePropertyFeedback } from './usePropertyFeedback';
-export { useDateContext, DateProvider } from './useDateContext'; 
+export { useDateContext, DateProvider } from './useDateContext';
+export { useModal } from './useModal';
+export { usePropertyTaxCalculations } from './usePropertyTaxCalculations';
+export { 
+  usePropertyTaxesContent, 
+  usePropertyValueContent, 
+  useOverviewContent,
+  useAttributesContent,
+  useContactUsContent,
+  useAbatementsContent,
+  useApprovedPermitsContent
+} from './usePropertyDetailsContent'; 

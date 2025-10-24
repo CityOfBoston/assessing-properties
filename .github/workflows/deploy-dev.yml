@@ -1,0 +1,110 @@
+name: Deploy to Development Environment
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      functions: ${{ steps.filter.outputs.functions }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            functions:
+              - 'functions/**'
+
+  deploy-frontend-dev:
+    name: Deploy Frontend to Development
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Create environment file
+        working-directory: ./frontend
+        run: |
+          echo "${{ secrets.DEV_FRONTEND_ENV }}" > .env
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting (Development)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID_DEV }}
+          channelId: live
+          entryPoint: ./frontend
+
+  deploy-functions-dev:
+    name: Deploy Functions to Development
+    needs: detect-changes
+    if: needs.detect-changes.outputs.functions == 'true'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./functions
+        run: npm ci
+
+      - name: Create environment file
+        working-directory: ./functions
+        run: |
+          echo "${{ secrets.DEV_FUNCTIONS_ENV }}" > .env
+
+      - name: Build functions
+        working-directory: ./functions
+        run: npm run build
+
+      - name: Deploy to Firebase Functions (Development)
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID_DEV }}
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_DEV }}
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
+

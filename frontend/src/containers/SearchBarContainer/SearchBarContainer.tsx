@@ -1,6 +1,6 @@
 import { useSearchSuggestions } from '@hooks/useSearchSuggestions';
-import { AnnotatedSearchBar } from '../../components/AnnotatedSearchBar';
-import { LoadingIndicator } from '../../components/LoadingIndicator';
+import { AnnotatedSearchBar } from '@components/AnnotatedSearchBar';
+import { LoadingIndicator } from '@components/LoadingIndicator';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getComponentText } from '@utils/contentMapper';
@@ -94,6 +94,7 @@ export const SearchBarContainer = ({
       return;
     }
 
+
     // If custom onSearch handler is provided, use it
     if (onSearch) {
       console.log('[SearchBarContainer] Using custom search handler');
@@ -117,6 +118,8 @@ export const SearchBarContainer = ({
 
   const handleSuggestionClick = useCallback((suggestion: SearchSuggestion) => {
     console.log('[SearchBarContainer] Suggestion clicked:', suggestion);
+    
+
     if (onSelect) {
       onSelect(suggestion.parcelId, suggestion.fullAddress);
     } else {
@@ -220,7 +223,7 @@ export const SearchBarContainer = ({
       onBlur={handleBlur}
       onClear={handleClear}
       inputRef={inputRef}
-      showSuggestions={showSuggestions && isFocused && !isLoading}
+      showSuggestions={showSuggestions && isFocused}
       searchButtonText={searchBarContent.searchButtonText}
       clearButtonText={searchBarContent.clearButtonText}
       cancelButtonText={searchBarContent.cancelButtonText}
@@ -235,4 +238,4 @@ export const SearchBarContainer = ({
       closeModalAriaLabel={searchBarContent.closeModalAriaLabel}
     />
   );
-}; 
+};

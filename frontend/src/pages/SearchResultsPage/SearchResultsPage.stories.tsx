@@ -1,5 +1,7 @@
 import React from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { DateProvider } from '@hooks/useDateContext';
+import { ParcelPairingsProvider } from '@hooks/useParcelPairingsContext';
 import SearchResultsPage from './SearchResultsPage';
 
 export default {
@@ -11,17 +13,25 @@ export default {
 };
 
 export const Default = () => (
-  <MemoryRouter initialEntries={['/search?search=123 Main St']}>
-    <Routes>
-      <Route path="/search" element={<SearchResultsPage />} />
-    </Routes>
+  <MemoryRouter initialEntries={['/search?q=child st']}>
+    <DateProvider>
+      <ParcelPairingsProvider>
+        <Routes>
+          <Route path="/search" element={<SearchResultsPage />} />
+        </Routes>
+      </ParcelPairingsProvider>
+    </DateProvider>
   </MemoryRouter>
 );
 
 export const NoResults = () => (
-  <MemoryRouter initialEntries={['/search?search=notfound']}>
-    <Routes>
-      <Route path="/search" element={<SearchResultsPage />} />
-    </Routes>
+  <MemoryRouter initialEntries={['/search?q=kkjaksdj']}>
+    <DateProvider>
+      <ParcelPairingsProvider>
+        <Routes>
+          <Route path="/search" element={<SearchResultsPage />} />
+        </Routes>
+      </ParcelPairingsProvider>
+    </DateProvider>
   </MemoryRouter>
 ); 

@@ -83,18 +83,6 @@
   }
 }
 
-.feedbackPrompt {
-  margin-top: 0;
-  margin-bottom: 8px;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-}
-
-.disclaimerText {
-  margin-bottom: 12px;
-  color: #58585B;
-}
-
 // Add spacing for text area and character count and set font to Lora
 :global(.usa-textarea) {
   margin-bottom: 8px;
@@ -113,7 +101,7 @@
   margin-bottom: 0.5rem;
 }
 
-// Add spacing for button and contact info
+// Add spacing for button
 :global(.usa-button) {
   margin-top: 24px;
   margin-bottom: 24px;
@@ -121,10 +109,4 @@
   font-family: 'Montserrat', sans-serif;
   font-weight: 600;
   letter-spacing: 0.5px;
-}
-
-.contactInfo {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #58585B;
 } 

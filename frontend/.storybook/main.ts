@@ -1,6 +1,8 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 import path from 'path';
+import fs from 'fs';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+import yaml from 'js-yaml';
 
 /**
  * USWDS Configuration
@@ -49,11 +51,34 @@ const config: StorybookConfig = {
     autodocs: true,
   },
   async viteFinal(config) {
+    // Filter out any existing YAML plugins to avoid conflicts
+    const filteredPlugins = (config.plugins || []).filter((plugin: any) => {
+      const pluginName = plugin && typeof plugin === 'object' && 'name' in plugin ? plugin.name : '';
+      return pluginName !== 'yaml-loader' && pluginName !== 'vite:yaml';
+    });
+
     return {
       ...config,
       base: './',
       plugins: [
-        ...(config.plugins || []),
+        // YAML loader plugin - must be first to intercept YAML files
+        {
+          name: 'yaml-loader',
+          enforce: 'pre',
+          load(id) {
+            if (id.endsWith('.yaml') || id.endsWith('.yml')) {
+              try {
+                const yamlContent = fs.readFileSync(id, 'utf8');
+                const data = yaml.load(yamlContent, { json: true });
+                return `export default ${JSON.stringify(data, null, 2)};`;
+              } catch (error) {
+                this.error('Error parsing YAML: ' + error.message);
+                return null;
+              }
+            }
+          }
+        },
+        ...filteredPlugins,
         viteStaticCopy({
           targets: USWDS_ASSETS,
           hook: 'writeBundle',
@@ -74,7 +99,11 @@ const config: StorybookConfig = {
           '@hooks': path.resolve(__dirname, '../src/hooks'),
           '@pages': path.resolve(__dirname, '../src/pages'),
           '@types': path.resolve(__dirname, '../src/types'),
+          '@utils': path.resolve(__dirname, '../src/utils'),
+          '@services': path.resolve(__dirname, '../src/services'),
+          '@presenters': path.resolve(__dirname, '../src/presenters'),
         },
+        extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.yaml', '.yml'],
       },
       css: {
         preprocessorOptions: {

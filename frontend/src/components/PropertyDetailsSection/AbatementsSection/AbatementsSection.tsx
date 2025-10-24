@@ -2,11 +2,9 @@
  * AbatementsSection component displays property tax abatements and incentives
  */
 import PropertyDetailsSection from '../PropertyDetailsSection';
-import { getAbatementPhase } from '@src/utils/periods';
-import { useDateContext } from '@src/hooks/useDateContext';
-import { getAbatementMessage } from '@src/utils/periodsLanguage';
 import ReactMarkdown from 'react-markdown';
 import styles from '../PropertyDetailsSection.module.scss';
+import { useAbatementsContent } from '@src/hooks/usePropertyDetailsContent';
 
 interface AbatementsSectionProps {
   parcelId: string;
@@ -14,21 +12,12 @@ interface AbatementsSectionProps {
 }
 
 export default function AbatementsSection({ parcelId, title }: AbatementsSectionProps) {
-  const { date } = useDateContext();
-  const now = date;
-  const calendarYear = now.getFullYear();
-  const nowMonth = now.getMonth();
-  // For abatements, we need to use the calendar year when applications are due
-  // For July 2025 (FY2026), abatements for FY2026 were due in February 2025 (calendar year 2025)
-  const abatementYear = nowMonth >= 6 ? calendarYear : calendarYear - 1;
-  const abatementPhase = getAbatementPhase(now, abatementYear, parcelId);
+  const { abatementPhase } = useAbatementsContent(parcelId);
+  
   // Only render the section if there's a message to show
   if (!abatementPhase.message) {
     return null;
   }
-
-  const content = getComponentText('AbatementsSection');
-  const pageContent = getComponentText('propertyDetails', 'pages.propertyDetails');
 
   return (
     <PropertyDetailsSection title={title}>

@@ -6,7 +6,8 @@ export interface OverviewSectionData {
   owners: string[];
   imageSrc: string;
   assessedValue: number;
-  propertyType: string;
+  propertyTypeCode: string;
+  propertyTypeDescription?: string;
   parcelId: string;
   netTax: number;
   totalBilledAmount: number;
@@ -99,7 +100,8 @@ export class PropertyDetails implements PropertyDetailsData {
     owners: string[];
     imageSrc: string;
     assessedValue: number;
-    propertyType: string;
+    propertyTypeCode: string;
+    propertyTypeDescription?: string;
     parcelId: string;
     propertyNetTax: number;
     personalExemptionFlag: boolean;
@@ -197,7 +199,8 @@ export class PropertyDetails implements PropertyDetailsData {
       owners: data.owners,
       imageSrc: data.imageSrc,
       assessedValue: data.assessedValue,
-      propertyType: data.propertyType,
+    propertyTypeCode: data.propertyTypeCode,
+    propertyTypeDescription: data.propertyTypeDescription,
       parcelId: data.parcelId,
       netTax: data.propertyNetTax,
       totalBilledAmount: data.totalBilledAmount,
@@ -213,13 +216,6 @@ export class PropertyDetails implements PropertyDetailsData {
     };
 
     // Construct property attributes section
-    console.log("[PropertyDetails] Constructing with data:", {
-      hasComplexCondoData: data.hasComplexCondoData,
-      buildingAttributes: data.buildingAttributes,
-      masterParcelId: data.masterParcelId,
-      grade: data.grade,
-      outbuildingAttributes: data.outbuildingAttributes?.length
-    });
 
     // Prepare common sections that appear in all cases
     const commonSections = [
@@ -462,11 +458,28 @@ export interface PropertySearchSuggestions {
   suggestions: PropertySearchSuggestion[];
 }
 
-export interface FeedbackData {
+// Base feedback interface
+export interface BaseFeedbackData {
+  feedbackMessage?: string;
+  createdAt?: any; // Firestore Timestamp
+}
+
+// Property-specific feedback (existing FeedbackSender)
+export interface PropertyFeedbackData extends BaseFeedbackData {
+  type: 'property';
   parcelId: string;
   hasPositiveSentiment: boolean;
-  feedbackMessage?: string;
 }
+
+// General site feedback (new ComplexFeedbackSender)
+export interface GeneralFeedbackData extends BaseFeedbackData {
+  type: 'general';
+  issueType: 'not-found' | 'bug' | 'suggestion';
+  searchQuery?: string;
+}
+
+// Union type for all feedback
+export type FeedbackData = PropertyFeedbackData | GeneralFeedbackData;
 
 // Standard response interface
 export interface StandardResponse<T = any> {

@@ -1,42 +1,13 @@
+/**
+ * OverviewSection component displays property overview information
+ */
 import styles from './OverviewSection.module.scss';
 import sharedStyles from '../PropertyDetailsSection.module.scss';
 import PropertyDetailsCardGroup from '@components/PropertyDetailsCardGroup';
-import IconButton from '@components/IconButton';
+import { IconButton } from '@components/IconButton';
 import PropertyDetailsSection from '../PropertyDetailsSection';
 import { OverviewSectionData } from '@src/types';
-import { useDateContext } from '@src/hooks/useDateContext';
-import { getOverviewMessage } from '@src/utils/periodsLanguage';
-import { getComponentText } from '@utils/contentMapper';
-
-/**
- * Helper function to determine property type based on property code
- * @param propertyCode - The numeric property code
- * @returns The property type label
- */
-const getPropertyTypeLabel = (propertyCode: string): string => {
-  const code = parseInt(propertyCode);
-  
-  // Handle invalid codes
-  if (isNaN(code)) {
-    return propertyCode;
-  }
-
-  // Residential property codes
-  if ((code >= 101 && code <= 110) || (code >= 130 && code <= 132)) {
-    return `Residential (${propertyCode})`;
-  }
-  
-  // Commercial property codes
-  if ((code >= 10 && code <= 31) || 
-      (code >= 111 && code <= 129) || 
-      code === 140 || 
-      (code >= 200 && code <= 999)) {
-    return `Commercial (${propertyCode})`;
-  }
-
-  // Default case - just return the code
-  return propertyCode;
-};
+import { useOverviewContent } from '@src/hooks/usePropertyDetailsContent';
 
 /**
  * Custom target icon component for property location
@@ -70,82 +41,37 @@ const TargetIcon = () => (
   </svg>
 );
 
-/**
- * OverviewSection component displays property overview information
- */
 interface OverviewSectionProps {
   data: OverviewSectionData;
   title: string;
 }
 
 export default function OverviewSection({ data, title }: OverviewSectionProps) {
-  const { date } = useDateContext();
-  
-  // Determine if we're in the preliminary period (July-December)
-  const nowMonth = date.getMonth();
-  const isPrelimPeriod = nowMonth >= 6 && nowMonth < 12; // July (6) to December (11)
-  
-  // In preliminary period, exemption flags show application status for current FY
-  // Outside preliminary period, exemption flags don't indicate anything meaningful
-  const getExemptionStatus = (amount: number, flag: boolean) => {
-    if (amount > 0) {
-      return getOverviewMessage('granted');
-    }
-    if (isPrelimPeriod && flag) {
-      return getOverviewMessage('amount_to_be_decided');
-    }
-    if (isPrelimPeriod && !flag) {
-      return getOverviewMessage('preliminary_flag_false');
-    }
-    return getOverviewMessage('not_granted');
-  };
-  
-  const cards = [
-    {
-      icon: <img src="/cob-uswds/img/usa-icons/account_circle.svg"/>,
-      header: 'Parcel ID',
-      value: data.parcelId.toString()
-    },
-    {
-      icon: <img src="/cob-uswds/img/usa-icons/attach_money.svg"/>,
-      header: isPrelimPeriod ? 'FY26 First Half Estimated Net Tax' : 'FY25 Net Tax',
-      value: (() => {
-        if (isPrelimPeriod) {
-          return data.totalBilledAmount != null ? `$${data.totalBilledAmount.toLocaleString()}` : 'N/A';
-        } else {
-          return data.netTax != null ? `$${data.netTax.toLocaleString()}` : 'N/A';
-        }
-      })()
-    },
-    { 
-      icon: <img src="/cob-uswds/img/usa-icons/person.svg"/>,
-      header: 'Personal Exemption',
-      value: getExemptionStatus(data.personalExemptionAmount, data.personalExemptionFlag)
-    },
-    {
-      icon: <img src="/cob-uswds/img/usa-icons/home.svg"/>,
-      header: 'Residential Exemption',
-      value: getExemptionStatus(data.residentialExemptionAmount, data.residentialExemptionFlag)
-    }
-  ];
+  const {
+    content,
+    sharedLabels,
+    cards,
+    formatPropertyType,
+    formatValue,
+    getMapUrl,
+    getPayTaxesUrl,
+  } = useOverviewContent(data);
 
-  const content = getComponentText('OverviewSection');
-  const pageContent = getComponentText('propertyDetails', 'pages.propertyDetails');
 
   return (
     <PropertyDetailsSection title={title}>
       <section className={styles.section}>
         <div className={styles.leftContent}>
           <div className={styles.locationContainer}>
-            <img src="/cob-uswds/img/usa-icons/location_on.svg" alt="Location" className={styles.locationIcon} />
+            <img src={content.sections?.location?.icon || '/cob-uswds/img/usa-icons/location_on.svg'} alt={content.sections?.location?.alt || 'Location'} className={styles.locationIcon} />
             <span>{data.fullAddress}</span>
           </div>
 
           <div className={styles.divider} />
 
           <div className={styles.sectionHeader}>
-            <img src="/cob-uswds/img/usa-icons/people.svg" alt="Owners" className={styles.sectionIcon} />
-            <h3 className={styles.sectionTitle}>Current Owner(s)</h3>
+            <img src={content.sections?.owners?.icon || '/cob-uswds/img/usa-icons/people.svg'} alt={content.sections?.owners?.alt || 'Owners'} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>{content.sections?.owners?.title || 'Current Owner(s)'}</h3>
           </div>
           <div className={styles.sectionContent}>
             <div className={styles.ownerNames}>
@@ -155,10 +81,10 @@ export default function OverviewSection({ data, title }: OverviewSectionProps) {
             </div>
             <div className={styles.ownerDisclaimers}>
               <div className={`${sharedStyles.paragraph} ${styles.ownerDisclaimer}`}>
-                Owner names appear as Last Name followed by First Name
+                {content.sections?.owners?.nameFormat || 'Owner names appear as Last Name followed by First Name'}
               </div>
               <div className={`${sharedStyles.paragraph} ${styles.ownerDisclaimer}`}>
-                {getOverviewMessage('owner_disclaimer')}
+                {content.sections?.owners?.disclaimer || "Owner information may not reflect any changes submitted to the City of Boston's Assessing Department after October 25, 2024."}
               </div>
             </div>
           </div>
@@ -166,37 +92,39 @@ export default function OverviewSection({ data, title }: OverviewSectionProps) {
           <div className={styles.divider} />
 
           <div className={styles.sectionHeader}>
-            <img src="/cob-uswds/img/usa-icons/trending_up.svg" alt="Value" className={styles.sectionIcon} />
-            <h3 className={styles.sectionTitle}>Assessed Value</h3>
+            <img src={content.sections?.assessedValue?.icon || '/cob-uswds/img/usa-icons/trending_up.svg'} alt={content.sections?.assessedValue?.alt || 'Value'} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>{content.sections?.assessedValue?.title || 'Assessed Value'}</h3>
           </div>
           <div className={styles.sectionContent}>
-            <div className={sharedStyles.paragraph}>{data.assessedValue != null ? `$${data.assessedValue.toLocaleString()}` : 'N/A'}</div>
+            <div className={sharedStyles.paragraph}>{formatValue(data.assessedValue)}</div>
           </div>
 
           <div className={styles.divider} />
 
           <div className={styles.sectionHeader}>
-            <img src="/cob-uswds/img/usa-icons/location_city.svg" alt="Property Type" className={styles.sectionIcon} />
-            <h3 className={styles.sectionTitle}>Property Type</h3>
+            <img src={content.sections?.propertyType?.icon || '/cob-uswds/img/usa-icons/location_city.svg'} alt={content.sections?.propertyType?.alt || 'Property Type'} className={styles.sectionIcon} />
+            <h3 className={styles.sectionTitle}>{content.sections?.propertyType?.title || 'Property Type'}</h3>
           </div>
           <div className={styles.sectionContent}>
-            <div className={sharedStyles.paragraph}>{getPropertyTypeLabel(data.propertyType)}</div>
+            <div className={sharedStyles.paragraph}>
+              {formatPropertyType(data.propertyTypeCode, data.propertyTypeDescription)}
+            </div>
           </div>
         </div>
 
         <div className={styles.rightContent}>
           {data.imageSrc && (
             <a
-              href={`https://app01.cityofboston.gov/AssessingMap/?find=${data.parcelId}`}
+              href={getMapUrl(data.parcelId)}
               target="_blank"
               rel="noreferrer"
-              aria-label="Open property location in map"
+              aria-label={content.map?.ariaLabel || 'Open property location in map'}
               className={styles.imageContainer}
               style={{ position: 'relative', display: 'block' }}
             >
               <img 
                 src={data.imageSrc} 
-                alt="Property" 
+                alt={sharedLabels?.property || 'Property'} 
                 className={styles.propertyImage}
               />
               <TargetIcon />
@@ -206,8 +134,8 @@ export default function OverviewSection({ data, title }: OverviewSectionProps) {
             className={`usa-link usa-link--external`}
             rel="noreferrer"
             target="_blank"
-            href={`https://app01.cityofboston.gov/AssessingMap/?find=${data.parcelId}`}
-          >{getOverviewMessage('open_in_map')}</a>
+            href={getMapUrl(data.parcelId)}
+          >{content.map?.linkText || 'Open in map'}</a>
           </div>
         </div>
       </section>
@@ -222,16 +150,22 @@ export default function OverviewSection({ data, title }: OverviewSectionProps) {
 
       <div className={styles.buttonGroup}>
         <a
-          href={`https://www.boston.gov/real-estate-taxes?input1=${data.parcelId}`}
+          href={getPayTaxesUrl(data.parcelId)}
           target="_blank"
           rel="noreferrer"
         >
           <IconButton 
-            text="Pay Your Taxes"
+            id="overview_pay_taxes_button"
+            text={content.buttons?.payTaxes?.text || 'Pay Your Taxes'}
             variant="primary"
           />
         </a>
-        <IconButton src="/cob-uswds/img/usa-icons/print.svg" text="Print" onClick={() => window.print()} />
+        <IconButton 
+          id="overview_print_button"
+          src={content.buttons?.print?.icon || '/cob-uswds/img/usa-icons/print.svg'} 
+          text={content.buttons?.print?.text || 'Print'} 
+          onClick={() => window.print()} 
+        />
       </div>
     </PropertyDetailsSection>
   );

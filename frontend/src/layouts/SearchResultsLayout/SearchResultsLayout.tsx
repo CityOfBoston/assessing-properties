@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Banner from "../Banner";
 import Footer from "../Footer";
 import Header from "../Header";
 import SearchBackground from "@components/SearchBackground";
 import styles from "./SearchResultsLayout.module.scss";
+import backToTop from "../../assets/back_to_top.png";
 
 interface SearchResultsLayoutProps {
   /**
@@ -59,6 +60,7 @@ export default function SearchResultsLayout({
   children, 
   headerContent 
 }: SearchResultsLayoutProps) {
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   
@@ -66,6 +68,9 @@ export default function SearchResultsLayout({
     const handleScroll = () => {
       const banner = document.querySelector('.cob-site-banner');
       if (!banner || !headerRef.current || !mainRef.current) return;
+      
+      // Show back to top button after scrolling 500px
+      setShowBackToTop(window.scrollY > 500);
       
       const bannerHeight = banner.getBoundingClientRect().height;
       
@@ -156,6 +161,15 @@ export default function SearchResultsLayout({
       
       {/* Footer at the bottom */}
       <Footer />
+
+      {/* Back to top button */}
+      <button
+        className={`${styles.backToTop} ${showBackToTop ? styles.visible : ''}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Back to top"
+      >
+        <img src={backToTop} alt="Back to top" />
+      </button>
     </div>
   );
 } 

@@ -1,4 +1,29 @@
-import periodsYaml from './periods.yaml';
+import periodsYaml from '@utils/periods.yaml';
+
+// Type definitions for structured content
+export interface Link {
+  text: string;
+  url: string;
+}
+
+export interface Phone {
+  text: string;
+  url: string;
+  label: string;
+}
+
+export interface StructuredDescription {
+  text: string;
+  links: Record<string, Link>;
+  phone?: Phone;
+  suffix?: string;
+  status_text?: string;
+  application_text?: {
+    prefix: string;
+    date: string;
+    suffix: string;
+  };
+}
 
 // Type definitions for the YAML structure
 interface PeriodsLanguage {
@@ -6,7 +31,7 @@ interface PeriodsLanguage {
     timepoints: Record<string, string>;
     abatement_phases: Record<string, string>;
     exemption_phases: Record<string, string>;
-    property_taxes: Record<string, string>;
+    property_taxes: Record<string, string | StructuredDescription>;
     personal_exemption_links: Record<string, string>;
     abatements: Record<string, string>;
     overview: Record<string, string>;
@@ -32,36 +57,30 @@ function replaceTemplateVariables(template: string, variables: Record<string, an
 export function getLanguageString(
   path: string, 
   variables: Record<string, any> = {}
-): string {
-  console.log('getLanguageString called with path:', path);
-  console.log('languageData:', languageData);
-  
+): string | StructuredDescription {
   const keys = path.split('.');
   let value: any = languageData;
   
-  console.log('Initial keys:', keys);
-  
   for (const key of keys) {
-    console.log(`Checking key: ${key}, Current value:`, value);
     if (value && typeof value === 'object' && key in value) {
       value = value[key];
-      console.log(`Found key ${key}, new value:`, value);
     } else {
       console.warn(`Language key not found: ${path}, stopped at key: ${key}`);
-      console.log('Available keys at this level:', Object.keys(value || {}));
       return path; // Return the path as fallback
     }
   }
   
-  console.log('Final value:', value);
-  
   if (typeof value === 'string') {
     const result = replaceTemplateVariables(value, variables);
-    console.log('Returning processed string:', result);
     return result;
   }
+
+  if (typeof value === 'object' && value !== null) {
+    // Return the structured content as is
+    return value as StructuredDescription;
+  }
   
-  console.warn(`Language value is not a string: ${path}, type:`, typeof value);
+  console.warn(`Language value is not a string or structured content: ${path}, type:`, typeof value);
   return path;
 }
 

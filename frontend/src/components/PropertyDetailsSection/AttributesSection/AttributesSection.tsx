@@ -1,8 +1,10 @@
-import { useState } from 'react';
+/**
+ * AttributesSection component displays property attributes and characteristics
+ */
 import PropertyDetailsSection from '../PropertyDetailsSection';
-import { getComponentText } from '@utils/contentMapper';
 import styles from './AttributesSection.module.scss';
-import { PropertyAttributesData } from '@src/types';
+import { PropertyAttributesData, PropertyAttributeCategory, PropertyAttributeField } from '@src/types';
+import { useAttributesContent } from '@src/hooks/usePropertyDetailsContent';
 
 interface AttributesSectionProps {
   data: PropertyAttributesData;
@@ -15,7 +17,7 @@ const isCategory = (item: PropertyAttributeCategory | PropertyAttributeField): i
 };
 
 // Helper function to render attribute fields
-const renderAttributeFields = (fields: PropertyAttributeField[]) => {
+const renderAttributeFields = (fields: PropertyAttributeField[], masterParcelIdLabel: string) => {
   const filteredFields = fields.filter(field => field.value !== null && field.value !== undefined);
   if (filteredFields.length === 0) return null;
 
@@ -23,7 +25,19 @@ const renderAttributeFields = (fields: PropertyAttributeField[]) => {
     <ul>
       {filteredFields.map(field => (
         <li key={field.label}>
-          <strong>{field.label}:</strong> {field.value}
+          <strong>{field.label}:</strong>{' '}
+          {field.label === masterParcelIdLabel ? (
+            <a
+              href={`#/search?q=${field.value}`}
+              className="usa-link usa-link--external"
+              rel="noreferrer"
+              target="_blank"
+            >
+              {field.value}
+            </a>
+          ) : (
+            field.value
+          )}
         </li>
       ))}
     </ul>
@@ -31,17 +45,20 @@ const renderAttributeFields = (fields: PropertyAttributeField[]) => {
 };
 
 export default function AttributesSection({ data, title }: AttributesSectionProps) {
-  const [showAllAttributes, setShowAllAttributes] = useState(false);
+  const {
+    sharedButtons,
+    sharedLabels,
+    showAllAttributes,
+    sectionRef,
+    handleToggle,
+  } = useAttributesContent(data);
+  
   const attributeGroups = data?.attributeGroups || [];
+  const masterParcelIdLabel = sharedLabels?.masterParcelId || 'Master Parcel ID';
 
-  console.log("[AttributesSection] Rendering with data:", {
-    data,
-    attributeGroups,
-    firstGroupContent: attributeGroups[0]?.content
-  });
 
   return (
-    <PropertyDetailsSection title={title}>
+    <PropertyDetailsSection title={title} ref={sectionRef}>
       <div className={`${styles.grid} ${showAllAttributes ? styles.expanded : ''}`}>
         {attributeGroups
           .filter(group => {
@@ -69,12 +86,12 @@ export default function AttributesSection({ data, title }: AttributesSectionProp
                     return (
                       <div key={item.title || index} className={styles.subgroup}>
                         <h4>{item.title}</h4>
-                        {renderAttributeFields(item.content)}
+                        {renderAttributeFields(item.content, masterParcelIdLabel)}
                       </div>
                     );
                   } else {
                     // If it's a direct attribute field, render it
-                    return renderAttributeFields([item]);
+                    return renderAttributeFields([item], masterParcelIdLabel);
                   }
                 })}
               </div>
@@ -82,10 +99,11 @@ export default function AttributesSection({ data, title }: AttributesSectionProp
           ))}
       </div>
       <button
+        id="attributes_toggle_button"
         className={styles.seeMoreButton}
-        onClick={() => setShowAllAttributes(!showAllAttributes)}
+        onClick={handleToggle}
       >
-        {showAllAttributes ? 'See Less' : 'See More'}
+        {showAllAttributes ? (sharedButtons?.seeLess || 'See Less') : (sharedButtons?.seeMore || 'See More')}
         <span className={`${styles.arrow} ${showAllAttributes ? styles.up : ''}`} />
       </button>
     </PropertyDetailsSection>

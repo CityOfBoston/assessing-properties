@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from './Tooltip.module.scss';
 import helpIcon from '../../assets/help.svg';
 import helpOutlineIcon from '../../assets/help_outline.svg';
@@ -15,12 +15,39 @@ export const Tooltip: React.FC<TooltipProps> = ({
   variant = 'default'
 }) => {
   const [isActive, setIsActive] = useState(false);
+  const [iconRect, setIconRect] = useState<DOMRect | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const handleMouseEnter = () => setIsActive(true);
+  const handleMouseEnter = () => {
+    updateIconPosition();
+    setIsActive(true);
+  };
   const handleMouseLeave = () => setIsActive(false);
   
-  const handleFocus = () => setIsActive(true);
+  const handleFocus = () => {
+    updateIconPosition();
+    setIsActive(true);
+  };
   const handleBlur = () => setIsActive(false);
+  
+  const updateIconPosition = () => {
+    if (buttonRef.current) {
+      setIconRect(buttonRef.current.getBoundingClientRect());
+    }
+  };
+  
+  useEffect(() => {
+    if (isActive) {
+      updateIconPosition();
+      // Update position on scroll or resize
+      window.addEventListener('scroll', updateIconPosition);
+      window.addEventListener('resize', updateIconPosition);
+      return () => {
+        window.removeEventListener('scroll', updateIconPosition);
+        window.removeEventListener('resize', updateIconPosition);
+      };
+    }
+  }, [isActive]);
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Toggle tooltip when Enter or Space is pressed
@@ -45,6 +72,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
       data-variant={variant}
     >
       <button
+        ref={buttonRef}
+        id="tooltip_help_button"
         className={styles.iconButton}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -65,6 +94,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
           className={styles.tooltipContent}
           role="tooltip"
           id="tooltip-content"
+          style={iconRect ? {
+            '--icon-top': `${iconRect.top}px`,
+            '--icon-left': `${iconRect.left}px`,
+            '--icon-width': `${iconRect.width}px`,
+          } as React.CSSProperties : undefined}
         >
           {hint}
         </div>

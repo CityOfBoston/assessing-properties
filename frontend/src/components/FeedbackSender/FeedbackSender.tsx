@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { IconButton } from '../IconButton';
+import { FeedbackTextArea } from '../FeedbackTextArea';
+import { useGoogleAnalytics } from '@hooks/useGoogleAnalytics';
+import { usePerformanceTracking } from '@src/services/analytics';
 import styles from './FeedbackSender.module.scss';
 
 export interface FeedbackSenderProps {
@@ -21,18 +24,18 @@ export interface FeedbackSenderProps {
   /**
    * Text content
    */
-  texts?: {
-    question?: string;
-    yesLabel?: string;
-    noLabel?: string;
-    promptTitle?: string;
-    promptOptional?: string;
-    disclaimer?: string;
-    submitButton?: string;
-    characterCount?: string;
-    characterRemaining?: string;
-    contactInfo?: string;
-    departmentLinkText?: string;
+  texts: {
+    question: string;
+    yesLabel: string;
+    noLabel: string;
+    promptTitle: string;
+    promptOptional: string;
+    disclaimer: string;
+    submitButton: string;
+    characterCount: string;
+    characterRemaining: string;
+    contactInfo: string;
+    departmentLinkText: string;
   };
 }
 
@@ -48,7 +51,8 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
   const [feedbackOption, setFeedbackOption] = useState<string | null>(null);
   const [feedbackText, setFeedbackText] = useState('');
   const MAX_CHARACTERS = 200;
-  const remainingChars = MAX_CHARACTERS - feedbackText.length;
+  const analytics = useGoogleAnalytics();
+  const performance = usePerformanceTracking('FeedbackSender');
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFeedbackOption(event.target.value);
@@ -61,15 +65,37 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
     }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
     if (onSubmit && feedbackOption) {
-      onSubmit({
-        helpful: feedbackOption === 'yes',
-        feedback: feedbackText || undefined,
-        parcelId,
-      });
+      const startTime = window.performance.now();
+      try {
+        await onSubmit({
+          helpful: feedbackOption === 'yes',
+          feedback: feedbackText || undefined,
+          parcelId,
+        });
+
+        // Track successful feedback submission with parcel ID context
+        analytics.trackButtonClick({
+          button_id: 'feedback_submit',
+          button_text: texts.submitButton,
+          context: parcelId ? `property_details_${parcelId}` : 'general'
+        });
+
+        performance.trackOperation('feedback_submit', 'success', window.performance.now() - startTime);
+      } catch (error) {
+        // Track feedback submission error
+        analytics.trackError({
+          error_type: 'feedback_submission',
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+          component: 'FeedbackSender'
+        });
+
+        performance.trackOperation('feedback_submit', 'error', window.performance.now() - startTime, error instanceof Error ? error.message : 'Unknown error');
+        throw error;
+      }
     }
     
     // Reset form
@@ -116,47 +142,22 @@ export const FeedbackSender: React.FC<FeedbackSenderProps> = ({
       </div>
       
       {feedbackOption && (
-        <div className={styles.feedbackContainer}>
-          <legend className={`usa-legend usa-legend ${styles.feedbackPrompt}`}>
-            <strong>{texts.promptTitle}</strong> {texts.promptOptional}
-          </legend>
-          
-          <div className={`usa-hint ${styles.disclaimerText}`} id="feedback-hint">
-            <em>{texts.disclaimer}</em>
-          </div>
-          
-          <textarea
-            className="usa-textarea"
-            id="feedback-textarea"
-            name="feedback-text"
-            aria-describedby="feedback-hint character-count"
-            value={feedbackText}
-            onChange={handleTextChange}
-            rows={6}
-            data-validate-maxlength={`.{0,${MAX_CHARACTERS}}`}
-            maxLength={MAX_CHARACTERS}
-          />
-          
-          <div className="usa-hint" id="character-count" data-validator="maxlength">
-            {feedbackText.length > 0 
-              ? texts.characterRemaining.replace('{count}', remainingChars.toString())
-              : texts.characterCount.replace('{count}', MAX_CHARACTERS.toString())
-            }
-          </div>
-          
-          <IconButton 
-            text={texts.submitButton}
-            variant="primary"
-            type="submit"
-          />
-          
-          <p className={styles.contactInfo}>
-            {texts.contactInfo}{' '}
-            <a className="usa-link" href={assessingDeptUrl}>
-              {texts.departmentLinkText}
-            </a>.
-          </p>
-        </div>
+        <FeedbackTextArea
+          value={feedbackText}
+          onChange={handleTextChange}
+          maxCharacters={MAX_CHARACTERS}
+          texts={texts}
+          assessingDeptUrl={assessingDeptUrl}
+          rows={6}
+          className={styles.feedbackContainer}
+          submitButton={
+            <IconButton 
+              text={texts.submitButton}
+              variant="primary"
+              type="submit"
+            />
+          }
+        />
       )}
     </form>
   );

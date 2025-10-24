@@ -6,6 +6,7 @@
   min-height: 100vh; /* Ensure at least full viewport height */
   margin: 0;
   padding: 0;
+  position: relative; /* For back to top button positioning */
   
   /* Header wrapper - handles the sticky behavior */
   .headerWrapper {
@@ -46,5 +47,43 @@
   /* Footer stays at the bottom */
   footer {
     width: 100%;
+  }
+
+  /* Back to top button */
+  .backToTop {
+    position: fixed;
+    bottom: 12rem;
+    right: 2rem;
+    width: 80px;
+    height: 60px;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    padding: 0;
+    border: none;
+    background: none;
+    
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      image-rendering: -webkit-optimize-contrast; /* Sharper image in Chrome */
+      image-rendering: crisp-edges; /* Sharper image in Firefox */
+      -ms-interpolation-mode: nearest-neighbor; /* Sharper image in IE */
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
   }
 } 

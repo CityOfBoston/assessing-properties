@@ -8,6 +8,7 @@ import { FeedbackSenderContainer } from "@containers/FeedbackSenderContainer";
 import { BetaLabel } from "@components/BetaLabel";
 import { getComponentText } from "@utils/contentMapper";
 import styles from "./PropertyDetailsLayout.module.scss";
+import backToTop from "../../assets/back_to_top.png";
 
 // Add useMediaQuery hook
 const useMediaQuery = (query: string) => {
@@ -78,6 +79,7 @@ interface PropertyDetailsLayoutProps {
 export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDetailsLayoutProps) {
   const layoutContent = getComponentText('PropertyDetailsLayout', 'layouts.PropertyDetailsLayout');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -90,6 +92,9 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
     const handleScroll = () => {
       const banner = document.querySelector('.cob-site-banner');
       if (!banner || !headerRef.current || !mainRef.current || !navRef.current) return;
+      
+      // Show back to top button after scrolling 500px
+      setShowBackToTop(window.scrollY > 500);
       
       const bannerHeight = banner.getBoundingClientRect().height;
       const headerHeight = headerRef.current.getBoundingClientRect().height;
@@ -264,6 +269,15 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
       
       {/* Footer at the bottom */}
       <Footer />
+
+      {/* Back to top button */}
+      <button
+        className={`${styles.backToTop} ${showBackToTop ? styles.visible : ''}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Back to top"
+      >
+        <img src={backToTop} alt="Back to top" />
+      </button>
     </div>
   );
 } 

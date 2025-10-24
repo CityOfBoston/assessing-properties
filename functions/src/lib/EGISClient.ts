@@ -38,13 +38,14 @@ const propertiesWebAppDataLayerUrl = `${baseUrl}/8`;
 const condoAttributesDataLayerUrl = `${baseUrl}/9`;
 const outbuildingsDataLayerUrl = `${baseUrl}/10`;
 
-// Type definitions for ArcGIS Feature and FeatureSet
+// Type definitions for ArcGIS Feature and response data
 interface ArcGISFeature {
     attributes: Record<string, any>;
     geometry?: any;
 }
 
-interface ArcGISFeatureSet {
+// Response type for EGIS API queries
+type EGISQueryResponse = {
     features: ArcGISFeature[];
     exceededTransferLimit?: boolean;
 }
@@ -59,74 +60,74 @@ interface ArcGISFeatureSet {
 const fetchEGISData = async (url: string, query: string): Promise<ArcGISFeature[]> => {
   console.log(`[EGISClient] Starting fetchEGISData with URL: ${url}`);
   console.log(`[EGISClient] Query: ${query}`);
-  console.log(`[EGISClient] Full request URL: ${url}/query${query}`);
 
   const allFeatures: ArcGISFeature[] = [];
   let resultOffset = 0;
-  let currentRecordCount = 5000; // Start with a larger chunk size
-  const minRecordCount = 100; // Minimum chunk size to avoid too many requests
-  const maxRecordCount = 10000; // Maximum chunk size to avoid timeouts
-
+  const recordCount = 1000; // Fixed chunk size to avoid memory issues
   let requestCount = 0;
-  let hasMoreData = true;
+  const maxRetries = 3;
 
-  while (hasMoreData) {
-    requestCount++;
-    const paginatedQuery = `${query}&resultOffset=${resultOffset}&resultRecordCount=${currentRecordCount}`;
-    const fullUrl = `${url}/query${paginatedQuery}`;
+  try {
+    while (true) {
+      requestCount++;
+      const paginatedQuery = `${query}&resultOffset=${resultOffset}&resultRecordCount=${recordCount}`;
+      const fullUrl = `${url}/query${paginatedQuery}`;
 
-    console.log(`[EGISClient] Making request #${requestCount}: ${fullUrl}`);
+      console.log(`[EGISClient] Making request #${requestCount} with offset ${resultOffset}`);
 
-    const response = await fetch(fullUrl);
+      let retryCount = 0;
+      let response;
+      let data;
 
-    if (!response.ok) {
-      console.error(`[EGISClient] Request failed with status: ${response.status} ${response.statusText}`);
-      // If request fails, try with a smaller chunk size, but only if we haven't tried this offset yet
-      if (currentRecordCount > minRecordCount) {
-        currentRecordCount = Math.max(minRecordCount, Math.floor(currentRecordCount / 2));
-        console.log(`[EGISClient] Reducing chunk size to ${currentRecordCount} and retrying`);
-        // Don't retry the same offset - move to next offset with smaller chunk
-        resultOffset += currentRecordCount;
-        continue;
+      // Retry logic for failed requests
+      while (retryCount < maxRetries) {
+        try {
+          response = await fetch(fullUrl);
+          if (response.ok) {
+            data = await response.json() as EGISQueryResponse;
+            break;
+          }
+          retryCount++;
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
+        } catch (error) {
+          console.error(`[EGISClient] Request attempt ${retryCount + 1} failed:`, error);
+          retryCount++;
+          if (retryCount === maxRetries) throw error;
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        }
       }
-      throw new Error(`Failed to fetch data from EGIS API: ${response.status} ${response.statusText}`);
+
+      if (!response?.ok || !data) {
+        throw new Error(`Failed to fetch data after ${maxRetries} retries`);
+      }
+
+      const features = data.features || [];
+      if (features.length === 0) {
+        break; // No more data to fetch
+      }
+
+      // Process features in smaller batches to avoid memory issues
+      const batchSize = 100;
+      for (let i = 0; i < features.length; i += batchSize) {
+        const batch = features.slice(i, i + batchSize);
+        allFeatures.push(...batch);
+      }
+
+      console.log(`[EGISClient] Processed ${features.length} features, total: ${allFeatures.length}`);
+
+      if (!data.exceededTransferLimit) {
+        break; // No more pages to fetch
+      }
+
+      resultOffset += features.length;
     }
 
-    const data: ArcGISFeatureSet = await response.json();
-    console.log(`[EGISClient] Received ${data.features?.length || 0} features, exceededTransferLimit: ${data.exceededTransferLimit}`);
-
-    if (!data.features || data.features.length === 0) {
-      console.log("[EGISClient] No more data to fetch, breaking loop");
-      hasMoreData = false;
-      break; // No more data to fetch
-    }
-
-    allFeatures.push(...data.features);
-    console.log(`[EGISClient] Total features collected so far: ${allFeatures.length}`);
-
-    // Use exceededTransferLimit to determine if there's more data
-    if (!data.exceededTransferLimit) {
-      console.log("[EGISClient] No exceededTransferLimit flag, breaking loop");
-      hasMoreData = false;
-      break; // No more data to fetch
-    }
-
-    // If we got fewer records than requested, reduce chunk size for next request
-    if (data.features.length < currentRecordCount && currentRecordCount > minRecordCount) {
-      currentRecordCount = Math.max(minRecordCount, Math.floor(currentRecordCount / 2));
-      console.log(`[EGISClient] Reducing chunk size to ${currentRecordCount} for next request`);
-    } else if (data.features.length === currentRecordCount && currentRecordCount < maxRecordCount) {
-      // If we got exactly what we asked for, we can try increasing the chunk size
-      currentRecordCount = Math.min(maxRecordCount, currentRecordCount * 2);
-      console.log(`[EGISClient] Increasing chunk size to ${currentRecordCount} for next request`);
-    }
-
-    resultOffset += data.features.length; // Use actual number of records received
-    console.log(`[EGISClient] Updated resultOffset to ${resultOffset}`);
+    console.log(`[EGISClient] Completed. Total features: ${allFeatures.length}, Requests: ${requestCount}`);
+    return allFeatures;
+  } catch (error) {
+    console.error(`[EGISClient] Error in fetchEGISData:`, error);
+    throw error;
   }
-
-  console.log(`[EGISClient] fetchEGISData completed. Total features: ${allFeatures.length}, Total requests: ${requestCount}`);
-  return allFeatures;
 };
 
 /**
@@ -137,37 +138,46 @@ const fetchEGISData = async (url: string, query: string): Promise<ArcGISFeature[
  * @return Filtered array with only the highest fiscal year and quarter entries
  */
 function filterForHighestFiscalYearAndQuarter(features: ArcGISFeature[]): ArcGISFeature[] {
-  if (features.length === 0) return features;
+  if (!features?.length) return [];
 
-  // Debug: Log sample feature attributes to understand the data structure
-  console.log("[EGISClient] Sample feature attributes:", features[0]?.attributes);
+  try {
+    // Process in batches to avoid memory issues
+    const batchSize = 1000;
+    let maxYear = 0;
+    let maxQuarter = 0;
 
-  // Debug: Log all fiscal years and quarters present
-  const fiscalYears = features.map((f) => f.attributes.fiscal_year).filter(Boolean);
-  const quarters = features.map((f) => f.attributes.quarter).filter(Boolean);
-  console.log("[EGISClient] Fiscal years found:", [...new Set(fiscalYears)]);
-  console.log("[EGISClient] Quarters found:", [...new Set(quarters)]);
+    // Find max year and quarter in batches
+    for (let i = 0; i < features.length; i += batchSize) {
+      const batch = features.slice(i, Math.min(i + batchSize, features.length));
+      batch.forEach(feature => {
+        const year = feature.attributes?.fiscal_year || 0;
+        const quarter = parseInt(feature.attributes?.quarter) || 0;
+        if (year > maxYear || (year === maxYear && quarter > maxQuarter)) {
+          maxYear = year;
+          maxQuarter = quarter;
+        }
+      });
+    }
 
-  // Find the highest fiscal year
-  const maxYear = Math.max(...features.map((f) => f.attributes.fiscal_year || 0));
-  console.log("[EGISClient] Highest fiscal year:", maxYear);
+    console.log(`[EGISClient] Found highest fiscal year: ${maxYear}, quarter: ${maxQuarter}`);
 
-  // Filter to only the highest year
-  const maxYearFeatures = features.filter((f) => f.attributes.fiscal_year === maxYear);
-  console.log(`[EGISClient] Features with highest fiscal year (${maxYear}):`, maxYearFeatures.length);
+    // Filter features in batches
+    const result: ArcGISFeature[] = [];
+    for (let i = 0; i < features.length; i += batchSize) {
+      const batch = features.slice(i, Math.min(i + batchSize, features.length));
+      const filtered = batch.filter(f => 
+        f.attributes?.fiscal_year === maxYear && 
+        parseInt(f.attributes?.quarter) === maxQuarter
+      );
+      result.push(...filtered);
+    }
 
-  if (maxYearFeatures.length === 0) return features;
-
-  // Find the highest quarter within the highest year
-  const maxQuarter = Math.max(...maxYearFeatures.map((f) => parseInt(f.attributes.quarter) || 0));
-  console.log(`[EGISClient] Highest quarter in year ${maxYear}:`, maxQuarter);
-
-  // Filter to only the highest quarter within the highest year
-  const result = maxYearFeatures.filter((f) => parseInt(f.attributes.quarter) === maxQuarter);
-
-  console.log(`[EGISClient] Filtered ${features.length} features to ${result.length} features (FY${maxYear} Q${maxQuarter})`);
-
-  return result;
+    console.log(`[EGISClient] Filtered ${features.length} features to ${result.length} features (FY${maxYear} Q${maxQuarter})`);
+    return result;
+  } catch (error) {
+    console.error("[EGISClient] Error in filterForHighestFiscalYearAndQuarter:", error);
+    return features; // Return original array in case of error
+  }
 }
 
 /**
@@ -271,18 +281,19 @@ export function parseAfterDash(value: string | null | undefined): string {
 export const fetchAllParcelIdAddressPairingsHelper = async (): Promise<{parcelId: string, fullAddress: string}[]> => {
   console.log("[EGISClient] Starting fetchAllParcelIdAddressPairings");
 
-  const query = "?where=1=1&outFields=parcel_id,street_number,street_number_suffix,street_name,street_name_suffix,apt_unit,city,location_zip_code&returnGeometry=false&f=json";
+  const query = "?where=1=1&outFields=parcel_id,street_number,street_number_suffix,street_name,street_name_suffix,apt_unit,city,location_zip_code,fiscal_year,quarter&returnGeometry=false&f=json";
   console.log(`[EGISClient] Parcel ID address pairings query: ${query}`);
   console.log(`[EGISClient] Full parcel ID address pairings URL: ${propertiesWebAppDataLayerUrl}/query${query}`);
 
-  const features = await fetchEGISData(propertiesWebAppDataLayerUrl, query);
+  let features = await fetchEGISData(propertiesWebAppDataLayerUrl, query);
 
-  console.log(`[EGISClient] Processing ${features.length} features for parcel ID and address pairings`);
+  console.log(`[EGISClient] Raw features before filtering: ${features.length} records`);
 
   // Filter for highest fiscal year and quarter
-  const filteredFeatures = filterForHighestFiscalYearAndQuarter(features);
+  features = filterForHighestFiscalYearAndQuarter(features);
+  console.log(`[EGISClient] After filtering for latest fiscal year/quarter: ${features.length} records`);
 
-  const result = filteredFeatures.map((feature: ArcGISFeature) => {
+  const result = features.map((feature: ArcGISFeature) => {
     return {
       parcelId: feature.attributes.parcel_id,
       fullAddress: constructFullAddress(feature.attributes),
@@ -821,7 +832,14 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
     owners: owners,
     imageSrc: "", // Not applicable for EGIS data
     assessedValue: propertyWebAppData.total_value || 0,
-    propertyType: toProperCase(propertyWebAppData.property_type) || "Not available",
+    propertyTypeCode: propertyWebAppData.property_type || "Not available",
+    propertyTypeDescription: (() => {
+      const classDesc = propertyWebAppData.property_class_description ? 
+        toProperCase(propertyWebAppData.property_class_description.trim()) : "";
+      const codeDesc = propertyWebAppData.property_code_description ?
+        toProperCase(propertyWebAppData.property_code_description.trim()) : "";
+      return classDesc && codeDesc ? `${classDesc} - ${codeDesc}` : classDesc || codeDesc || "";
+    })(),
     parcelId: parcelId,
     propertyNetTax: propertyWebAppData.net_tax || 0,
     personalExemptionFlag: propertyWebAppData.personal_exemption_flag,
@@ -831,7 +849,8 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
     historicPropertyValues: historicalValues,
     // Property Attributes fields
     landUse: prioritizeValue(parseAfterDash(primaryResidentialAttrs.composite_land_use), parseAfterDash(condoAttrs.composite_land_use), parseAfterDash(propertyWebAppData.land_use)) || "Not available",
-    grossArea: propertyWebAppData.gross_area || "Not available",
+    grossArea: propertyWebAppData.gross_area || undefined,
+    livingArea: propertyWebAppData.living_area || undefined,
     style: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.building_style)), toProperCase(parseAfterDash(condoAttrs.building_style)), toProperCase(parseAfterDash(propertyWebAppData.building_style))) || "Not available",
     storyHeight: prioritizeValue(toProperCase(primaryResidentialAttrs.story_height), toProperCase(condoAttrs.story_height), toProperCase(propertyWebAppData.story_height)) || "Not available",
     floor: prioritizeValue(toProperCase(primaryResidentialAttrs.floor), toProperCase(condoAttrs.floor), toProperCase(propertyWebAppData.floor)) || undefined,
