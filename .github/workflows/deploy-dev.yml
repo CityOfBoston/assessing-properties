@@ -103,7 +103,7 @@ jobs:
       - name: Deploy to Firebase Functions (Development)
         uses: w9jds/firebase-action@master
         with:
-          args: deploy --only functions --project ${{ secrets.FIREBASE_PROJECT_ID_DEV }}
+          args: deploy --only functions --force --project ${{ secrets.FIREBASE_PROJECT_ID_DEV }}
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_DEV }}
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}

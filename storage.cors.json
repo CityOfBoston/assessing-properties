@@ -1,8 +1,6 @@
 [
   {
     "origin": [
-      "https://assessing-properties-dev.web.app",
-      "https://assessing-properties-dev.firebaseapp.com",
       "http://localhost:5173",
       "http://localhost:3000"
     ],

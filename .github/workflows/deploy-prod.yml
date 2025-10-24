@@ -65,7 +65,7 @@ jobs:
       - name: Deploy to Firebase (Production)
         uses: w9jds/firebase-action@master
         with:
-          args: deploy --project ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
+          args: deploy --force --project ${{ secrets.FIREBASE_PROJECT_ID_PROD }}
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROD }}
