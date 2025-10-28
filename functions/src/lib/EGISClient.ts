@@ -37,6 +37,7 @@ const currentOwnersDataLayerUrl = `${baseUrl}/7`;
 const propertiesWebAppDataLayerUrl = `${baseUrl}/8`;
 const condoAttributesDataLayerUrl = `${baseUrl}/9`;
 const outbuildingsDataLayerUrl = `${baseUrl}/10`;
+const salesDataLayerUrl = `${baseUrl}/11`;
 
 // Type definitions for ArcGIS Feature and response data
 interface ArcGISFeature {
@@ -88,12 +89,12 @@ const fetchEGISData = async (url: string, query: string): Promise<ArcGISFeature[
             break;
           }
           retryCount++;
-          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
+          await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
         } catch (error) {
           console.error(`[EGISClient] Request attempt ${retryCount + 1} failed:`, error);
           retryCount++;
           if (retryCount === maxRetries) throw error;
-          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+          await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
         }
       }
 
@@ -125,7 +126,7 @@ const fetchEGISData = async (url: string, query: string): Promise<ArcGISFeature[
     console.log(`[EGISClient] Completed. Total features: ${allFeatures.length}, Requests: ${requestCount}`);
     return allFeatures;
   } catch (error) {
-    console.error(`[EGISClient] Error in fetchEGISData:`, error);
+    console.error("[EGISClient] Error in fetchEGISData:", error);
     throw error;
   }
 };
@@ -149,7 +150,7 @@ function filterForHighestFiscalYearAndQuarter(features: ArcGISFeature[]): ArcGIS
     // Find max year and quarter in batches
     for (let i = 0; i < features.length; i += batchSize) {
       const batch = features.slice(i, Math.min(i + batchSize, features.length));
-      batch.forEach(feature => {
+      batch.forEach((feature) => {
         const year = feature.attributes?.fiscal_year || 0;
         const quarter = parseInt(feature.attributes?.quarter) || 0;
         if (year > maxYear || (year === maxYear && quarter > maxQuarter)) {
@@ -165,8 +166,8 @@ function filterForHighestFiscalYearAndQuarter(features: ArcGISFeature[]): ArcGIS
     const result: ArcGISFeature[] = [];
     for (let i = 0; i < features.length; i += batchSize) {
       const batch = features.slice(i, Math.min(i + batchSize, features.length));
-      const filtered = batch.filter(f => 
-        f.attributes?.fiscal_year === maxYear && 
+      const filtered = batch.filter((f) =>
+        f.attributes?.fiscal_year === maxYear &&
         parseInt(f.attributes?.quarter) === maxQuarter
       );
       result.push(...filtered);
@@ -723,6 +724,25 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
     condition: toProperCase(parseAfterDash(feature.attributes.condition)),
   }));
 
+  // Get sales data from layer 11 (note: this layer does not have fiscal year/quarter fields)
+  console.log(`[EGISClient] Fetching sales data for parcelId: ${parcelId}`);
+  const salesDataQuery = `?where=parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
+
+  console.log(`[EGISClient] Sales data query: ${salesDataQuery}`);
+  console.log(`[EGISClient] Full sales data URL: ${salesDataLayerUrl}/query${salesDataQuery}`);
+
+  let salesDataFeatures: ArcGISFeature[] = [];
+  try {
+    salesDataFeatures = await fetchEGISData(salesDataLayerUrl, salesDataQuery);
+    console.log(`[EGISClient] Sales data found: ${salesDataFeatures.length} records`);
+  } catch (error) {
+    console.log(`[EGISClient] Sales data query failed: ${salesDataQuery}`, error);
+  }
+
+  // Extract sales data from the first feature (should only be one per parcel)
+  const salesData = salesDataFeatures[0]?.attributes || {};
+  console.log("[EGISClient] Sales data:", salesData);
+
   // Get exemption data from exemptionDataLayerUrl
   console.log(`[EGISClient] Fetching exemption data for parcelId: ${parcelId}`);
   let propertyWebAppQuery = `?where=parcel_id='${parcelId}'&outFields=*&returnGeometry=false&f=json`;
@@ -834,7 +854,7 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
     assessedValue: propertyWebAppData.total_value || 0,
     propertyTypeCode: propertyWebAppData.property_type || "Not available",
     propertyTypeDescription: (() => {
-      const classDesc = propertyWebAppData.property_class_description ? 
+      const classDesc = propertyWebAppData.property_class_description ?
         toProperCase(propertyWebAppData.property_class_description.trim()) : "";
       const codeDesc = propertyWebAppData.property_code_description ?
         toProperCase(propertyWebAppData.property_code_description.trim()) : "";
@@ -892,9 +912,12 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
     heatType: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.heat_type)), toProperCase(parseAfterDash(condoAttrs.heat_type)), toProperCase(parseAfterDash(propertyWebAppData.heat_type))) || undefined,
     acType: prioritizeValue(toProperCase(parseAfterDash(primaryResidentialAttrs.ac_type)), toProperCase(parseAfterDash(condoAttrs.ac_type)), toProperCase(parseAfterDash(propertyWebAppData.ac_type))) || undefined,
     fireplaces: prioritizeValue(primaryResidentialAttrs.fireplaces, condoAttrs.fireplaces, propertyWebAppData.fireplaces) || undefined,
-    salePrice: undefined,
-    saleDate: propertyWebAppData.latest_sale_date || undefined,
-    registryBookAndPlace: undefined,
+    salePrice: (() => {
+      const price = salesData["latest_sales_price"] || salesData["latest-sales_price"];
+      return price ? Number(price).toLocaleString() : undefined;
+    })(),
+    saleDate: salesData.latest_sales_date || undefined,
+    registryBookAndPlace: salesData.latest_bkgpcert || undefined,
     // Property Taxes fields
     propertyGrossTax: propertyWebAppData.gross_tax || 0,
     residentialExemptionAmount: propertyWebAppData.resexempt || 0, // TODO: cast to number

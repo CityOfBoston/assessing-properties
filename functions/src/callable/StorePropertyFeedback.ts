@@ -14,7 +14,7 @@ export const storePropertyFeedback = createCallable(async (data: FeedbackData) =
     throw new Error("type is required");
   }
 
-  if (data.type === 'property') {
+  if (data.type === "property") {
     // Validate property feedback
     if (!data.parcelId) {
       console.error("[StorePropertyFeedback] Missing required field: parcelId for property feedback");
@@ -27,19 +27,19 @@ export const storePropertyFeedback = createCallable(async (data: FeedbackData) =
     }
 
     console.log(`[StorePropertyFeedback] Property feedback validation passed. ParcelId: ${data.parcelId}, Positive: ${data.hasPositiveSentiment}`);
-  } else if (data.type === 'general') {
+  } else if (data.type === "general") {
     // Validate general feedback
     if (!data.issueType) {
       console.error("[StorePropertyFeedback] Missing required field: issueType for general feedback");
       throw new Error("issueType is required for general feedback");
     }
 
-    if (!['not-found', 'bug', 'suggestion'].includes(data.issueType)) {
+    if (!["not-found", "bug", "suggestion"].includes(data.issueType)) {
       console.error("[StorePropertyFeedback] Invalid issueType for general feedback:", data.issueType);
       throw new Error("issueType must be one of: not-found, bug, suggestion");
     }
 
-    const source = data.searchQuery ? 'search_results' : 'welcome';
+    const source = data.searchQuery ? "search_results" : "welcome";
     console.log(`[StorePropertyFeedback] General feedback validation passed. IssueType: ${data.issueType}, Source: ${source}`);
   } else {
     console.error("[StorePropertyFeedback] Invalid feedback type:", (data as any).type);
@@ -49,10 +49,10 @@ export const storePropertyFeedback = createCallable(async (data: FeedbackData) =
   // Store feedback using FirestoreClient
   await addFeedbackData(data);
 
-  const logMessage = data.type === 'property' 
-    ? `Successfully stored property feedback for parcelId: ${data.parcelId}`
-    : `Successfully stored general feedback with issueType: ${data.issueType}`;
-  
+  const logMessage = data.type === "property" ?
+    `Successfully stored property feedback for parcelId: ${data.parcelId}` :
+    `Successfully stored general feedback with issueType: ${data.issueType}`;
+
   console.log(`[StorePropertyFeedback] ${logMessage}`);
 
   return createSuccessResponse(null, "Feedback stored successfully");

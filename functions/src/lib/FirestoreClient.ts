@@ -12,10 +12,10 @@ export const feedbackDataRef = db.collection("feedback");
  * @param feedbackData The feedback data to add to the feedback collection.
  */
 export const addFeedbackData = async (feedbackData: FeedbackData): Promise<void> => {
-  const identifier = feedbackData.type === 'property' 
-    ? `parcelId: ${feedbackData.parcelId}` 
-    : `issueType: ${feedbackData.issueType}`;
-  
+  const identifier = feedbackData.type === "property" ?
+    `parcelId: ${feedbackData.parcelId}` :
+    `issueType: ${feedbackData.issueType}`;
+
   console.log(`[FirestoreClient] Adding feedback data for ${identifier}`);
 
   try {

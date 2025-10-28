@@ -201,8 +201,8 @@ export class PropertyDetails implements PropertyDetailsData {
       owners: data.owners,
       imageSrc: data.imageSrc,
       assessedValue: data.assessedValue,
-    propertyTypeCode: data.propertyTypeCode,
-    propertyTypeDescription: data.propertyTypeDescription,
+      propertyTypeCode: data.propertyTypeCode,
+      propertyTypeDescription: data.propertyTypeDescription,
       parcelId: data.parcelId,
       netTax: data.propertyNetTax,
       totalBilledAmount: data.totalBilledAmount,
@@ -245,7 +245,7 @@ export class PropertyDetails implements PropertyDetailsData {
         content: [
           {label: "Sale Price", value: data.salePrice ? `$${data.salePrice}` : undefined},
           {label: "Sale Date", value: data.saleDate},
-          {label: "Registry Book and Place", value: data.registryBookAndPlace},
+          {label: "Registry Book & Place", value: data.registryBookAndPlace},
         ],
       },
     ];
@@ -475,15 +475,15 @@ export interface BaseFeedbackData {
 
 // Property-specific feedback (existing FeedbackSender)
 export interface PropertyFeedbackData extends BaseFeedbackData {
-  type: 'property';
+  type: "property";
   parcelId: string;
   hasPositiveSentiment: boolean;
 }
 
 // General site feedback (new ComplexFeedbackSender)
 export interface GeneralFeedbackData extends BaseFeedbackData {
-  type: 'general';
-  issueType: 'not-found' | 'bug' | 'suggestion';
+  type: "general";
+  issueType: "not-found" | "bug" | "suggestion";
   searchQuery?: string;
 }
 

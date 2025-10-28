@@ -236,7 +236,7 @@ export class PropertyDetails implements PropertyDetailsData {
         content: [
           {label: "Sale Price", value: data.salePrice ? `$${data.salePrice}` : undefined},
           {label: "Sale Date", value: data.saleDate},
-          {label: "Registry Book and Place", value: data.registryBookAndPlace}
+          {label: "Registry Book & Place", value: data.registryBookAndPlace}
         ]
       }
     ];
