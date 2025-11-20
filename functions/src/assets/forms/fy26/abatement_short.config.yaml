@@ -19,7 +19,7 @@ fields:
   parcel_id:
     mode: bounding_box
     x: 170
-    y: 165
+    y: 168
     width: 65
     height: 10
     auto_size_font: true
@@ -29,7 +29,7 @@ fields:
   class_code:
     mode: bounding_box
     x: 285
-    y: 165
+    y: 168
     width: 90
     height: 10
     auto_size_font: true
