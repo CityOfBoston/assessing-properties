@@ -14,6 +14,11 @@ interface PageLayoutProps {
    * Optional additional content to inject into the header
    */
   headerContent?: React.ReactNode;
+  
+  /**
+   * Optional background color for the main content area
+   */
+  backgroundColor?: string;
 }
 
 /**
@@ -52,7 +57,7 @@ interface PageLayoutProps {
  * }
  * ```
  */
-export default function PageLayout({ children, headerContent }: PageLayoutProps) {
+export default function PageLayout({ children, headerContent, backgroundColor }: PageLayoutProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   
@@ -136,7 +141,7 @@ export default function PageLayout({ children, headerContent }: PageLayoutProps)
       </div>
       
       {/* Main content */}
-      <main ref={mainRef}>
+      <main ref={mainRef} style={backgroundColor ? { backgroundColor } : undefined}>
         {children}
       </main>
       

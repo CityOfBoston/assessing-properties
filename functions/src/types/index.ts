@@ -8,6 +8,7 @@ export interface OverviewSectionData {
   assessedValue: number;
   propertyTypeCode: string;
   propertyTypeDescription?: string;
+  landUseCode?: string; // Raw land_use code from map server 8 (e.g., "R1", "C")
   parcelId: string;
   netTax: number;
   totalBilledAmount: number;
@@ -102,6 +103,7 @@ export class PropertyDetails implements PropertyDetailsData {
     assessedValue: number;
     propertyTypeCode: string;
     propertyTypeDescription?: string;
+    landUseCode?: string;
     parcelId: string;
     propertyNetTax: number;
     personalExemptionFlag: boolean;
@@ -203,6 +205,7 @@ export class PropertyDetails implements PropertyDetailsData {
       assessedValue: data.assessedValue,
       propertyTypeCode: data.propertyTypeCode,
       propertyTypeDescription: data.propertyTypeDescription,
+      landUseCode: data.landUseCode,
       parcelId: data.parcelId,
       netTax: data.propertyNetTax,
       totalBilledAmount: data.totalBilledAmount,
@@ -495,4 +498,114 @@ export interface StandardResponse<T = any> {
   status: "success" | "error";
   message: string;
   data?: T;
+}
+
+// PDF Generation Types
+
+/**
+ * PDF form types
+ */
+export type PdfFormType = "residential" | "personal" | "abatement";
+
+/**
+ * PDF form subtype (for abatements)
+ */
+export type PdfFormSubtype = "short" | "long";
+
+/**
+ * Request to generate a PDF form
+ */
+export interface PdfGenerationRequest {
+  parcelId: string;
+  formType: PdfFormType;
+  date?: string;
+}
+
+/**
+ * Response from PDF generation
+ */
+export interface PdfGenerationResponse {
+  pdfUrl: string;
+  formType: string;
+  formSubtype?: string;
+  metadata: {
+    parcelId: string;
+    fiscalYear: number;
+    cached: boolean;
+  };
+}
+
+/**
+ * Bounding box configuration for PDF field placement
+ */
+export interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Barcode configuration
+ */
+export interface BarcodeConfig extends BoundingBox {
+  mode: "bounding_box";
+}
+
+/**
+ * Font configuration for bounding box text
+ */
+export interface FontConfig {
+  autoSizeFont?: boolean;
+  maxFontSize?: number;
+  minFontSize?: number;
+  defaultFontSize?: number;
+}
+
+/**
+ * Field configuration for field index mode
+ */
+export interface FieldIndexConfig {
+  mode: "field_index";
+  index: number;
+}
+
+/**
+ * Field configuration for bounding box mode
+ */
+export interface BoundingBoxFieldConfig extends BoundingBox, FontConfig {
+  mode: "bounding_box";
+}
+
+/**
+ * Union type for field configurations
+ */
+export type FieldConfig = FieldIndexConfig | BoundingBoxFieldConfig;
+
+/**
+ * Complete form field mapping from YAML
+ */
+export interface FormFieldMapping {
+  fields: {
+    [fieldName: string]: FieldConfig;
+  };
+}
+
+/**
+ * Property data for PDF generation
+ */
+export interface PdfPropertyData {
+  parcelId: string;
+  owner: string[];
+  address: string;
+  zipCode?: string;
+  firstName?: string;
+  lastName?: string;
+  date?: string;
+  assessedValue: number;
+  propertyTypeCode?: string;
+  applicationNumber?: string; // For abatements: year + sequence number
+  classCode?: string; // Property class code
+  streetNumber?: string; // Street number portion of address
+  streetName?: string; // Street name portion of address
 }

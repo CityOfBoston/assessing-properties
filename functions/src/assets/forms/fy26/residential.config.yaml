@@ -1,0 +1,31 @@
+# Residential Exemption Form Field Configuration
+# This file maps property data fields to PDF form locations
+# Mode can be either "field_index" (for fillable fields) or "bounding_box" (for positioning text)
+# Note: Coordinates use top-left as origin (0,0). Barcode is automatically placed centered at top.
+
+fields:
+  # Parcel ID - adjust index/coordinates based on actual PDF structure
+  parcel_id:
+    mode: bounding_box
+    x: 70
+    y: 150
+    width: 180
+    height: 10
+    auto_size_font: true
+    max_font_size: 12
+    min_font_size: 8
+
+  # Owner name - adjust as needed
+  owner:
+    mode: field_index
+    index: 0
+
+  # Property address
+  address:
+    mode: field_index
+    index: 9
+  
+  zip_code:
+    mode: field_index
+    index: 1
+

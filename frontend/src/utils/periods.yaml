@@ -26,7 +26,7 @@ periods:
 
       The deadline for filing an abatement application is **{deadline_date}**.
 
-      [Download Property Tax Abatements Application (PDF)](//www.boston.gov/assessing-online/form/abatement/FY{next_year}/{parcel_id})
+      [Download Property Tax Abatements Application (PDF)](#/form?parcelId={parcel_id}&formType=abatement)
     after_deadline: |
       Abatement applications are not available after {deadline_date}. An abatement is a reduction in the assessed value of a property. An abatement is granted when the property is determined to be:
       - over-valued
@@ -63,7 +63,7 @@ periods:
     
     # Personal exemption open phase messages
     personal_exemption_granted: "**Granted:** We have granted a Personal Exemption for this property"
-    personal_exemption_not_granted: "**Not granted:** To file a Personal Exemption Application for **FY{next_year}**, use the link below. The deadline for submission is **{deadline_date}**, at **12 a.m.** The current exemption amounts shown are for **FY{next_year}**.\n\n[Download Personal Exemptions Application (PDF)]({personal_exemption_url})"
+    personal_exemption_not_granted: "**Not granted:** To file a Personal Exemption Application for **FY{next_year}**, use the link below. The deadline for submission is **{deadline_date}**, at **12 a.m.** The current exemption amounts shown are for **FY{next_year}**.\n\n[Download Personal Exemptions Application (PDF)](#/form?parcelId={parcel_id}&formType=personal)"
     
     # Exemption descriptions
     residential_exemption_description: "If you own and live in your property as a primary residence, you may qualify for the residential exemption. This fiscal year, the residential exemption will save qualified Boston homeowners up to ${max_amount}. The exemption amount will be applied to your third-quarter tax bill issued in late December. If you didn't get the credit on your bill and believe you should have, you can apply for a residential exemption."
@@ -104,7 +104,7 @@ periods:
     # URLs and links
     how_we_tax_url: "https://www.boston.gov/departments/assessing/how-we-tax-your-property"
     tax_rate_history_url: "https://www.boston.gov/departments/assessing/property-tax-rates"
-    residential_exemption_url: "https://www.boston.gov/assessing-online/form/resexempt/FY{current_fy}/{parcel_id}"
+    residential_exemption_url: "#/form?parcelId={parcel_id}&formType=residential"
     personal_exemption_preliminary_description:
       text: "The Assessing Department provides tax relief programs for eligible taxpayers based on statutory requirements and locally adopted provisions. These programs are summarized below.\n\nIf you already submitted an application and have questions on its status, or if you have questions about any of these programs, please call our"
       links:
@@ -150,7 +150,7 @@ periods:
     pay_taxes_url: "https://www.boston.gov/real-estate-taxes?input1={parcel_id}"
     tax_rate_history_url: "https://www.boston.gov/sites/default/files/file/2024/01/FY24%20Tax%20Rate%20History_1.pdf"
     how_we_tax_url: "https://www.boston.gov/departments/assessing/how-we-tax-your-property"
-    residential_exemption_url: "https://www.boston.gov/assessing-online/form/resexempt/FY{current_fy}/{parcel_id}"
+    residential_exemption_url: "#/form?parcelId={parcel_id}&formType=residential"
 
   # Personal exemption links
   personal_exemption_links:

@@ -5,7 +5,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import type { PropertyDetailsData, PropertySearchResults, 
-  FeedbackData, StandardResponse } from '../types';
+  FeedbackData, StandardResponse, PdfGenerationRequest, PdfGenerationResponse } from '../types';
 
 // Firebase configuration.
 const firebaseConfig = {
@@ -68,3 +68,9 @@ export const getCurrentParcelIdAddressPairings = async (): Promise<{ compressedD
   return callFunction<{}, { compressedData: string; fileName: string }>('getCurrentParcelIdAddressPairings', {});
 };
 
+export const generatePdf = async (request: PdfGenerationRequest): Promise<PdfGenerationResponse> => {
+  console.log('[firebaseConfig] Calling generatePdf with request:', request);
+  const result = await callFunction<PdfGenerationRequest, PdfGenerationResponse>('generatePdf', request);
+  console.log('[firebaseConfig] generatePdf response:', result);
+  return result;
+};

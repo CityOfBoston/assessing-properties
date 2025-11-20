@@ -1,0 +1,61 @@
+# Abatement Short Form Field Configuration (for Residential properties)
+# This file maps property data fields to PDF form locations
+# Mode can be either "field_index" (for fillable fields) or "bounding_box" (for positioning text)
+# Note: Coordinates use top-left as origin (0,0). Barcode is automatically placed centered at top.
+
+fields:
+  # Parcel ID - adjust index/coordinates based on actual PDF structure
+
+  application_number:
+    mode: bounding_box
+    x: 490
+    y: 75
+    width: 82
+    height: 10
+    auto_size_font: true
+    max_font_size: 12
+    min_font_size: 8
+  
+  parcel_id:
+    mode: bounding_box
+    x: 170
+    y: 165
+    width: 65
+    height: 10
+    auto_size_font: true
+    max_font_size: 12
+    min_font_size: 8
+  
+  class_code:
+    mode: bounding_box
+    x: 285
+    y: 165
+    width: 90
+    height: 10
+    auto_size_font: true
+    max_font_size: 12
+    min_font_size: 8
+
+  assessed_value:
+    mode: field_index
+    index: 0
+
+  # Owner name - adjust as needed
+  owner:
+    mode: field_index
+    index: 1
+
+  # Property address
+  street_number:
+    mode: field_index
+    index: 3
+  
+  street_name:
+    mode: field_index
+    index: 23
+ 
+  zip_code:
+    mode: field_index
+    index: 4
+  
+

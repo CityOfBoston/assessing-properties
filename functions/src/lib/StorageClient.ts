@@ -5,6 +5,7 @@ import {promisify} from "util";
 const gzip = promisify(zlib.gzip);
 const parcelIdAddressPairingsCacheBucket = admin.storage().bucket(process.env.PARCEL_ID_ADDRESS_PAIRINGS_CACHE_BUCKET!);
 const staticMapImageCacheBucket = admin.storage().bucket(process.env.STATIC_MAP_IMAGE_CACHE_BUCKET!);
+const pdfCacheBucket = admin.storage().bucket(process.env.PDF_CACHE_BUCKET!);
 
 /**
  * Retreives the signed URL of a static map image from the staticMapImageCacheBucket
@@ -177,4 +178,83 @@ export const getMostRecentParcelIdAddressPairingsUrl = async (): Promise<string 
     console.error("[StorageClient] Error getting most recent parcel ID address pairings URL:", error);
     throw error;
   }
+};
+
+/**
+ * Check if a generated PDF is cached for a given parcelId, formType, and fiscal year.
+ *
+ * @param parcelId The parcel ID to check.
+ * @param formType The form type (residential, personal, abatement_short, abatement_long).
+ * @param fiscalYear The fiscal year for the PDF.
+ * @return A boolean indicating whether the PDF is cached.
+ */
+export const isPdfCached = async (parcelId: string, formType: string, fiscalYear: number): Promise<boolean> => {
+  const [files] = await pdfCacheBucket.getFiles({
+    prefix: `generated-pdfs/${fiscalYear}/${parcelId}/${formType}`,
+  });
+
+  return files.length > 0;
+};
+
+/**
+ * Store a generated PDF in the cache bucket.
+ *
+ * @param parcelId The parcel ID for the PDF.
+ * @param formType The form type.
+ * @param fiscalYear The fiscal year for the PDF.
+ * @param pdfBuffer The PDF file as a Buffer.
+ * @return The signed URL of the stored PDF.
+ */
+export const storePdf = async (parcelId: string, formType: string, fiscalYear: number, pdfBuffer: Buffer): Promise<string> => {
+  const filename = `generated-pdfs/${fiscalYear}/${parcelId}/${formType}.pdf`;
+  const file = pdfCacheBucket.file(filename);
+
+  await file.save(pdfBuffer, {
+    metadata: {
+      contentType: "application/pdf",
+      cacheControl: "public, max-age=3600",
+      metadata: {
+        parcelId: parcelId,
+        formType: formType,
+        fiscalYear: fiscalYear.toString(),
+        generatedAt: new Date().toISOString(),
+      },
+    },
+  });
+
+  console.log(`[StorageClient] Successfully uploaded PDF to ${filename}`);
+
+  // Generate signed URL (valid for 1 hour) with inline disposition for viewing
+  const [signedUrl] = await file.getSignedUrl({
+    action: "read",
+    expires: Date.now() + 60 * 60 * 1000, // 1 hour from now
+    responseDisposition: "inline",
+    responseType: "application/pdf",
+  });
+
+  console.log(`[StorageClient] Generated signed URL for ${filename}`);
+  return signedUrl;
+};
+
+/**
+ * Get the signed URL for a cached PDF.
+ *
+ * @param parcelId The parcel ID for the PDF.
+ * @param formType The form type.
+ * @param fiscalYear The fiscal year for the PDF.
+ * @return The signed URL of the cached PDF.
+ */
+export const getPdfUrl = async (parcelId: string, formType: string, fiscalYear: number): Promise<string> => {
+  const filename = `generated-pdfs/${fiscalYear}/${parcelId}/${formType}.pdf`;
+  const file = pdfCacheBucket.file(filename);
+
+  const [signedUrl] = await file.getSignedUrl({
+    action: "read",
+    expires: Date.now() + 60 * 60 * 1000, // 1 hour from now
+    responseDisposition: "inline",
+    responseType: "application/pdf",
+  });
+
+  console.log(`[StorageClient] Generated signed URL for cached PDF ${filename}`);
+  return signedUrl;
 };

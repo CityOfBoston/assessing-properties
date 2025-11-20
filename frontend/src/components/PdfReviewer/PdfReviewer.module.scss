@@ -1,0 +1,77 @@
+@use '@styles/main.scss' as main;
+
+.pdfReviewerContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  gap: 1rem;
+}
+
+.pdfViewerWrapper {
+  flex: 1;
+  min-height: 600px;
+  border: 1px solid #dfe1e2;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background-color: #f9f9f9;
+}
+
+.pdfViewer {
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  border: none;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0;
+  flex-wrap: wrap;
+  
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+  }
+}
+
+.backButton {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-family: 'Lora', 'Georgia', 'Cambria', 'Times New Roman', 'Times', serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #005ea2;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: underline;
+  text-transform: none;
+
+  &:hover {
+    color: #1a4480;
+  }
+
+  &:focus {
+    outline: 0.25rem solid #2378c3;
+    outline-offset: 0.25rem;
+  }
+  
+  @media (max-width: 640px) {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+
+@media print {
+  .pdfReviewerContainer {
+    display: none;
+  }
+}
+

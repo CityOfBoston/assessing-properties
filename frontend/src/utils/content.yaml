@@ -267,8 +267,8 @@ components:
   AbatementsSection:
     title: "@shared.labels.abatements"
     description: {
-      text: "An abatement is a reduction in the assessed value of a property. An abatement is granted when the property is determined to be:\n- over-valued\n- improperly classified, or\n- disproportionately assessed.\n\nLearn more about [tax exemptions and abatements](https://www.boston.gov/departments/assessing/tax-exemptions-and-abatements).\n\nThe deadline for filing an abatement application is **{deadline_date}**.\n\n[Download Property Tax Abatements Application (PDF)](//www.boston.gov/assessing-online/form/abatement/{fiscal_year}/{parcel_id})",
-      url: "//www.boston.gov/assessing-online/form/abatement/{fiscal_year}/{parcel_id}"
+      text: "An abatement is a reduction in the assessed value of a property. An abatement is granted when the property is determined to be:\n- over-valued\n- improperly classified, or\n- disproportionately assessed.\n\nLearn more about [tax exemptions and abatements](https://www.boston.gov/departments/assessing/tax-exemptions-and-abatements).\n\nThe deadline for filing an abatement application is **{deadline_date}**.\n\n[Download Property Tax Abatements Application (PDF)](#/form?parcelId={parcel_id}&formType=abatement)",
+      url: "#/form?parcelId={parcel_id}&formType=abatement"
     }
 
   # Approved Permits Section
@@ -298,23 +298,35 @@ components:
           text: "TRACFAXSG@boston.gov"
           url: "mailto:TRACFAXSG@boston.gov"
       billing:
-        text: "If you have questions about **paying your bill**, please call the Collecting Division at"
+        text: "If you have questions about **paying your bill**, please **call or email** the Collecting Division at"
         phone:
           text: "617-635-4131"
           url: "tel:617-635-4131"
           label: "City of Boston Collecting Division"
+        emailPrefix: "or"
+        email:
+          text: "collecting@boston.org"
+          url: "mailto:collecting@boston.org"
       values:
-        text: "If you have questions about **property values**, please call the Assessing Department at"
+        text: "If you have questions about **property values**, please **call or email** the Assessing Department at"
         phone:
           text: "617-635-4321"
           url: "tel:617-635-4321"
           label: "City of Boston Assessing Department"
+        emailPrefix: "or"
+        email:
+          text: "assessing@boston.gov"
+          url: "mailto:assessing@boston.gov"
       ownership:
-        text: "If you have **updates to ownership names or mailing addresses**, please call the Assessing Department's Tax Data Administration team at"
+        text: "If you have **updates to ownership names or mailing addresses**, please **call or email** the Assessing Department's Tax Data Administration team at"
         phone:
           text: "617-635-3783"
           url: "tel:617-635-3783"
           label: "City of Boston Assessing Department Tax Data Administration"
+        emailPrefix: "or"
+        email:
+          text: "TDA@boston.gov"
+          url: "mailto:TDA@boston.gov"
 
   # Other components
   WelcomeContent:

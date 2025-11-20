@@ -487,3 +487,24 @@ export interface StandardResponse<T = any> {
   message: string;
   data?: T;
 }
+
+// PDF Generation Types
+
+export type PdfFormType = "residential" | "personal" | "abatement";
+
+export interface PdfGenerationRequest {
+  parcelId: string;
+  formType: PdfFormType;
+  date?: string;
+}
+
+export interface PdfGenerationResponse {
+  pdfUrl: string;
+  formType: string;
+  formSubtype?: string;
+  metadata: {
+    parcelId: string;
+    fiscalYear: number;
+    cached: boolean;
+  };
+}

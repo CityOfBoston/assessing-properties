@@ -69,6 +69,7 @@ const fetchEGISData = async (url: string, query: string): Promise<ArcGISFeature[
   const maxRetries = 3;
 
   try {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       requestCount++;
       const paginatedQuery = `${query}&resultOffset=${resultOffset}&resultRecordCount=${recordCount}`;
@@ -860,6 +861,7 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
         toProperCase(propertyWebAppData.property_code_description.trim()) : "";
       return classDesc && codeDesc ? `${classDesc} - ${codeDesc}` : classDesc || codeDesc || "";
     })(),
+    landUseCode: propertyWebAppData.land_use || undefined, // Raw land_use field from map server 8
     parcelId: parcelId,
     propertyNetTax: propertyWebAppData.net_tax || 0,
     personalExemptionFlag: propertyWebAppData.personal_exemption_flag,

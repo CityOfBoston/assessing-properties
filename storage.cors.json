@@ -2,7 +2,9 @@
   {
     "origin": [
       "http://localhost:5173",
-      "http://localhost:3000"
+      "http://localhost:3000",
+      "https://assessing-properties-dev.web.app",
+      "https://assessing-properties-dev.firebaseapp.com"
     ],
     "method": ["GET", "HEAD"],
     "maxAgeSeconds": 3600,

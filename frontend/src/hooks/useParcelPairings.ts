@@ -144,13 +144,15 @@ export function useParcelPairings(): UseParcelPairingsReturn {
     return str;
   };
 
-  // Check if query is a potential parcel ID (5+ consecutive digits)
-  const parcelIdMatch = query.match(/^\d{5,}$/);  // Must be only digits
+  // Check if query is a potential parcel ID (5+ digits, possibly with hyphens)
+  // Strip hyphens first to check if it's all digits
+  const queryWithoutHyphens = query.replace(/-/g, '');
+  const parcelIdMatch = queryWithoutHyphens.match(/^\d{5,}$/);  // Must be only digits after removing hyphens
   const isParcelIdSearch = !!parcelIdMatch;
   
 
-  // For parcel ID search, just use the raw query
-  const cleanQuery = isParcelIdSearch ? query : query.trim().toLowerCase()
+  // For parcel ID search, just use the query without hyphens
+  const cleanQuery = isParcelIdSearch ? queryWithoutHyphens : query.trim().toLowerCase()
     .replace(/[^\w\s-]/g, ' ')  // Replace special chars with space
     .replace(/\s+#\s*[\w-]+/g, '')  // Remove apartment numbers (e.g., #20-1)
     .replace(/\s+\d{5}(?:-\d{4})?/g, '')  // Remove zip codes (e.g., 02119 or 02119-1234)
@@ -169,9 +171,10 @@ export function useParcelPairings(): UseParcelPairingsReturn {
         
         // If query is less than 7 digits, do exact partial matching
         if (queryParcelId.length < 7) {
-          const partialMatches = pairings.filter(p => 
-            p.parcelId.startsWith(queryParcelId)
-          );
+          const partialMatches = pairings.filter(p => {
+            const parcelIdWithoutHyphens = p.parcelId.replace(/-/g, '');
+            return parcelIdWithoutHyphens.startsWith(queryParcelId);
+          });
           return partialMatches;
         }
 
@@ -179,11 +182,15 @@ export function useParcelPairings(): UseParcelPairingsReturn {
         const queryPrefix = queryParcelId.slice(0, 7);
         const queryLastThree = queryParcelId.length >= 10 ? parseInt(queryParcelId.slice(7)) : null;
         
-        // Find matches with same first 7 digits
+        // Find matches with same first 7 digits (ignoring hyphens in stored parcel IDs)
         const matchesWithScores = pairings
-          .filter(p => p.parcelId.startsWith(queryPrefix))
+          .filter(p => {
+            const parcelIdWithoutHyphens = p.parcelId.replace(/-/g, '');
+            return parcelIdWithoutHyphens.startsWith(queryPrefix);
+          })
           .map(p => {
-            const lastThree = parseInt(p.parcelId.slice(7));
+            const parcelIdWithoutHyphens = p.parcelId.replace(/-/g, '');
+            const lastThree = parseInt(parcelIdWithoutHyphens.slice(7));
             // If query has last 3 digits, calculate distance
             const distance = queryLastThree !== null ? 
               Math.abs(lastThree - queryLastThree) : 
