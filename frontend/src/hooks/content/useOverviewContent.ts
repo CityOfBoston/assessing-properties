@@ -42,30 +42,29 @@ export interface OverviewContent {
 
 /**
  * Helper function to determine property type based on property code
+ * Property code is 4 digits (e.g., "0101"), first digit is always 0
+ * We use the last 3 digits for classification
  */
 const getPropertyTypeLabel = (propertyCode: string, sharedLabels: any): string => {
-  const code = parseInt(propertyCode);
+  // Extract the last 3 digits
+  const last3Digits = propertyCode.slice(-3);
+  const code = parseInt(last3Digits, 10);
   
   // Handle invalid codes
   if (isNaN(code)) {
-    return propertyCode;
+    return sharedLabels.unknown || 'Unknown';
   }
 
-  // Residential property codes
-  if ((code >= 101 && code <= 110) || (code >= 130 && code <= 132)) {
-    return sharedLabels.residential;
-  }
-  
-  // Commercial property codes
+  // Commercial property codes: 010-031, 111-129, 140, 200-999
   if ((code >= 10 && code <= 31) || 
       (code >= 111 && code <= 129) || 
       code === 140 || 
       (code >= 200 && code <= 999)) {
     return sharedLabels.commercial;
   }
-
-  // Default case - just return Unknown
-  return sharedLabels.unknown;
+  
+  // Residential property codes: everything else (101-110, 130-132, etc.)
+  return sharedLabels.residential;
 };
 
 /**

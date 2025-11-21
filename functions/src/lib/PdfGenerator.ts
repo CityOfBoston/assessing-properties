@@ -180,7 +180,7 @@ export const embedBarcodeInPdf = async (
 /**
  * Determine the appropriate form type based on property type code.
  *
- * @param propertyTypeCode The property type code.
+ * @param propertyTypeCode The property type code (4-digit LUC code, first digit is always 0).
  * @param formCategory The form category (residential, personal, or abatement).
  * @return The specific form type (for abatements: abatement_short or abatement_long).
  */
@@ -190,10 +190,26 @@ export const determineFormType = (propertyTypeCode: string, formCategory: string
   }
 
   // For abatements: residential properties use short form, commercial use long form
-  // Property type codes starting with "1" are typically residential
-  const isResidential = propertyTypeCode.startsWith("1") || propertyTypeCode.startsWith("0");
+  // Property type code is 4 digits (e.g., "0101"), first digit is always 0
+  // Extract the last 3 digits for classification
+  const last3Digits = propertyTypeCode.slice(-3);
+  const code = parseInt(last3Digits, 10);
 
-  return isResidential ? "abatement_short" : "abatement_long";
+  // Handle invalid codes - default to residential
+  if (isNaN(code)) {
+    console.warn(`[PdfGenerator] Invalid property type code: ${propertyTypeCode}, defaulting to residential`);
+    return "abatement_short";
+  }
+
+  // Commercial property ranges:
+  // 010-031, 111-129, 140, 200-999
+  const isCommercial = 
+    (code >= 10 && code <= 31) ||
+    (code >= 111 && code <= 129) ||
+    code === 140 ||
+    (code >= 200 && code <= 999);
+
+  return isCommercial ? "abatement_long" : "abatement_short";
 };
 
 /**

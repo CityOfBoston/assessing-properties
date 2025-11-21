@@ -65,6 +65,15 @@ export default function ContactUsSection({ title }: ContactUsSectionProps) {
           >
             {paragraphs.billing.phone.text}
           </a>
+          {' '}
+          {paragraphs.billing?.emailPrefix || 'or'}
+          {' '}
+          <a
+            href={paragraphs.billing?.email?.url || 'mailto:collecting@boston.org'}
+            className="usa-link"
+          >
+            {paragraphs.billing?.email?.text || 'collecting@boston.org'}
+          </a>
           .
         </div>
 
@@ -80,6 +89,15 @@ export default function ContactUsSection({ title }: ContactUsSectionProps) {
           >
             {paragraphs.values.phone.text}
           </a>
+          {' '}
+          {paragraphs.values?.emailPrefix || 'or'}
+          {' '}
+          <a
+            href={paragraphs.values?.email?.url || 'mailto:assessing@boston.gov'}
+            className="usa-link"
+          >
+            {paragraphs.values?.email?.text || 'assessing@boston.gov'}
+          </a>
           .
         </div>
 
@@ -94,6 +112,15 @@ export default function ContactUsSection({ title }: ContactUsSectionProps) {
             aria-label={paragraphs.ownership.phone.label}
           >
             {paragraphs.ownership.phone.text}
+          </a>
+          {' '}
+          {paragraphs.ownership?.emailPrefix || 'or'}
+          {' '}
+          <a
+            href={paragraphs.ownership?.email?.url || 'mailto:TDA@boston.gov'}
+            className="usa-link"
+          >
+            {paragraphs.ownership?.email?.text || 'TDA@boston.gov'}
           </a>
           .
         </div>
