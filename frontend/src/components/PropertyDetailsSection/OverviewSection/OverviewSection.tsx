@@ -57,6 +57,9 @@ export default function OverviewSection({ data, title }: OverviewSectionProps) {
     getPayTaxesUrl,
   } = useOverviewContent(data);
 
+  // Check if image is unavailable
+  const isImageUnavailable = data.imageSrc === 'UNAVAILABLE';
+  const hasImage = data.imageSrc && !isImageUnavailable;
 
   return (
     <PropertyDetailsSection title={title}>
@@ -113,7 +116,7 @@ export default function OverviewSection({ data, title }: OverviewSectionProps) {
         </div>
 
         <div className={styles.rightContent}>
-          {data.imageSrc && (
+          {hasImage && (
             <a
               href={getMapUrl(data.parcelId)}
               target="_blank"
@@ -128,6 +131,20 @@ export default function OverviewSection({ data, title }: OverviewSectionProps) {
                 className={styles.propertyImage}
               />
               <TargetIcon />
+            </a>
+          )}
+          {isImageUnavailable && (
+            <a
+              href={getMapUrl(data.parcelId)}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={content.map?.ariaLabel || 'Open property location in map'}
+              className={styles.imageContainer}
+              style={{ position: 'relative', display: 'block' }}
+            >
+              <div className={styles.placeholderImage}>
+                <span className={styles.placeholderText}>Preview Unavailable</span>
+              </div>
             </a>
           )}
           <div className={styles.mapLink}><a

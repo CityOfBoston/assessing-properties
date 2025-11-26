@@ -144,15 +144,15 @@ export function useParcelPairings(): UseParcelPairingsReturn {
     return str;
   };
 
-  // Check if query is a potential parcel ID (5+ digits, possibly with hyphens)
-  // Strip hyphens first to check if it's all digits
-  const queryWithoutHyphens = query.replace(/-/g, '');
-  const parcelIdMatch = queryWithoutHyphens.match(/^\d{5,}$/);  // Must be only digits after removing hyphens
+  // Check if query is a potential parcel ID (5+ digits, possibly with spaces/hyphens)
+  // Strip spaces and hyphens first to check if it's all digits
+  const queryWithoutSpacesHyphens = query.replace(/[\s-]/g, '');
+  const parcelIdMatch = queryWithoutSpacesHyphens.match(/^\d{5,}$/);  // Must be 5+ digits after removing spaces/hyphens
   const isParcelIdSearch = !!parcelIdMatch;
   
 
-  // For parcel ID search, just use the query without hyphens
-  const cleanQuery = isParcelIdSearch ? queryWithoutHyphens : query.trim().toLowerCase()
+  // For parcel ID search, just use the query without spaces/hyphens
+  const cleanQuery = isParcelIdSearch ? queryWithoutSpacesHyphens : query.trim().toLowerCase()
     .replace(/[^\w\s-]/g, ' ')  // Replace special chars with space
     .replace(/\s+#\s*[\w-]+/g, '')  // Remove apartment numbers (e.g., #20-1)
     .replace(/\s+\d{5}(?:-\d{4})?/g, '')  // Remove zip codes (e.g., 02119 or 02119-1234)
@@ -165,46 +165,54 @@ export function useParcelPairings(): UseParcelPairingsReturn {
 
     try {
       
-      // For parcel ID search, match first 7 digits exactly and allow proximity for last 3
+      // For parcel ID search, use string-based proximity matching
       if (isParcelIdSearch && parcelIdMatch) {
         const queryParcelId = parcelIdMatch[0];
         
-        // If query is less than 7 digits, do exact partial matching
-        if (queryParcelId.length < 7) {
-          const partialMatches = pairings.filter(p => {
-            const parcelIdWithoutHyphens = p.parcelId.replace(/-/g, '');
-            return parcelIdWithoutHyphens.startsWith(queryParcelId);
-          });
-          return partialMatches;
-        }
-
-        // Get the first 7 digits and last 3 digits (if they exist)
-        const queryPrefix = queryParcelId.slice(0, 7);
-        const queryLastThree = queryParcelId.length >= 10 ? parseInt(queryParcelId.slice(7)) : null;
-        
-        // Find matches with same first 7 digits (ignoring hyphens in stored parcel IDs)
+        // Find all parcel IDs that contain the query string
         const matchesWithScores = pairings
-          .filter(p => {
-            const parcelIdWithoutHyphens = p.parcelId.replace(/-/g, '');
-            return parcelIdWithoutHyphens.startsWith(queryPrefix);
-          })
           .map(p => {
             const parcelIdWithoutHyphens = p.parcelId.replace(/-/g, '');
-            const lastThree = parseInt(parcelIdWithoutHyphens.slice(7));
-            // If query has last 3 digits, calculate distance
-            const distance = queryLastThree !== null ? 
-              Math.abs(lastThree - queryLastThree) : 
-              0;
+            
+            // Check if the query appears in the parcel ID
+            const matchIndex = parcelIdWithoutHyphens.indexOf(queryParcelId);
+            
+            if (matchIndex === -1) {
+              return null; // No match
+            }
+            
+            // Calculate score based on match position and type
+            let score = 0;
+            
+            // Best: Exact match (entire parcel ID)
+            if (parcelIdWithoutHyphens === queryParcelId) {
+              score = 1000;
+            }
+            // Second best: Matches from the beginning (prefix)
+            else if (matchIndex === 0) {
+              score = 500 + queryParcelId.length; // Longer matches rank higher
+            }
+            // Third best: Matches at the end (suffix)
+            else if (matchIndex + queryParcelId.length === parcelIdWithoutHyphens.length) {
+              score = 300 + queryParcelId.length; // Longer matches rank higher
+            }
+            // Fourth: Substring match (somewhere in the middle)
+            else {
+              // Penalize matches further from the end
+              const distanceFromEnd = parcelIdWithoutHyphens.length - (matchIndex + queryParcelId.length);
+              score = 100 + queryParcelId.length - distanceFromEnd;
+            }
             
             return {
               pairing: p,
-              distance: distance
+              score: score
             };
-          });
+          })
+          .filter((match): match is { pairing: ParcelPairing; score: number } => match !== null);
 
-        // Sort by numeric proximity of last 3 digits
+        // Sort by score (highest first)
         const sortedMatches = matchesWithScores
-          .sort((a, b) => a.distance - b.distance)
+          .sort((a, b) => b.score - a.score)
           .map(m => m.pairing);
 
         if (sortedMatches.length > 0) {

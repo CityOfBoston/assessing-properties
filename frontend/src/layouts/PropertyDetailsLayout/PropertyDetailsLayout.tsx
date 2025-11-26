@@ -225,9 +225,7 @@ export default function PropertyDetailsLayout({ sections, parcelId }: PropertyDe
             onClose={() => setIsSearchOpen(false)} 
             texts={{
               closeButtonAriaLabel: layoutContent.searchPopup.closeButtonAriaLabel,
-              labelText: layoutContent.searchButton.text,
-              tooltipHint: layoutContent.searchPopup.tooltipHint,
-              placeholderText: layoutContent.searchPopup.placeholderText
+              labelText: layoutContent.searchButton.text
             }}
           />
         )}

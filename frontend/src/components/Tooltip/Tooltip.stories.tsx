@@ -1,8 +1,13 @@
+/**
+ * @deprecated This component is no longer used in the application.
+ * Previously used in AnnotatedSearchBar but has been replaced with inline helper text.
+ * Retained for reference only - do not use in new code.
+ */
 import type { Meta, StoryObj } from '@storybook/react';
 import { Tooltip } from './Tooltip';
 
 const meta = {
-  title: 'Components/Tooltip',
+  title: 'Components/Tooltip (Deprecated)',
   component: Tooltip,
   parameters: {
     layout: 'padded',

@@ -79,8 +79,15 @@ export const fetchPropertyDetailsByParcelId = createCallable(async (data: { parc
   if (!isCached) {
     // Use the geometry from the property details call to generate the static map image
     const staticMapImageData = await generatePropertyStaticMapImageFromGeometryHelper(data.parcelId, geometry);
-    const signedUrl = await storeStaticMapImage(data.parcelId, staticMapImageData);
-    propertyDetails.overview.imageSrc = signedUrl;
+    
+    // If no geometry is available, set a special value for the frontend to handle
+    if (!staticMapImageData) {
+      console.log(`[FetchPropertyDetailsByParcelId] No geometry available for parcelId: ${data.parcelId}, marking image as unavailable`);
+      propertyDetails.overview.imageSrc = "UNAVAILABLE";
+    } else {
+      const signedUrl = await storeStaticMapImage(data.parcelId, staticMapImageData);
+      propertyDetails.overview.imageSrc = signedUrl;
+    }
   } else {
     const signedUrl = await getStaticMapImageUrl(data.parcelId);
     propertyDetails.overview.imageSrc = signedUrl;

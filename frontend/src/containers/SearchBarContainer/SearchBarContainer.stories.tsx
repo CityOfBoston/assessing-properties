@@ -34,7 +34,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     labelText: 'Search by address or parcel ID',
-    tooltipHint: 'A unique, legal 10 digit number assigned by the City of Boston to each parcel of property.',
+    helperText: 'A unique, legal 10 digit number assigned by the City of Boston to each parcel of property.',
     placeholderText: 'Enter address or parcel ID',
   },
 };

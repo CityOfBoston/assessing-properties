@@ -3,6 +3,7 @@ import { SearchBarContainer } from '@containers/SearchBarContainer';
 import { SearchBackground } from '@components/SearchBackground';
 import styles from './PropertySearchPopup.module.scss';
 import { useNavigate } from 'react-router-dom';
+import { getComponentText } from '@utils/contentMapper';
 
 export interface PropertySearchPopupProps {
   onClose: () => void;
@@ -10,8 +11,6 @@ export interface PropertySearchPopupProps {
   texts?: {
     closeButtonAriaLabel?: string;
     labelText?: string;
-    tooltipHint?: string;
-    placeholderText?: string;
   };
 }
 
@@ -22,6 +21,7 @@ export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
 }) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const navigate = useNavigate();
+  const searchBarContent = getComponentText('AnnotatedSearchBar');
 
   const handlePropertySelect = (pid: string, fullAddress?: string) => {
     // If a custom onSelect handler is provided, use it
@@ -42,18 +42,19 @@ export const PropertySearchPopup: React.FC<PropertySearchPopupProps> = ({
         id="search_popup_close_button"
         className={styles.closeButton}
         onClick={onClose}
-        aria-label={texts.closeButtonAriaLabel}
+        aria-label={texts?.closeButtonAriaLabel}
       >
         ×
       </button>
       <SearchBackground>
         <div className={styles.content}>
-          <SearchBarContainer onSelect={handlePropertySelect} 
-          labelText={texts.labelText}
-          tooltipHint={texts.tooltipHint}
-          placeholderText={texts.placeholderText}
-          onFocus={() => setIsSearchFocused(true)}
-          onBlur={() => setIsSearchFocused(false)}
+          <SearchBarContainer 
+            onSelect={handlePropertySelect} 
+            labelText={texts?.labelText}
+            helperText={searchBarContent.helperText}
+            placeholderText={searchBarContent.placeholderText}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
           />
         </div>
       </SearchBackground>

@@ -626,6 +626,7 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
       buildingNumber: index + 1,
       landUse: parseAfterDash(feature.attributes.composite_land_use),
       grossArea: feature.attributes.gross_area,
+      livingArea: feature.attributes.living_area,
       style: toProperCase(parseAfterDash(feature.attributes.building_style)),
       storyHeight: toProperCase(feature.attributes.story_height),
       floor: toProperCase(feature.attributes.floor),
@@ -945,15 +946,15 @@ export const fetchPropertyDetailsByParcelIdHelper = async (
  *
  * @param parcelId The parcel ID for logging purposes.
  * @param geometry The geometry data from the property details call.
- * @return A Buffer containing the PNG image data.
+ * @return A Buffer containing the PNG image data, or null if geometry is not available.
  */
-export const generatePropertyStaticMapImageFromGeometryHelper = async (parcelId: string, geometry: any): Promise<Buffer> => {
+export const generatePropertyStaticMapImageFromGeometryHelper = async (parcelId: string, geometry: any): Promise<Buffer | null> => {
   console.log(`[EGISClient] Starting generatePropertyStaticMapImageFromGeometry for parcelId: ${parcelId}`);
 
   try {
     if (!geometry || !geometry.rings) {
-      console.log(`[EGISClient] No valid geometry provided for parcelId: ${parcelId}`);
-      throw new Error(`No valid geometry provided for parcelId: ${parcelId}`);
+      console.log(`[EGISClient] No valid geometry provided for parcelId: ${parcelId} - will use placeholder image`);
+      return null;
     }
 
     console.log("[EGISClient] Geometry spatial reference:", geometry.spatialReference);

@@ -1,3 +1,8 @@
+/**
+ * @deprecated This component is no longer used in the application.
+ * Previously used in AnnotatedSearchBar but has been replaced with inline helper text.
+ * Retained for reference only - do not use in new code.
+ */
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './Tooltip.module.scss';
 import helpIcon from '../../assets/help.svg';
@@ -5,11 +10,21 @@ import helpOutlineIcon from '../../assets/help_outline.svg';
 import helpWhiteIcon from '../../assets/help_white.svg';
 import helpOutlineWhiteIcon from '../../assets/help_outline_white.svg';
 
+/**
+ * @deprecated This component is no longer used in the application.
+ * Previously used in AnnotatedSearchBar but has been replaced with inline helper text.
+ * Retained for reference only - do not use in new code.
+ */
 interface TooltipProps {
   hint: string;
   variant?: 'default' | 'white';
 }
 
+/**
+ * @deprecated This component is no longer used in the application.
+ * Previously used in AnnotatedSearchBar but has been replaced with inline helper text.
+ * Retained for reference only - do not use in new code.
+ */
 export const Tooltip: React.FC<TooltipProps> = ({
   hint,
   variant = 'default'

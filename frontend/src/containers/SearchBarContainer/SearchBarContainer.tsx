@@ -9,7 +9,7 @@ interface SearchBarContainerProps {
   onSelect?: (pid: string, fullAddress: string) => void;
   onSearch?: (searchTerm: string) => void;
   labelText?: string;
-  tooltipHint?: string;
+  helperText?: string;
   placeholderText?: string;
   debounceMs?: number;
   onFocus?: () => void;
@@ -28,9 +28,9 @@ interface SearchSuggestion {
 export const SearchBarContainer = ({
   onSelect,
   onSearch,
-  labelText = 'Search by address or parcel ID',
-  tooltipHint = 'A unique, legal 10 digit number assigned by the City of Boston to each parcel of property.',
-  placeholderText = 'Enter address or parcel ID',
+  labelText,
+  helperText,
+  placeholderText,
   debounceMs = 10,
   onFocus,
   onBlur,
@@ -41,6 +41,11 @@ export const SearchBarContainer = ({
 }: SearchBarContainerProps) => {
   const navigate = useNavigate();
   const searchBarContent = getComponentText('AnnotatedSearchBar');
+  
+  // Use props if provided, otherwise fall back to YAML content
+  const finalLabelText = labelText || searchBarContent.labelText;
+  const finalHelperText = helperText || searchBarContent.helperText;
+  const finalPlaceholderText = placeholderText || searchBarContent.placeholderText;
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasBeenFocused, setHasBeenFocused] = useState(false);
@@ -209,9 +214,9 @@ export const SearchBarContainer = ({
 
   return (
     <AnnotatedSearchBar
-      labelText={labelText}
-      tooltipHint={tooltipHint}
-      placeholderText={placeholderText}
+      labelText={finalLabelText}
+      helperText={finalHelperText}
+      placeholderText={finalPlaceholderText}
       value={value || searchValue}
       onChange={handleInputChange}
       onSuggestionClick={handleSuggestionClick}

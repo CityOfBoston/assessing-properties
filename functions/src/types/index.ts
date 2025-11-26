@@ -263,7 +263,8 @@ export class PropertyDetails implements PropertyDetailsData {
               title: "General",
               content: [
                 {label: "Land Use", value: building.landUse},
-                {label: building.grossArea ? "Gross Area" : building.livingArea ? "Living Area" : "Gross Area", value: building.grossArea ? `${building.grossArea} sq ft` : building.livingArea ? `${building.livingArea} sq ft` : "Not Available"},
+                {label: "Gross Area", value: building.grossArea ? `${building.grossArea} sq ft` : undefined},
+                {label: "Living Area", value: building.livingArea ? `${building.livingArea} sq ft` : undefined},
                 {label: "Style", value: building.style},
                 {label: "Story Height", value: building.storyHeight},
                 {label: "Floor", value: building.floor},
@@ -330,7 +331,8 @@ export class PropertyDetails implements PropertyDetailsData {
               title: "General",
               content: [
                 {label: "Land Use", value: data.landUse},
-                {label: data.grossArea ? "Gross Area" : data.livingArea ? "Living Area" : "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : data.livingArea ? `${data.livingArea} sq ft` : "Not Available"},
+                {label: "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : undefined},
+                {label: "Living Area", value: data.livingArea ? `${data.livingArea} sq ft` : undefined},
                 {label: "Style", value: data.style},
                 {label: "Story Height", value: data.storyHeight},
                 {label: "Floor", value: data.floor},
@@ -378,7 +380,8 @@ export class PropertyDetails implements PropertyDetailsData {
           title: "General",
           content: [
             {label: "Land Use", value: data.landUse},
-            {label: data.grossArea ? "Gross Area" : data.livingArea ? "Living Area" : "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : data.livingArea ? `${data.livingArea} sq ft` : "Not Available"},
+            {label: "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : undefined},
+            {label: "Living Area", value: data.livingArea ? `${data.livingArea} sq ft` : undefined},
             {label: "Style", value: data.style},
             {label: "Story Height", value: data.storyHeight},
             {label: "Floor", value: data.floor},

@@ -36,8 +36,6 @@ export const Default: Story = {
     texts: {
       closeButtonAriaLabel: 'Close search popup',
       labelText: 'Search for a property',
-      tooltipHint: 'Search by address, parcel ID, or owner name',
-      placeholderText: 'Enter address, parcel ID, or owner...',
     },
   },
 };
@@ -48,8 +46,6 @@ export const WithoutSelectHandler: Story = {
     texts: {
       closeButtonAriaLabel: 'Close search popup',
       labelText: 'Search for a property',
-      tooltipHint: 'Search by address, parcel ID, or owner name',
-      placeholderText: 'Enter address, parcel ID, or owner...',
     },
   },
 }; 

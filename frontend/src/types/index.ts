@@ -110,6 +110,7 @@ export class PropertyDetails implements PropertyDetailsData {
       buildingNumber: number;
       landUse?: string;
       grossArea?: string;
+      livingArea?: string;
       style?: string;
       storyHeight?: string;
       floor?: string;
@@ -153,6 +154,7 @@ export class PropertyDetails implements PropertyDetailsData {
     grade?: string;
     landUse?: string;
     grossArea?: string;
+    livingArea?: string;
     style?: string;
     storyHeight?: string;
     floor?: string;
@@ -252,6 +254,7 @@ export class PropertyDetails implements PropertyDetailsData {
               content: [
                 {label: "Land Use", value: building.landUse},
                 {label: "Gross Area", value: building.grossArea ? `${building.grossArea} sq ft` : undefined},
+                {label: "Living Area", value: building.livingArea ? `${building.livingArea} sq ft` : undefined},
                 {label: "Style", value: building.style},
                 {label: "Story Height", value: building.storyHeight},
                 {label: "Floor", value: building.floor},
@@ -319,6 +322,7 @@ export class PropertyDetails implements PropertyDetailsData {
               content: [
                 {label: "Land Use", value: data.landUse},
                 {label: "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : undefined},
+                {label: "Living Area", value: data.livingArea ? `${data.livingArea} sq ft` : undefined},
                 {label: "Style", value: data.style},
                 {label: "Story Height", value: data.storyHeight},
                 {label: "Floor", value: data.floor},
@@ -367,6 +371,7 @@ export class PropertyDetails implements PropertyDetailsData {
           content: [
             {label: "Land Use", value: data.landUse},
             {label: "Gross Area", value: data.grossArea ? `${data.grossArea} sq ft` : undefined},
+            {label: "Living Area", value: data.livingArea ? `${data.livingArea} sq ft` : undefined},
             {label: "Style", value: data.style},
             {label: "Story Height", value: data.storyHeight},
             {label: "Floor", value: data.floor},

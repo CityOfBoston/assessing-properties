@@ -24,15 +24,18 @@
   }
 }
 
-.tooltipWrapper {
-  margin-left: 0.5rem;
-  display: inline-flex;
-  align-items: center;
-  line-height: 1.2;
-  font-size: 16px;
+.helperText {
+  color: white;
   font-family: Lora, serif;
+  font-size: 16px;
   font-weight: normal;
-  text-transform: none;
+  margin-top: 12px;
+  line-height: 1.4;
+
+  @include at-media-max('mobile-lg') {
+    font-size: 14px;
+    margin-top: 8px;
+  }
 }
 
 .searchForm {

@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styles from './AnnotatedSearchBar.module.scss';
-import Tooltip from '../Tooltip';
 
 interface Suggestion {
   fullAddress: string;
@@ -10,7 +9,7 @@ interface Suggestion {
 interface AnnotatedSearchBarProps {
   // Main content
   labelText: string;
-  tooltipHint: string;
+  helperText?: string;
   placeholderText?: string;
   errorMessage?: string;
   value: string;
@@ -49,7 +48,7 @@ interface AnnotatedSearchBarProps {
 export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
   // Main content
   labelText,
-  tooltipHint,
+  helperText,
   placeholderText,
   errorMessage,
   value,
@@ -263,9 +262,6 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
       <div className={styles.labelContainer}>
         <label className={styles.label} id="search-label" htmlFor="search-field">
           {labelText}
-          <span className={styles.tooltipWrapper}>
-            <Tooltip hint={tooltipHint} variant="white" />
-          </span>
         </label>
       </div>
       
@@ -324,6 +320,12 @@ export const AnnotatedSearchBar: React.FC<AnnotatedSearchBarProps> = ({
           </button>
         </form>
       </section>
+
+      {helperText && (
+        <div className={styles.helperText}>
+          {helperText}
+        </div>
+      )}
 
         {/* Desktop suggestions */}
         {!isMobile && (

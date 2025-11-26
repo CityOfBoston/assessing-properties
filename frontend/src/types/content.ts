@@ -24,7 +24,7 @@ export interface WelcomeContentProps {
 
 export interface SearchBarProps {
   labelText: string;
-  tooltipHint: string;
+  helperText: string;
   placeholderText: string;
 }
 
